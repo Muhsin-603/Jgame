@@ -16,22 +16,23 @@ public class Player {
     private double speed = 4.0;
     private int health = 100;
 
-    private BufferedImage sprite;
-    public int getHealth(){
-        return this.health;
+    private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
+    private int animationTick = 0;
+    private int animationSpeed = 15; // Change sprite every 15 frames. Higher is slower.
+    private int spriteNum = 1;       // Which sprite to show: 1 or 2
+
+    public Player(int startX, int startY) {
+        this.x = startX;
+        this.y = startY;
+        loadSprites();
     }
+
+    
 
     // In Player.java
 
 
-    public void takeDamage(int amount) {
-        this.health -= amount;
-        System.out.println("Player health: " + health);
-        if (health <= 0) {
-            System.out.println("GAME OVER - You have been eaten.");
-        // In a real game, you'd trigger a game over screen here.
-        }
-    }
+
 
     // Movement state flags
     public boolean movingUp, movingDown, movingLeft, movingRight;
@@ -47,19 +48,15 @@ public class Player {
         this.y = startY;
         this.width = size;
         this.height = size;
-        loadSprite();
+        loadSprites();
     }
 
-    private void loadSprite(){
-        try{
-            InputStream is = getClass().getResourceAsStream("/sprites/bug.png");
-            if(is != null)
-            {
-                sprite = ImageIO.read(is);
-            }else{
-                System.err.println("sprite not found....!");
-            }
-        }catch(IOException e){
+    private void loadSprites() {
+        try {
+            // Using the path that worked for you before!
+            sprite_walk1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug.png"));
+            sprite_walk2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug_mov_1.png"));
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -81,26 +78,50 @@ public class Player {
         if (movingRight) {
             x += speed;
         }
+        boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
+
+        if (isMoving) {
+            animationTick++;
+            if (animationTick > animationSpeed) {
+                animationTick = 0;
+                // Flip between sprite 1 and 2
+                if (spriteNum == 1) {
+                    spriteNum = 2;
+                } else {
+                    spriteNum = 1;
+                }
+            }
+        }
     }
 
     /**
      * Draws the player on the screen.
      * @param g The graphics context to draw with.
      */
-    public void draw(Graphics g) {
-        if(sprite != null){
-            g.drawImage(sprite, x, y, width, height, null);
-        }else{
-        g.setColor(Color.GREEN); // Still our beloved green rectangle
-        g.fillRect(x, y, width, height);
+        public void draw(Graphics g) {
+            BufferedImage imageToDraw = null;
+
+        // Decide which image to draw based on our spriteNum
+            if (spriteNum == 1) {
+                imageToDraw = sprite_walk1;
+            } else {
+                imageToDraw = sprite_walk2;
+            }
+        
+            if (imageToDraw != null) {
+                g.drawImage(imageToDraw, x, y, width, height, null);
+            } else {
+            // Failsafe green square
+                g.setColor(Color.GREEN);
+                g.fillRect(x, y, width, height);
+            }
         }
-    }
     
     /**
      * Returns the player's collision bounds. Super useful later!
      * @return A Rectangle object representing the player's position and size.
      */
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, width, height);
-    }
+    public Rectangle getBounds() { return new Rectangle(x, y, width, height); }
+    public void takeDamage(int amount) { this.health -= amount; if(health < 0) health = 0; System.out.println("Health: " + health); }
+    public int getHealth() { return this.health; }
 }
