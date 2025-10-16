@@ -28,7 +28,7 @@ public class GamePanel extends JPanel {
 
         // Create an instance of the Player. Let's start it at (100, 100) with a size of
         // 32x32.
-        this.player = new Player(100, 100, 48, 64);
+        this.player = new Player(100, 100, 32, 32);
 
         // Your key listener now talks to the Player object
         addKeyListener(new KeyInputAdapter());
@@ -80,7 +80,7 @@ public class GamePanel extends JPanel {
         g.setColor(Color.WHITE);
         g.drawRect(10, 10, 200, 20);
 
-        player.drawDebugInfo(g);
+        
     }
 
     // An inner class for handling key inputs. This is a clean way to do it.

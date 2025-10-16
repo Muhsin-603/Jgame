@@ -34,19 +34,8 @@ public class Player {
         if (imageToDraw != null) {
             g2d.drawImage(imageToDraw, 0, 0, this.width, this.height, null);
         }
-        int localCenterX = this.width / 2;
-        int localCenterY = this.height / 2;
-        g2d.setColor(new Color(255, 0, 0, 100)); // semi-transparent red
-        g2d.fillOval(localCenterX - this.collisionRadius, localCenterY - this.collisionRadius, this.collisionRadius * 2,
-                this.collisionRadius * 2);
-
-        // C. Draw the debug text. We must un-rotate the "div" first so the text is
-        // straight!
-        g2d.rotate(-Math.toRadians(this.rotationAngle), this.width / 2.0, this.height / 2.0);
-        g2d.setColor(Color.YELLOW);
-        g2d.setFont(new Font("Consolas", Font.BOLD, 14));
-        g2d.drawString("Pos: [" + this.x + ", " + this.y + "]", 0, -15);
-        g2d.drawString("Radius: " + this.collisionRadius, 0, 0);
+        
+        
 
         // 4. Throw the "div" away. The main screen is unaffected.
         g2d.dispose();
@@ -54,30 +43,7 @@ public class Player {
 
     // Add this method to your Player.java class
 
-    public void drawDebugInfo(Graphics g) {
-        // Create a disposable copy to be extra safe
-        Graphics2D g2d = (Graphics2D) g.create();
-
-        // Set a nice, visible color like yellow or white
-        g2d.setColor(Color.YELLOW);
-
-        // Set a font
-        g2d.setFont(new Font("Consolas", Font.BOLD, 14));
-
-        // Get the player's real coordinates
-        int playerX = this.x;
-        int playerY = this.y;
-        int centerX = getCenterX();
-        int centerY = getCenterY();
-
-        // Draw the data right above the player
-        g2d.drawString("Player Pos: [" + playerX + ", " + playerY + "]", playerX, playerY - 30);
-        g2d.drawString("Hitbox Center: [" + centerX + ", " + centerY + "]", playerX, playerY - 15);
-        g2d.drawString("Hitbox Radius: " + this.collisionRadius, playerX, playerY);
-
-        // Throw the copy away
-        g2d.dispose();
-    }
+    
 
     // The new, super-safe drawHitbox method in Player.java
     public void drawHitbox(Graphics g) {
