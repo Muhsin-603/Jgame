@@ -14,6 +14,7 @@ public class Player {
     private double speed = 4.0;
     private int health = 100;
     private int collisionRadius;
+    private int healthDrainTimer = 0;
 
     private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
     private int animationTick = 0;
@@ -21,6 +22,13 @@ public class Player {
     private int spriteNum = 1; // Which sprite to show: 1 or 2
 
     private double rotationAngle = 0;
+
+    public void heal(int amount) {
+        this.health += amount;
+        if (this.health > 100) {
+            this.health = 100;
+        }
+    }
 
     public void render(Graphics g) {
 
@@ -34,16 +42,12 @@ public class Player {
         if (imageToDraw != null) {
             g2d.drawImage(imageToDraw, 0, 0, this.width, this.height, null);
         }
-        
-        
 
         // 4. Throw the "div" away. The main screen is unaffected.
         g2d.dispose();
     }
 
     // Add this method to your Player.java class
-
-    
 
     // The new, super-safe drawHitbox method in Player.java
     public void drawHitbox(Graphics g) {
@@ -113,32 +117,61 @@ public class Player {
      * Updates the player's position based on movement flags.
      * This will be called in the main game loop.
      */
-    public void update() {
-        // System.out.println("Player is thinking...");
+    // The new update method now takes the World as an argument
+    public void update(src.com.buglife.world.World world) {
+        // Calculate how far we WILL move this frame
+        double nextX = x;
+        double nextY = y;
+
         if (movingUp) {
-            y -= speed;
+            nextY -= speed;
         }
         if (movingDown) {
-            y += speed;
+            nextY += speed;
         }
         if (movingLeft) {
-            x -= speed;
+            nextX -= speed;
         }
         if (movingRight) {
-            x += speed;
+            nextX += speed;
         }
-        boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
 
+        // --- NEW COLLISION CHECK ---
+        // Get the player's collision bounding box at the *next* position
+        int nextLeft = (int) nextX;
+        int nextRight = (int) nextX + width - 1;
+        int nextTop = (int) nextY;
+        int nextBottom = (int) nextY + height - 1;
+
+        // Check all four corners for a collision in the next position
+        boolean topLeftSolid = world.isTileSolid(nextLeft, nextTop);
+        boolean topRightSolid = world.isTileSolid(nextRight, nextTop);
+        boolean bottomLeftSolid = world.isTileSolid(nextLeft, nextBottom);
+        boolean bottomRightSolid = world.isTileSolid(nextRight, nextBottom);
+
+        // If NONE of the corners are about to hit a solid tile, the move is safe!
+        if (!topLeftSolid && !topRightSolid && !bottomLeftSolid && !bottomRightSolid) {
+            // Commit the move
+            x = (int) nextX;
+            y = (int) nextY;
+        }
+        healthDrainTimer++;
+
+        if (healthDrainTimer > 120) {
+
+            takeDamage(1);
+
+            healthDrainTimer = 0;
+
+        }
+
+        // --- Animation logic (this part stays the same) ---
+        boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
         if (isMoving) {
             animationTick++;
             if (animationTick > animationSpeed) {
                 animationTick = 0;
-                // Flip between sprite 1 and 2
-                if (spriteNum == 1) {
-                    spriteNum = 2;
-                } else {
-                    spriteNum = 1;
-                }
+                spriteNum = (spriteNum == 1) ? 2 : 1;
             }
         }
     }
@@ -199,11 +232,11 @@ public class Player {
     }
 
     public void takeDamage(int amount) {
-        System.out.println("!!! DAMAGE METHOD CALLED !!!");
+        // System.out.println("!!! DAMAGE METHOD CALLED !!!");
         this.health -= amount;
         if (health < 0)
             health = 0;
-        System.out.println("Health: " + health);
+
     }
 
     public int getHealth() {

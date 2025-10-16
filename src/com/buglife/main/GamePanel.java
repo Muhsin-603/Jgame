@@ -1,12 +1,17 @@
 package src.com.buglife.main;
 
+import java.util.Random;
+
+import src.com.buglife.entities.Food;
 // Make sure to import your new Player class!
 import src.com.buglife.entities.Player;
 import src.com.buglife.entities.Spider;
+import src.com.buglife.world.World;
 
 import javax.swing.JPanel;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.Color;
@@ -15,46 +20,67 @@ import java.awt.Color;
 public class GamePanel extends JPanel {
 
     private Spider spider;
-
-    // GamePanel no longer holds player x/y. It holds a Player object!
     private Player player;
+    private Food food;
+    private World world;
+    private int cameraX, cameraY;
+    private Random rand = new Random();
 
     public GamePanel() {
 
         this.spider = new Spider(400, 300);
-        // ... (your existing panel setup)
+        world = new World();
         setPreferredSize(new Dimension(1920, 1080));
         setFocusable(true);
-
-        // Create an instance of the Player. Let's start it at (100, 100) with a size of
-        // 32x32.
         this.player = new Player(100, 100, 32, 32);
 
-        // Your key listener now talks to the Player object
+        this.food = new Food(600, 500, 20);
+        spawnFood();
+
         addKeyListener(new KeyInputAdapter());
     }
 
-    // This method is called by your game loop to update game logic
     public void updateGame() {
-        //System.out.println("--- FRAME START ---");
-        // Update entity positions first
-        spider.update();
-        player.update();
 
-        // --- REMOVED THE OLD BROKEN "if" STATEMENT ---
-        // Now we ONLY use the circular collision check.
+        player.update(world);
+        spider.update();
+
+        cameraX = player.getCenterX() - (1920 / 2);
+        cameraY = player.getCenterY() - (1080 / 2);
 
         double dx = player.getCenterX() - spider.getCenterX();
         double dy = player.getCenterY() - spider.getCenterY();
         double distance = Math.sqrt(dx * dx + dy * dy);
-
         double requiredDistance = player.getRadius() + spider.getRadius();
 
-        // Our debugger line, now free to do its job!
-        //System.out.println("Current Distance: " + (int) distance + "  |  Required: " + (int) requiredDistance);
+        if (food != null) {
+            double dxFood = player.getCenterX() - food.getCenterX();
+            double dyFood = player.getCenterY() - food.getCenterY();
+            double distanceFood = Math.sqrt(dxFood * dxFood + dyFood * dyFood);
+            double requiredDistanceFood = player.getRadius() + food.getRadius();
+
+            if (distanceFood < requiredDistanceFood) {
+                player.heal(25); // Heal for a nice chunk of health
+                spawnFood();
+            }
+        }
 
         if (distance < requiredDistance) {
             player.takeDamage(1);
+        }
+    }
+
+    public void spawnFood() {
+        while (true) {
+            int randomCol = rand.nextInt(world.getMapWidth());
+            int randomRow = rand.nextInt(world.getMapHeight());
+
+            if (world.getTileIdAt(randomCol, randomRow) == 0) { // Check for floor tile
+                int foodX = randomCol * World.TILE_SIZE + (World.TILE_SIZE / 4);
+                int foodY = randomRow * World.TILE_SIZE + (World.TILE_SIZE / 4);
+                food = new Food(foodX, foodY, 20);
+                break; // Found a spot, exit the loop
+            }
         }
     }
 
@@ -63,8 +89,17 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        player.render(g);
-        spider.draw(g);
+        world.render(g, cameraX, cameraY);
+
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.translate(-cameraX, -cameraY);
+
+        player.render(g2d);
+        spider.draw(g2d);
+        if (food != null) {
+            food.draw(g2d);
+        }
+        g2d.dispose();
 
         // --- DRAW HUD HERE ---
         // Background of the health bar (the empty part)
@@ -80,7 +115,6 @@ public class GamePanel extends JPanel {
         g.setColor(Color.WHITE);
         g.drawRect(10, 10, 200, 20);
 
-        
     }
 
     // An inner class for handling key inputs. This is a clean way to do it.
