@@ -26,9 +26,9 @@ public class GamePanel extends JPanel {
         setPreferredSize(new Dimension(1920, 1080));
         setFocusable(true);
 
-        // Create an instance of the Player. Let's start it at (100, 100) with a size of
-        // 32x32.
-        this.player = new Player(100, 100, 48, 64);
+        // Create an instance of the Player. Let's start it at (100, 100) with a 
+        // drawing size and collision size of 48x48.
+        this.player = new Player(100, 100, 48, 48);
 
         // Your key listener now talks to the Player object
         addKeyListener(new KeyInputAdapter());
@@ -66,9 +66,7 @@ public class GamePanel extends JPanel {
         player.draw(g);
         spider.draw(g);
 
-        player.draw(g);
         player.drawHitbox(g);
-        spider.draw(g);
 
         // --- DRAW HUD HERE ---
         // Background of the health bar (the empty part)

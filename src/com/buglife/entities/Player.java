@@ -9,18 +9,26 @@ import java.awt.geom.AffineTransform;
 
 public class Player {
     // Player attributes
-    private int x, y;
+    // x and y now represent the CENTER of the player
+    private double x, y;
     private int width, height;
     private double speed = 4.0;
     private int health = 100;
     private int collisionRadius;
 
     private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
+    // Offsets to compensate for any transparent padding inside the sprite images.
+    // These will be calculated from the image content so the visible bug is centered.
+    private double spriteOffsetX1 = 0, spriteOffsetY1 = 0;
+    private double spriteOffsetX2 = 0, spriteOffsetY2 = 0;
     private int animationTick = 0;
     private int animationSpeed = 3; // Change sprite every 15 frames. Higher is slower.
     private int spriteNum = 1; // Which sprite to show: 1 or 2
 
     private double rotationAngle = 0;
+
+    // Movement state flags
+    public boolean movingUp, movingDown, movingLeft, movingRight;
 
     // Add this method to your Player.java class
 
@@ -34,16 +42,13 @@ public class Player {
         // Set a font
         g2d.setFont(new Font("Consolas", Font.BOLD, 14));
 
-        // Get the player's real coordinates
-        int playerX = this.x;
-        int playerY = this.y;
+        // Get the player's center coordinates
         int centerX = getCenterX();
         int centerY = getCenterY();
 
-        // Draw the data right above the player
-        g2d.drawString("Player Pos: [" + playerX + ", " + playerY + "]", playerX, playerY - 30);
-        g2d.drawString("Hitbox Center: [" + centerX + ", " + centerY + "]", playerX, playerY - 15);
-        g2d.drawString("Hitbox Radius: " + this.collisionRadius, playerX, playerY);
+        // Draw the data near the player's center
+        g2d.drawString("Player Center: [" + centerX + ", " + centerY + "]", centerX + 30, centerY);
+        g2d.drawString("Hitbox Radius: " + this.collisionRadius, centerX + 30, centerY + 15);
 
         // Throw the copy away
         g2d.dispose();
@@ -54,15 +59,15 @@ public class Player {
         // 1. Create a disposable copy, JUST for the hitbox.
         Graphics2D g2d = (Graphics2D) g.create();
 
-        // Get the center of the bug
-        int centerX = getCenterX();
-        int centerY = getCenterY();
-
         // Set the color to a semi-transparent red
         g2d.setColor(new Color(255, 0, 0, 100));
 
-        // Draw the oval on our clean, disposable copy
-        g2d.fillOval(centerX - collisionRadius, centerY - collisionRadius, collisionRadius * 2, collisionRadius * 2);
+        // Draw the oval centered on the player's x, y coordinates
+        g2d.fillOval(
+                (int) Math.round(x - collisionRadius),
+                (int) Math.round(y - collisionRadius),
+                collisionRadius * 2,
+                collisionRadius * 2);
 
         // 2. Throw the copy away immediately.
         g2d.dispose();
@@ -71,11 +76,13 @@ public class Player {
     // In Player.java
 
     public int getCenterX() {
-        return this.x + (this.width / 2);
+        // x is now the center, so just return it.
+        return (int) Math.round(this.x);
     }
 
     public int getCenterY() {
-        return this.y + (this.height / 2);
+        // y is now the center, so just return it.
+        return (int) Math.round(this.y);
     }
 
     public double getRadius() {
@@ -84,8 +91,7 @@ public class Player {
 
     // In Player.java
 
-    // Movement state flags
-    public boolean movingUp, movingDown, movingLeft, movingRight;
+    // Movement state flags are now back to movingUp, movingDown, etc.
 
     /**
      * Constructor for our heroic bug.
@@ -108,9 +114,57 @@ public class Player {
             // Using the path that worked for you before!
             sprite_walk1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug.png"));
             sprite_walk2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug_mov_1.png"));
+            // Compute content offsets so the visible content is centered on the logical center
+            if (sprite_walk1 != null) {
+                double[] o1 = computeSpriteContentOffset(sprite_walk1);
+                spriteOffsetX1 = o1[0];
+                spriteOffsetY1 = o1[1];
+            }
+            if (sprite_walk2 != null) {
+                double[] o2 = computeSpriteContentOffset(sprite_walk2);
+                spriteOffsetX2 = o2[0];
+                spriteOffsetY2 = o2[1];
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Scans the sprite image for non-transparent pixels and returns an (x,y)
+     * offset in destination-pixels to shift the drawn image so its visible
+     * content is centered. The offsets are in the same units as the final
+     * drawing size (i.e. already scaled to the configured width/height).
+     */
+    private double[] computeSpriteContentOffset(BufferedImage img) {
+        int iw = img.getWidth();
+        int ih = img.getHeight();
+        int minX = iw, minY = ih, maxX = 0, maxY = 0;
+        boolean found = false;
+
+        for (int yy = 0; yy < ih; yy++) {
+            for (int xx = 0; xx < iw; xx++) {
+                int a = (img.getRGB(xx, yy) >>> 24) & 0xff;
+                if (a > 0) {
+                    found = true;
+                    if (xx < minX) minX = xx;
+                    if (yy < minY) minY = yy;
+                    if (xx > maxX) maxX = xx;
+                    if (yy > maxY) maxY = yy;
+                }
+            }
+        }
+
+        if (!found) return new double[] { 0.0, 0.0 };
+
+        double contentCenterX = (minX + maxX) / 2.0;
+        double contentCenterY = (minY + maxY) / 2.0;
+
+        // When we draw the image scaled to 'width'/'height', scale the pixel offset accordingly.
+        double offsetX = (iw / 2.0 - contentCenterX) * ((double) width / (double) iw);
+        double offsetY = (ih / 2.0 - contentCenterY) * ((double) height / (double) ih);
+
+        return new double[] { offsetX, offsetY };
     }
 
     /**
@@ -118,7 +172,6 @@ public class Player {
      * This will be called in the main game loop.
      */
     public void update() {
-        // System.out.println("Player is thinking...");
         if (movingUp) {
             y -= speed;
         }
@@ -153,37 +206,42 @@ public class Player {
      * @param g The graphics context to draw with.
      */
     public void draw(Graphics g) {
-        // --- This is the new, upgraded draw method ---
-
         // Cast our crayon to a fancy art tool
         Graphics2D g2d = (Graphics2D) g.create(); // Create a copy to not mess up other drawings
 
-        BufferedImage imageToDraw = null;
-
-        if (spriteNum == 1) {
-            imageToDraw = sprite_walk1;
-        } else {
-            imageToDraw = sprite_walk2;
-        }
+        BufferedImage imageToDraw = (spriteNum == 1) ? sprite_walk1 : sprite_walk2;
 
         if (imageToDraw != null) {
-
-            int centerX = x + width / 2;
-            int centerY = y + height / 2;
-
-            // This object holds our rotation information
+            // The AffineTransform will handle the rotation and positioning.
             AffineTransform tx = new AffineTransform();
-            // Tell it to rotate around the center of the bug
-            tx.rotate(Math.toRadians(rotationAngle), centerX, centerY);
 
-            g2d.setTransform(tx); // Apply the rotation to our drawing tool
+            // 1. Calculate the top-left corner for drawing, since x/y is the center
+            double topLeftX = x - width / 2.0;
+            double topLeftY = y - height / 2.0;
 
-            // Draw the image!
-            g2d.drawImage(imageToDraw, x, y, width, height, null);
+            // 2. Translate the transform to the player's top-left position.
+            tx.translate(Math.round(topLeftX), Math.round(topLeftY));
+
+            // Apply sprite-specific content offset so the visible pixels are centered.
+            double offX = (spriteNum == 1) ? spriteOffsetX1 : spriteOffsetX2;
+            double offY = (spriteNum == 1) ? spriteOffsetY1 : spriteOffsetY2;
+            tx.translate(offX, offY);
+
+            // 3. Set the rotation of the transform around the image's center.
+            tx.rotate(Math.toRadians(rotationAngle), width / 2.0, height / 2.0);
+
+            // Apply the transform to the graphics context
+            g2d.setTransform(tx);
+
+            // Draw the image at the origin (0,0) of the new, transformed coordinate space.
+            g2d.drawImage(imageToDraw, 0, 0, width, height, null);
+
         } else {
             // Fallback green square in case something breaks
-            g.setColor(Color.GREEN);
-            g.fillRect(x, y, width, height);
+            double topLeftX = x - width / 2.0;
+            double topLeftY = y - height / 2.0;
+            g2d.setColor(Color.GREEN);
+            g2d.fillRect((int) Math.round(topLeftX), (int) Math.round(topLeftY), width, height);
         }
 
         g2d.dispose(); // Clean up our copy
@@ -199,7 +257,9 @@ public class Player {
      * @return A Rectangle object representing the player's position and size.
      */
     public Rectangle getBounds() {
-        return new Rectangle(x, y, width, height);
+        double topLeftX = x - width / 2.0;
+        double topLeftY = y - height / 2.0;
+        return new Rectangle((int) Math.round(topLeftX), (int) Math.round(topLeftY), width, height);
     }
 
     public void takeDamage(int amount) {
