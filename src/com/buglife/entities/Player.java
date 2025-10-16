@@ -22,6 +22,36 @@ public class Player {
 
     private double rotationAngle = 0;
 
+    public void render(Graphics g) {
+
+        Graphics2D g2d = (Graphics2D) g.create();
+
+        g2d.translate(this.x, this.y);
+
+        g2d.rotate(Math.toRadians(this.rotationAngle), this.width / 2.0, this.height / 2.0);
+
+        BufferedImage imageToDraw = (spriteNum == 1) ? sprite_walk1 : sprite_walk2;
+        if (imageToDraw != null) {
+            g2d.drawImage(imageToDraw, 0, 0, this.width, this.height, null);
+        }
+        int localCenterX = this.width / 2;
+        int localCenterY = this.height / 2;
+        g2d.setColor(new Color(255, 0, 0, 100)); // semi-transparent red
+        g2d.fillOval(localCenterX - this.collisionRadius, localCenterY - this.collisionRadius, this.collisionRadius * 2,
+                this.collisionRadius * 2);
+
+        // C. Draw the debug text. We must un-rotate the "div" first so the text is
+        // straight!
+        g2d.rotate(-Math.toRadians(this.rotationAngle), this.width / 2.0, this.height / 2.0);
+        g2d.setColor(Color.YELLOW);
+        g2d.setFont(new Font("Consolas", Font.BOLD, 14));
+        g2d.drawString("Pos: [" + this.x + ", " + this.y + "]", 0, -15);
+        g2d.drawString("Radius: " + this.collisionRadius, 0, 0);
+
+        // 4. Throw the "div" away. The main screen is unaffected.
+        g2d.dispose();
+    }
+
     // Add this method to your Player.java class
 
     public void drawDebugInfo(Graphics g) {

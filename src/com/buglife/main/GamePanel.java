@@ -63,11 +63,7 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        player.draw(g);
-        spider.draw(g);
-
-        player.draw(g);
-        player.drawHitbox(g);
+        player.render(g);
         spider.draw(g);
 
         // --- DRAW HUD HERE ---
