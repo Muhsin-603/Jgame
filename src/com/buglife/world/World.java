@@ -52,7 +52,7 @@ public class World {
     }
 
     private void loadTileTypes() {
-        tileTypes = new Tile[2]; // We have 2 types of tiles right now
+        tileTypes = new Tile[10]; // We have 2 types of tiles right now
         try {
             // Tile 0: The Floor
             BufferedImage floorImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/floor.png"));
@@ -60,7 +60,9 @@ public class World {
 
             // Tile 1: The Wall
             BufferedImage wallImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall.png"));
-            tileTypes[1] = new Tile(wallImage, true); // true = solid
+            tileTypes[1] = new Tile(wallImage, true);
+            BufferedImage wallImage1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall_5.png"));
+            tileTypes[2] = new Tile(wallImage1, true);
 
         } catch (IOException e) {
             System.err.println("Could not load tile images!");
