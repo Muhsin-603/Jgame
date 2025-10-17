@@ -118,41 +118,27 @@ public class GamePanel extends JPanel {
     }
 
     // An inner class for handling key inputs. This is a clean way to do it.
-    private class KeyInputAdapter extends KeyAdapter {
-        @Override
-        public void keyPressed(KeyEvent e) {
-            int key = e.getKeyCode();
+    // Inside GamePanel.java
 
-            if (key == KeyEvent.VK_W) {
-                player.movingUp = true;
-                player.setRotationAngle(0); // Face Up (default)
-            }
-            if (key == KeyEvent.VK_S) {
-                player.movingDown = true;
-                player.setRotationAngle(180); // Face Down
-            }
-            if (key == KeyEvent.VK_A) {
-                player.movingLeft = true;
-                player.setRotationAngle(-90); // Face Left-ish
-            }
-            if (key == KeyEvent.VK_D) {
-                player.movingRight = true;
-                player.setRotationAngle(90); // Face Right-ish
-            }
-        }
+private class KeyInputAdapter extends KeyAdapter {
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
 
-        @Override
-        public void keyReleased(KeyEvent e) {
-            int key = e.getKeyCode();
-
-            if (key == KeyEvent.VK_W)
-                player.movingUp = false;
-            if (key == KeyEvent.VK_S)
-                player.movingDown = false;
-            if (key == KeyEvent.VK_A)
-                player.movingLeft = false;
-            if (key == KeyEvent.VK_D)
-                player.movingRight = false;
-        }
+        if (key == KeyEvent.VK_W) player.movingUp = true;
+        if (key == KeyEvent.VK_S) player.movingDown = true;
+        if (key == KeyEvent.VK_A) player.movingLeft = true;
+        if (key == KeyEvent.VK_D) player.movingRight = true;
     }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        int key = e.getKeyCode();
+
+        if (key == KeyEvent.VK_W) player.movingUp = false;
+        if (key == KeyEvent.VK_S) player.movingDown = false;
+        if (key == KeyEvent.VK_A) player.movingLeft = false;
+        if (key == KeyEvent.VK_D) player.movingRight = false;
+    }
+}
 }

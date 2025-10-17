@@ -2,9 +2,10 @@ package src.com.buglife.entities;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-
+import java.util.ArrayList;
+import java.util.List;
 import javax.imageio.ImageIO;
-import java.io.*;
+//import java.io.*;
 import java.awt.geom.AffineTransform;
 
 public class Player {
@@ -15,13 +16,26 @@ public class Player {
     private int health = 100;
     private int collisionRadius;
     private int healthDrainTimer = 0;
+    private boolean isFacingLeft = false;
 
     private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
     private int animationTick = 0;
     private int animationSpeed = 3; // Change sprite every 15 frames. Higher is slower.
     private int spriteNum = 1; // Which sprite to show: 1 or 2
-
+    private int currentFrame = 0;
     private double rotationAngle = 0;
+    private PlayerState currentState = PlayerState.IDLE_DOWN;
+    private List<BufferedImage> idleDownFrames;
+    private List<BufferedImage> walkDownFrames;
+    private List<BufferedImage> walkUpFrames;
+    private List<BufferedImage> walkRightFrames;
+
+    public enum PlayerState {
+        IDLE_DOWN,
+        WALKING_DOWN,
+        WALKING_UP,
+        WALKING_HORIZONTAL
+    }
 
     public void heal(int amount) {
         this.health += amount;
@@ -31,21 +45,31 @@ public class Player {
     }
 
     public void render(Graphics g) {
-
-        Graphics2D g2d = (Graphics2D) g.create();
-
-        g2d.translate(this.x, this.y);
-
-        g2d.rotate(Math.toRadians(this.rotationAngle), this.width / 2.0, this.height / 2.0);
-
-        BufferedImage imageToDraw = (spriteNum == 1) ? sprite_walk1 : sprite_walk2;
-        if (imageToDraw != null) {
-            g2d.drawImage(imageToDraw, 0, 0, this.width, this.height, null);
-        }
-
-        // 4. Throw the "div" away. The main screen is unaffected.
-        g2d.dispose();
+    // --- PART 1: DRAW THE PLAYER (This part is the same) ---
+    List<BufferedImage> currentAnimation = getActiveAnimation();
+    if (currentAnimation == null || currentAnimation.isEmpty() || currentFrame >= currentAnimation.size()) {
+        // If something is wrong, draw a magenta square so we KNOW
+        g.setColor(Color.MAGENTA);
+        g.fillRect(this.x, this.y, this.width, this.height);
+        return;
     }
+
+    BufferedImage imageToDraw = currentAnimation.get(currentFrame);
+    
+    int drawX = this.x;
+    int drawWidth = this.width;
+
+    if (!isFacingLeft && currentState == PlayerState.WALKING_HORIZONTAL) {
+        drawX = this.x + this.width;
+        drawWidth = -this.width;
+    }
+
+    g.drawImage(imageToDraw, drawX, this.y, drawWidth, this.height, null);
+
+    
+
+    
+}
 
     // Add this method to your Player.java class
 
@@ -100,18 +124,55 @@ public class Player {
         this.width = drawSize;
         this.height = drawSize;
         this.collisionRadius = collisionSize / 2;
-        loadSprites();
+        loadAnimations();
     }
 
-    private void loadSprites() {
+    private void loadAnimations() {
+        idleDownFrames = new ArrayList<>();
+        walkDownFrames = new ArrayList<>();
+        walkUpFrames = new ArrayList<>();
+        walkRightFrames = new ArrayList<>();
+
         try {
-            // Using the path that worked for you before!
-            sprite_walk1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug.png"));
-            sprite_walk2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug_mov_1.png"));
-        } catch (IOException e) {
+            BufferedImage spriteSheet = ImageIO.read(getClass().getResourceAsStream("/res/sprites/player/loose sprites.png"));
+            final int SPRITE_WIDTH = 16;
+            final int SPRITE_HEIGHT = 16;
+
+            // --- THE CORRECTED SLICING ---
+            // Walk Up (Top Row, showing the back)
+            walkUpFrames.add(spriteSheet.getSubimage(0 * SPRITE_WIDTH, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+            walkUpFrames.add(spriteSheet.getSubimage(1 * SPRITE_WIDTH, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+
+            // Walk Down (Second Row, facing us)
+            walkDownFrames.add(spriteSheet.getSubimage(0 * SPRITE_WIDTH, 1 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+            walkDownFrames.add(spriteSheet.getSubimage(1 * SPRITE_WIDTH, 1 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+            
+            // Walk Right (Third Row, facing right)
+            walkRightFrames.add(spriteSheet.getSubimage(0 * SPRITE_WIDTH, 2 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+            walkRightFrames.add(spriteSheet.getSubimage(1 * SPRITE_WIDTH, 2 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+            
+            // Idle (first frame of walking down)
+            idleDownFrames.add(walkDownFrames.get(0));
+
+        } catch (Exception e) {
+            System.err.println("CRASH! Could not slice the player sprite sheet correctly.");
             e.printStackTrace();
         }
     }
+
+    /*
+     * private void loadSprites() {
+     * try {
+     * // Using the path that worked for you before!
+     * sprite_walk1 =
+     * ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug.png"));
+     * sprite_walk2 =
+     * ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug_mov_1.png"));
+     * } catch (IOException e) {
+     * e.printStackTrace();
+     * }
+     * }
+     */
 
     /**
      * Updates the player's position based on movement flags.
@@ -120,6 +181,25 @@ public class Player {
     // The new update method now takes the World as an argument
     public void update(src.com.buglife.world.World world) {
         // Calculate how far we WILL move this frame
+
+        PlayerState previousState = currentState;
+        if (movingUp) {
+            currentState = PlayerState.WALKING_UP;
+        } else if (movingDown) {
+            currentState = PlayerState.WALKING_DOWN;
+        } else if (movingLeft || movingRight) {
+            currentState = PlayerState.WALKING_HORIZONTAL;
+            isFacingLeft = movingLeft;
+        } else {
+            currentState = PlayerState.IDLE_DOWN;
+        }
+
+        // If we changed state, reset the animation to the first frame
+        if (previousState != currentState) {
+            currentFrame = 0;
+            animationTick = 0;
+        }
+
         double nextX = x;
         double nextY = y;
 
@@ -167,12 +247,34 @@ public class Player {
 
         // --- Animation logic (this part stays the same) ---
         boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
-        if (isMoving) {
+
+        if (isMoving) { // <-- THE FIX! Only animate if we are moving.
             animationTick++;
             if (animationTick > animationSpeed) {
                 animationTick = 0;
-                spriteNum = (spriteNum == 1) ? 2 : 1;
+                currentFrame++;
+
+                List<BufferedImage> currentAnimation = getActiveAnimation();
+                if (currentFrame >= currentAnimation.size()) {
+                    currentFrame = 0; // Loop the animation
+                }
             }
+        } else {
+            // If we're not moving, reset to the first frame of the animation
+            currentFrame = 0;
+        }
+    }
+
+    private List<BufferedImage> getActiveAnimation() {
+        switch (currentState) {
+            case WALKING_UP:
+                return walkUpFrames;
+            case WALKING_DOWN:
+                return walkDownFrames;
+            case WALKING_HORIZONTAL:
+                return walkRightFrames;
+            default:
+                return idleDownFrames;
         }
     }
 
