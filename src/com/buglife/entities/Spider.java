@@ -13,10 +13,10 @@ import java.awt.Point;
 
 public class Spider {
     // Core Attributes
-    private int x, y;
+    private double x, y;
     private int width = 48, height = 48; // Using the bug's original size
     private int speed = 2;
-    
+
     private double rotationAngle = 90; // Start facing right (90 degrees from North)
 
     // Animation Reel (for the 2-frame bug)
@@ -42,10 +42,10 @@ public class Spider {
             this.x = this.patrolPath.get(0).x - (width / 2);
             this.y = this.patrolPath.get(0).y - (height / 2);
         }
-        
+
         loadSprites();
     }
-    
+
     private void loadSprites() {
         walkingFrames = new BufferedImage[TOTAL_FRAMES];
         try {
@@ -58,39 +58,62 @@ public class Spider {
         }
     }
 
-    public void update() {
-        if (patrolPath == null || patrolPath.isEmpty()) return;
+    // In Spider.java, replace the entire update method.
+public void update(World world) {
+    if (patrolPath == null || patrolPath.isEmpty()) {
+        return; // No path, no movement.
+    }
 
-        Point target = patrolPath.get(currentTargetIndex);
-        double dx = target.x - this.getCenterX();
-        double dy = target.y - this.getCenterY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
+    // Get the current destination.
+    Point target = patrolPath.get(currentTargetIndex);
+    double dx = target.x - getCenterX();
+    double dy = target.y - getCenterY();
+    double distance = Math.sqrt(dx * dx + dy * dy);
 
-        // --- GHOST FIX #1: THE DIMENSIONAL WARP ---
-        // If we are NOT at our target, move towards it.
-        if (distance > speed) {
-            double moveX = (dx / distance) * speed;
-            double moveY = (dy / distance) * speed;
-            this.x += moveX;
-            this.y += moveY;
-
-            // Update rotation only when moving
-            this.rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 90;
-
-        } else { // We've arrived at the target, pick the next one
-            currentTargetIndex++;
-            if (currentTargetIndex >= patrolPath.size()) {
-                currentTargetIndex = 0;
-            }
+    // --- THE NEW, DECISIVE LOGIC ---
+    // Check if we have arrived at our destination.
+    if (distance < speed * 1.5) { // Use a slightly larger radius to prevent getting stuck
+        // We've arrived! Pick the next target for the *next* frame.
+        currentTargetIndex++;
+        if (currentTargetIndex >= patrolPath.size()) {
+            currentTargetIndex = 0; // Loop back to the start.
         }
+        return; // STOP here for this frame. Don't try to move.
+    }
 
-        // Animation
-        animationTick++;
-        if (animationTick > animationSpeed) {
-            animationTick = 0;
-            currentFrame = (currentFrame == 0) ? 1 : 0;
+    // If we haven't arrived, calculate the next step.
+    double moveX = (dx / distance) * speed;
+    double moveY = (dy / distance) * speed;
+    
+    // --- Wall Collision Check (remains the same) ---
+    double nextX = x + moveX;
+    double nextY = y + moveY;
+    
+    int nextLeft = (int) nextX;
+    int nextRight = (int) nextX + width - 1;
+    int nextTop = (int) nextY;
+    int nextBottom = (int) nextY + height - 1;
+
+    if (!world.isTileSolid(nextLeft, nextTop) && !world.isTileSolid(nextRight, nextTop) &&
+        !world.isTileSolid(nextLeft, nextBottom) && !world.isTileSolid(nextRight, nextBottom)) {
+        // Path is clear! Commit the move.
+        x = nextX;
+        y = nextY;
+        this.rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
+    } else {
+        // Hit a wall! Skip to the next waypoint to get unstuck.
+        currentTargetIndex++;
+        if (currentTargetIndex >= patrolPath.size()) {
+            currentTargetIndex = 0;
         }
     }
+
+    // Animate (remains the same)
+    animationTick++;
+    if (animationTick > animationSpeed) {
+        currentFrame = (currentFrame + 1) % TOTAL_FRAMES;
+    }
+}
 
     public void draw(Graphics g) {
         // We will use the simple draw method for now to be safe
@@ -98,19 +121,34 @@ public class Spider {
         if (imageToDraw != null) {
             Graphics2D g2d = (Graphics2D) g.create();
             g2d.rotate(Math.toRadians(this.rotationAngle), this.getCenterX(), this.getCenterY());
-            g2d.drawImage(imageToDraw, (int)this.x, (int)this.y, this.width, this.height, null);
+            g2d.drawImage(imageToDraw, (int) this.x, (int) this.y, this.width, this.height, null);
             g2d.dispose();
         } else {
             // Failsafe so we can see it even if sprites are null
             g.setColor(Color.MAGENTA);
-            g.fillRect((int)this.x, (int)this.y, this.width, this.height);
+            g.fillRect((int) this.x, (int) this.y, this.width, this.height);
         }
     }
-    
+    public double getRadius() {
+    // My radius is just half my width!
+    return width / 2.0;
+    }
+
     // Collision Helpers
-    public int getX() { return (int)this.x; }
-    public int getY() { return (int)this.y; }
-    public int getCenterX() { return (int)this.x + width / 2; }
-    public int getCenterY() { return (int)this.y + height / 2; }
-    public double getRadius() { return width / 2.0; }
+    // Helper methods now cast the double to an int just before returning
+    public int getX() {
+        return (int) this.x;
+    }
+
+    public int getY() {
+        return (int) this.y;
+    }
+
+    public int getCenterX() {
+        return (int) this.x + width / 2;
+    }
+
+    public int getCenterY() {
+        return (int) this.y + height / 2;
+    }
 }

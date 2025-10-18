@@ -30,7 +30,6 @@ public class GamePanel extends JPanel {
 
     public GamePanel() {
 
-        
         world = new World();
         setPreferredSize(new Dimension(1920, 1080));
         setFocusable(true);
@@ -40,18 +39,27 @@ public class GamePanel extends JPanel {
         spawnFood();
 
         addKeyListener(new KeyInputAdapter());
+        // Inside your GamePanel constructor
+
+        // --- A NEW, LEGAL GPS ROUTE ---
         List<Point> patrolPath = new ArrayList<>();
-        patrolPath.add(new Point(7, 2));  // Start at tile (7, 2)
-        patrolPath.add(new Point(7, 6));  // Go down to (7, 6)
-        patrolPath.add(new Point(12, 6)); // Go right to (12, 6)
-        patrolPath.add(new Point(12, 2));
+        patrolPath.add(new Point(10, 8)); // Start in the safe central corridor
+        patrolPath.add(new Point(17, 8)); // Move right into the pillar room
+        patrolPath.add(new Point(17, 10)); // Move down
+        patrolPath.add(new Point(22, 10)); // Move to the far right
+        patrolPath.add(new Point(22, 2)); // Go all the way up
+        patrolPath.add(new Point(14, 2)); // Patrol left along the top
+        patrolPath.add(new Point(14, 5)); // Dip down into the middle
+
         this.spider = new Spider(patrolPath);
     }
+
+    // Add this method anywhere inside your Spider.java class
 
     public void updateGame() {
 
         player.update(world);
-        spider.update();
+        spider.update(world);
 
         cameraX = player.getCenterX() - (1920 / 2);
         cameraY = player.getCenterY() - (1080 / 2);
@@ -128,25 +136,33 @@ public class GamePanel extends JPanel {
     // An inner class for handling key inputs. This is a clean way to do it.
     // Inside GamePanel.java
 
-private class KeyInputAdapter extends KeyAdapter {
-    @Override
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
+    private class KeyInputAdapter extends KeyAdapter {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            int key = e.getKeyCode();
 
-        if (key == KeyEvent.VK_W) player.movingUp = true;
-        if (key == KeyEvent.VK_S) player.movingDown = true;
-        if (key == KeyEvent.VK_A) player.movingLeft = true;
-        if (key == KeyEvent.VK_D) player.movingRight = true;
+            if (key == KeyEvent.VK_W)
+                player.movingUp = true;
+            if (key == KeyEvent.VK_S)
+                player.movingDown = true;
+            if (key == KeyEvent.VK_A)
+                player.movingLeft = true;
+            if (key == KeyEvent.VK_D)
+                player.movingRight = true;
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            int key = e.getKeyCode();
+
+            if (key == KeyEvent.VK_W)
+                player.movingUp = false;
+            if (key == KeyEvent.VK_S)
+                player.movingDown = false;
+            if (key == KeyEvent.VK_A)
+                player.movingLeft = false;
+            if (key == KeyEvent.VK_D)
+                player.movingRight = false;
+        }
     }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        int key = e.getKeyCode();
-
-        if (key == KeyEvent.VK_W) player.movingUp = false;
-        if (key == KeyEvent.VK_S) player.movingDown = false;
-        if (key == KeyEvent.VK_A) player.movingLeft = false;
-        if (key == KeyEvent.VK_D) player.movingRight = false;
-    }
-}
 }
