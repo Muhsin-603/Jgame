@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
-//import java.io.*;
 import java.awt.geom.AffineTransform;
 
 public class Player {

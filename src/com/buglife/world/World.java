@@ -62,7 +62,7 @@ public class World {
             BufferedImage wallImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall.png"));
             tileTypes[1] = new Tile(wallImage, true);
             BufferedImage wallImage1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall_5.png"));
-            tileTypes[2] = new Tile(wallImage1, true);
+            tileTypes[9] = new Tile(wallImage1, true);
 
         } catch (IOException e) {
             System.err.println("Could not load tile images!");
@@ -71,19 +71,23 @@ public class World {
     }
 
     private void loadMap() {
-        // This is our hard-coded level! 1=wall, 0=floor.
-        // Feel free to go crazy and design a bigger room.
-        this.mapData = new int[][] {
-                { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-                { 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1 },
-                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-                { 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1 },
-                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-                { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
-        };
-    }
+    // A much deadlier level. 1 = Outer Wall, 9 = Inner Obstacle
+    this.mapData = new int[][]{
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 9, 9, 9, 0, 9, 0, 9, 9, 9, 0, 1, 0, 9, 9, 9, 9, 9, 0, 9, 9, 9, 0, 1},
+        {1, 0, 9, 0, 0, 0, 9, 0, 0, 0, 9, 0, 1, 0, 9, 0, 0, 0, 0, 0, 0, 0, 9, 0, 1},
+        {1, 0, 9, 0, 9, 9, 9, 0, 9, 0, 9, 0, 0, 0, 9, 0, 9, 9, 9, 9, 9, 0, 9, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 9, 0, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 9, 0, 0, 0, 1},
+        {1, 9, 9, 9, 9, 0, 9, 9, 9, 0, 0, 0, 0, 0, 0, 0, 9, 9, 9, 9, 9, 9, 9, 9, 1},
+        {1, 0, 0, 0, 9, 0, 9, 0, 0, 0, 9, 9, 1, 9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 9, 0, 9, 0, 9, 0, 9, 0, 0, 0, 1, 0, 0, 0, 9, 9, 0, 9, 9, 9, 9, 0, 1},
+        {1, 0, 9, 0, 0, 0, 0, 0, 9, 9, 9, 0, 1, 0, 9, 0, 0, 9, 0, 9, 0, 0, 0, 0, 1},
+        {1, 0, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 1, 0, 9, 0, 0, 9, 0, 9, 0, 9, 9, 9, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 9, 9, 9, 9, 1, 9, 9, 9, 9, 9, 0, 9, 0, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+    };
+}
 
     public void render(Graphics g, int cameraX, int cameraY) {
         for (int row = 0; row < mapData.length; row++) {

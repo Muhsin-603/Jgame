@@ -7,7 +7,9 @@ import src.com.buglife.entities.Food;
 import src.com.buglife.entities.Player;
 import src.com.buglife.entities.Spider;
 import src.com.buglife.world.World;
-
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JPanel;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -28,7 +30,7 @@ public class GamePanel extends JPanel {
 
     public GamePanel() {
 
-        this.spider = new Spider(400, 300);
+        
         world = new World();
         setPreferredSize(new Dimension(1920, 1080));
         setFocusable(true);
@@ -38,6 +40,12 @@ public class GamePanel extends JPanel {
         spawnFood();
 
         addKeyListener(new KeyInputAdapter());
+        List<Point> patrolPath = new ArrayList<>();
+        patrolPath.add(new Point(7, 2));  // Start at tile (7, 2)
+        patrolPath.add(new Point(7, 6));  // Go down to (7, 6)
+        patrolPath.add(new Point(12, 6)); // Go right to (12, 6)
+        patrolPath.add(new Point(12, 2));
+        this.spider = new Spider(patrolPath);
     }
 
     public void updateGame() {
