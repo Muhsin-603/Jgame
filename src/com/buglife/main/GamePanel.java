@@ -46,7 +46,9 @@ public class GamePanel extends JPanel {
         List<Point> patrolPath3 = new ArrayList<>();
         patrolPath3.add(new Point(18, 5));    // Start in first open floor tile
         patrolPath3.add(new Point(18, 3));    
-        patrolPath3.add(new Point(20, 3));
+        patrolPath3.add(new Point(26, 3));
+        patrolPath3.add(new Point(26, 8));
+        patrolPath3.add(new Point(26, 3));
         patrolPath3.add(new Point(18, 3));
         patrolPath3.add(new Point(18, 5));
         //new spider creation
