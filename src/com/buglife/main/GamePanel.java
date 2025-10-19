@@ -27,11 +27,13 @@ public class GamePanel extends JPanel {
     private World world;
     private int cameraX, cameraY;
     private Random rand = new Random();
+    public static final int SCREEN_WIDTH = 1024;
+    public static final int SCREEN_HEIGHT = 768;
 
     public GamePanel() {
 
         world = new World();
-        setPreferredSize(new Dimension(1920, 1080));
+        setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
         this.player = new Player(100, 100, 32, 32);
 
@@ -60,14 +62,22 @@ public class GamePanel extends JPanel {
 
         player.update(world);
         spider.update(world);
+        world = new World();
 
-        cameraX = player.getCenterX() - (1920 / 2);
-        cameraY = player.getCenterY() - (1080 / 2);
+        cameraX = player.getCenterX() - (SCREEN_WIDTH / 2);
+        cameraY = player.getCenterY() - (SCREEN_HEIGHT / 2);
 
         double dx = player.getCenterX() - spider.getCenterX();
         double dy = player.getCenterY() - spider.getCenterY();
         double distance = Math.sqrt(dx * dx + dy * dy);
         double requiredDistance = player.getRadius() + spider.getRadius();
+
+        List<Point> spiderTrack = world.findSpiderPath();
+
+        // 2. Create the spider and give it the track
+        if (spiderTrack != null && !spiderTrack.isEmpty()) {
+            this.spider = new Spider(spiderTrack);
+        }
 
         if (food != null) {
             double dxFood = player.getCenterX() - food.getCenterX();
@@ -87,17 +97,28 @@ public class GamePanel extends JPanel {
     }
 
     public void spawnFood() {
-        while (true) {
+        int maxTries = 100; // Give it 100 attempts to find a spot.
+        int tries = 0;
+
+        while (tries < maxTries) {
             int randomCol = rand.nextInt(world.getMapWidth());
             int randomRow = rand.nextInt(world.getMapHeight());
 
-            if (world.getTileIdAt(randomCol, randomRow) == 0) { // Check for floor tile
+            // Check if the tile at that random spot is a floor tile (ID 0)
+            if (world.getTileIdAt(randomCol, randomRow) == 0) {
+                // Success! Create the food and exit.
                 int foodX = randomCol * World.TILE_SIZE + (World.TILE_SIZE / 4);
                 int foodY = randomRow * World.TILE_SIZE + (World.TILE_SIZE / 4);
                 food = new Food(foodX, foodY, 20);
-                break; // Found a spot, exit the loop
+                System.out.println("Food spawned successfully at [" + randomCol + ", " + randomRow + "]");
+                return; // We're done, exit the method.
             }
+
+            tries++; // Increment our attempt counter.
         }
+
+        // If the loop finishes without finding a spot, we print a warning.
+        System.err.println("WARNING: Could not find a valid spot to spawn food after " + maxTries + " tries. Is your map full?");
     }
 
     // The paintComponent method now tells the player to draw itself
@@ -105,7 +126,7 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        world.render(g, cameraX, cameraY);
+        world.render(g, cameraX, cameraY, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.translate(-cameraX, -cameraY);

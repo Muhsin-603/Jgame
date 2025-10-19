@@ -14,7 +14,7 @@ import java.awt.Point;
 public class Spider {
     // Core Attributes
     private double x, y;
-    private int width = 48, height = 48; // Using the bug's original size
+    private int width = 48, height = 48;
     private int speed = 2;
 
     private double rotationAngle = 90; // Start facing right (90 degrees from North)
@@ -27,6 +27,7 @@ public class Spider {
     private int animationSpeed = 5;
     private List<Point> patrolPath;
     private int currentTargetIndex = 0;
+    // private boolean isMovingForward = true;
 
     public Spider(List<Point> tilePath) {
         // Convert the tile-based path to a pixel-based path
@@ -59,61 +60,45 @@ public class Spider {
     }
 
     // In Spider.java, replace the entire update method.
-public void update(World world) {
-    if (patrolPath == null || patrolPath.isEmpty()) {
-        return; // No path, no movement.
-    }
+    // In Spider.java
 
-    // Get the current destination.
-    Point target = patrolPath.get(currentTargetIndex);
-    double dx = target.x - getCenterX();
-    double dy = target.y - getCenterY();
-    double distance = Math.sqrt(dx * dx + dy * dy);
+    public void update(World world) {
+        if (patrolPath == null || patrolPath.isEmpty()) return;
 
-    // --- THE NEW, DECISIVE LOGIC ---
-    // Check if we have arrived at our destination.
-    if (distance < speed * 1.5) { // Use a slightly larger radius to prevent getting stuck
-        // We've arrived! Pick the next target for the *next* frame.
-        currentTargetIndex++;
-        if (currentTargetIndex >= patrolPath.size()) {
-            currentTargetIndex = 0; // Loop back to the start.
+        Point target = patrolPath.get(currentTargetIndex);
+        double dx = target.x - getCenterX();
+        double dy = target.y - getCenterY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        // --- THE CHILL-OUT PROTOCOL ---
+        if (distance > speed) {
+            // We are moving, so calculate movement and rotation.
+            double moveX = (dx / distance) * speed;
+            double moveY = (dy / distance) * speed;
+            
+            // Check for walls before committing to the move.
+            double nextX = x + moveX;
+            double nextY = y + moveY;
+            // ... (Your wall collision logic here) ...
+            
+            // If path is clear, commit the move.
+            x = nextX;
+            y = nextY;
+            
+            // Only update rotation if we are actually moving.
+            this.rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
+
+        } else {
+            // We have arrived. Just pick the next target and do nothing else.
+            currentTargetIndex = (currentTargetIndex + 1) % patrolPath.size();
         }
-        return; // STOP here for this frame. Don't try to move.
-    }
 
-    // If we haven't arrived, calculate the next step.
-    double moveX = (dx / distance) * speed;
-    double moveY = (dy / distance) * speed;
-    
-    // --- Wall Collision Check (remains the same) ---
-    double nextX = x + moveX;
-    double nextY = y + moveY;
-    
-    int nextLeft = (int) nextX;
-    int nextRight = (int) nextX + width - 1;
-    int nextTop = (int) nextY;
-    int nextBottom = (int) nextY + height - 1;
-
-    if (!world.isTileSolid(nextLeft, nextTop) && !world.isTileSolid(nextRight, nextTop) &&
-        !world.isTileSolid(nextLeft, nextBottom) && !world.isTileSolid(nextRight, nextBottom)) {
-        // Path is clear! Commit the move.
-        x = nextX;
-        y = nextY;
-        this.rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
-    } else {
-        // Hit a wall! Skip to the next waypoint to get unstuck.
-        currentTargetIndex++;
-        if (currentTargetIndex >= patrolPath.size()) {
-            currentTargetIndex = 0;
+        // Animate
+        animationTick++;
+        if (animationTick > animationSpeed) {
+            currentFrame = (currentFrame + 1) % TOTAL_FRAMES;
         }
     }
-
-    // Animate (remains the same)
-    animationTick++;
-    if (animationTick > animationSpeed) {
-        currentFrame = (currentFrame + 1) % TOTAL_FRAMES;
-    }
-}
 
     public void draw(Graphics g) {
         // We will use the simple draw method for now to be safe
@@ -129,26 +114,16 @@ public void update(World world) {
             g.fillRect((int) this.x, (int) this.y, this.width, this.height);
         }
     }
+
     public double getRadius() {
-    // My radius is just half my width!
-    return width / 2.0;
+        // My radius is just half my width!
+        return width / 2.0;
     }
 
     // Collision Helpers
     // Helper methods now cast the double to an int just before returning
-    public int getX() {
-        return (int) this.x;
-    }
-
-    public int getY() {
-        return (int) this.y;
-    }
-
-    public int getCenterX() {
-        return (int) this.x + width / 2;
-    }
-
-    public int getCenterY() {
-        return (int) this.y + height / 2;
-    }
+    public int getX() {return (int) this.x;}
+    public int getY() {return (int) this.y;}
+    public int getCenterX() {return (int) this.x + width / 2;}
+    public int getCenterY() {return (int) this.y + height / 2;}
 }
