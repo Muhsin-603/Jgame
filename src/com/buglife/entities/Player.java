@@ -39,6 +39,21 @@ public class Player {
             this.health = 100;
         }
     }
+    // Add this method anywhere inside your Player class
+
+public void reset() {
+    // Reset to the default starting position and state
+    this.x = 200;
+    this.y = 200;
+    this.health = 100; // Assuming health is a field in Player
+    this.currentState = PlayerState.IDLE_DOWN;
+    
+    // Make sure it's not moving
+    this.movingUp = false;
+    this.movingDown = false;
+    this.movingLeft = false;
+    this.movingRight = false;
+}
 
     public void render(Graphics g) {
         // --- PART 1: DRAW THE PLAYER (This part is the same) ---

@@ -77,43 +77,27 @@ public class GamePanel extends JPanel {
     // Add this new method anywhere in GamePanel.java
     // In GamePanel.java
 
-    public void restartGame() {
-        System.out.println("Restarting the nightmare...");
+    // In GamePanel.java
 
-        // --- 1. Re-create the player with the CORRECT size ---
-        // Make sure these numbers match the ones in your GamePanel constructor!
-        this.player = new Player(200, 200, 32, 32);
+public void restartGame() {
+    System.out.println("Resetting the nightmare...");
 
-        // --- 2. Vaporize the OLD spider army ---
-        //spiders.clear();
+    // 1. Reset the player.
+    player.reset();
 
-        // --- 3. Rebuild the NEW spider army from the blueprints ---
-        // (This is the logic that was missing!)
-        /*List<Point> path1 = new ArrayList<>();
-        path1.add(new Point(7, 7));
-        path1.add(new Point(18, 7));
-        spiders.add(new Spider(path1));
-
-        List<Point> path2 = new ArrayList<>();
-        path2.add(new Point(14, 3));
-        path2.add(new Point(14, 6));
-        spiders.add(new Spider(path2));
-
-        List<Point> patrolPath3 = new ArrayList<>();
-        patrolPath3.add(new Point(18, 5)); // Start in first open floor tile
-        patrolPath3.add(new Point(18, 3));
-        patrolPath3.add(new Point(26, 3));
-        patrolPath3.add(new Point(26, 8));
-        patrolPath3.add(new Point(26, 3));
-        patrolPath3.add(new Point(18, 3));
-        patrolPath3.add(new Point(18, 5));*/
-
-        // --- 4. Respawn the food ---
-        spawnFood();
-
-        // --- 5. Set the scene back to the beginning ---
-        currentState = GameState.PLAYING;
+    // 2. Reset every spider in our existing army.
+    for (Spider spider : spiders) {
+        if (spider != null) {
+            spider.reset();
+        }
     }
+
+    // 3. Respawn the food.
+    spawnFood();
+
+    // 4. Set the scene back to the beginning.
+    currentState = GameState.PLAYING;
+}
 
     // Add this method anywhere inside your Spider.java class
 

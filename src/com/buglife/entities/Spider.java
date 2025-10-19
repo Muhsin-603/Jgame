@@ -27,7 +27,7 @@ public class Spider {
     private int animationSpeed = 5;
     private List<Point> patrolPath;
     private int currentTargetIndex = 0;
-    // private boolean isMovingForward = true;
+    private boolean isMovingForward = true;
 
     public Spider(List<Point> tilePath) {
         // Convert the tile-based path to a pixel-based path
@@ -59,47 +59,94 @@ public class Spider {
         }
     }
 
+    // Add this method anywhere inside your Spider class
+
+public void reset() {
+    System.out.println("Spider is resetting to its starting position.");
+    
+    // Teleport back to the first point in the patrol path
+    if (patrolPath != null && !patrolPath.isEmpty()) {
+        this.x = patrolPath.get(0).x - (width / 2.0);
+        this.y = patrolPath.get(0).y - (height / 2.0);
+    }
+    
+    // Reset the AI's brain to its initial state
+    this.currentTargetIndex = 1; // Immediately target the second point to start moving
+    this.isMovingForward = true;
+    
+    // Reset the animation to the first frame
+    this.currentFrame = 0;
+    this.animationTick = 0;
+}
+
     // In Spider.java, replace the entire update method.
     // In Spider.java
 
     public void update(World world) {
-        if (patrolPath == null || patrolPath.isEmpty()) return;
-
-        Point target = patrolPath.get(currentTargetIndex);
-        double dx = target.x - getCenterX();
-        double dy = target.y - getCenterY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
-
-        // --- THE CHILL-OUT PROTOCOL ---
-        if (distance > speed) {
-            // We are moving, so calculate movement and rotation.
-            double moveX = (dx / distance) * speed;
-            double moveY = (dy / distance) * speed;
-            
-            // Check for walls before committing to the move.
-            double nextX = x + moveX;
-            double nextY = y + moveY;
-            // ... (Your wall collision logic here) ...
-            
-            // If path is clear, commit the move.
-            x = nextX;
-            y = nextY;
-            
-            // Only update rotation if we are actually moving.
-            this.rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
-
-        } else {
-            // We have arrived. Just pick the next target and do nothing else.
-            currentTargetIndex = (currentTargetIndex + 1) % patrolPath.size();
-        }
-
-        // Animate
-        animationTick++;
-        if (animationTick > animationSpeed) {
-            currentFrame = (currentFrame + 1) % TOTAL_FRAMES;
-            animationTick = 0;  // Reset the tick counter
-        }
+    if (patrolPath == null || patrolPath.isEmpty() || patrolPath.size() < 2) {
+        return; // Can't patrol without at least two points.
     }
+
+    // --- The "Retrace Your Steps" AI ---
+    
+    // 1. Get the current target.
+    Point target = patrolPath.get(currentTargetIndex);
+    double dx = target.x - getCenterX();
+    double dy = target.y - getCenterY();
+    double distance = Math.sqrt(dx * dx + dy * dy);
+
+    // 2. Check if we've arrived at our destination.
+    if (distance < 5) { // The "close enough" rule
+        // We've arrived! Decide where to go next based on our direction.
+        if (isMovingForward) {
+            currentTargetIndex++; // Move to the next point in the list.
+            if (currentTargetIndex >= patrolPath.size()) {
+                // We've hit the end! Time to turn back.
+                isMovingForward = false;
+                currentTargetIndex = patrolPath.size() - 2; // Target the second-to-last point.
+            }
+        } else { // We are moving backward.
+            currentTargetIndex--; // Move to the previous point.
+            if (currentTargetIndex < 0) {
+                // We've hit the beginning! Time to turn back again.
+                isMovingForward = true;
+                currentTargetIndex = 1; // Target the second point.
+            }
+        }
+        return; // Get a fresh start on the next frame.
+    }
+    
+    // 3. If we haven't arrived, calculate movement.
+    double moveX = (dx / distance) * speed;
+    double moveY = (dy / distance) * speed;
+    
+    // 4. THE CONSCIENCE: Check for walls before moving.
+    double nextX = x + moveX;
+    double nextY = y + moveY;
+    
+    int nextLeft = (int) nextX;
+    int nextRight = (int) nextX + width - 1;
+    int nextTop = (int) nextY;
+    int nextBottom = (int) nextY + height - 1;
+
+    if (!world.isTileSolid(nextLeft, nextTop) && !world.isTileSolid(nextRight, nextTop) &&
+        !world.isTileSolid(nextLeft, nextBottom) && !world.isTileSolid(nextRight, nextBottom)) {
+        // Path is clear! Commit the move and update rotation.
+        x = nextX;
+        y = nextY;
+        this.rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 90;
+    } else {
+        // Hit a wall! Skip to the next waypoint to try and get unstuck.
+        currentTargetIndex = (currentTargetIndex + 1) % patrolPath.size();
+    }
+    
+    // 5. Animate.
+    animationTick++;
+    if (animationTick > animationSpeed) {
+        animationTick = 0;
+        currentFrame = (currentFrame + 1) % TOTAL_FRAMES;
+    }
+}
 
     public void draw(Graphics g) {
         // We will use the simple draw method for now to be safe
