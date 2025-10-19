@@ -31,8 +31,16 @@ public class GamePanel extends JPanel {
     public static final int SCREEN_HEIGHT = 768;
 
     public GamePanel() {
-
+        
+        player = new Player(200, 200, 48, 32);
         world = new World();
+
+        List<Point> spiderTrack = world.findSpiderPath();
+        if (spiderTrack != null && !spiderTrack.isEmpty()) {
+            this.spider = new Spider(spiderTrack);
+        }
+
+        
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
         this.player = new Player(100, 100, 32, 32);
@@ -61,8 +69,9 @@ public class GamePanel extends JPanel {
     public void updateGame() {
 
         player.update(world);
-        spider.update(world);
-
+        spider.update(world);if (spider != null) {
+            spider.update(world);
+        }
         // Update camera with bounds checking
         cameraX = Math.max(0, Math.min(player.getCenterX() - (SCREEN_WIDTH / 2), 
                           world.getMapWidth() * World.TILE_SIZE - SCREEN_WIDTH));
@@ -74,12 +83,9 @@ public class GamePanel extends JPanel {
         double distance = Math.sqrt(dx * dx + dy * dy);
         double requiredDistance = player.getRadius() + spider.getRadius();
 
-        List<Point> spiderTrack = world.findSpiderPath();
-
+        
         // 2. Create the spider and give it the track
-        if (spiderTrack != null && !spiderTrack.isEmpty()) {
-            this.spider = new Spider(spiderTrack);
-        }
+        
 
         if (food != null) {
             double dxFood = player.getCenterX() - food.getCenterX();
