@@ -97,6 +97,7 @@ public class Spider {
         animationTick++;
         if (animationTick > animationSpeed) {
             currentFrame = (currentFrame + 1) % TOTAL_FRAMES;
+            animationTick = 0;  // Reset the tick counter
         }
     }
 
@@ -105,10 +106,12 @@ public class Spider {
         BufferedImage imageToDraw = walkingFrames[currentFrame];
         if (imageToDraw != null) {
             Graphics2D g2d = (Graphics2D) g.create();
-            g2d.rotate(Math.toRadians(this.rotationAngle), this.getCenterX(), this.getCenterY());
-            g2d.drawImage(imageToDraw, (int) this.x, (int) this.y, this.width, this.height, null);
-            g2d.dispose();
-        } else {
+            try {
+                g2d.rotate(Math.toRadians(this.rotationAngle), this.getCenterX(), this.getCenterY());
+                g2d.drawImage(imageToDraw, (int) this.x, (int) this.y, this.width, this.height, null);
+            } finally {g2d.dispose();}
+        } 
+        else {
             // Failsafe so we can see it even if sprites are null
             g.setColor(Color.MAGENTA);
             g.fillRect((int) this.x, (int) this.y, this.width, this.height);
@@ -126,4 +129,4 @@ public class Spider {
     public int getY() {return (int) this.y;}
     public int getCenterX() {return (int) this.x + width / 2;}
     public int getCenterY() {return (int) this.y + height / 2;}
-}
+    }

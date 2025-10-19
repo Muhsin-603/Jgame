@@ -62,10 +62,12 @@ public class GamePanel extends JPanel {
 
         player.update(world);
         spider.update(world);
-        world = new World();
 
-        cameraX = player.getCenterX() - (SCREEN_WIDTH / 2);
-        cameraY = player.getCenterY() - (SCREEN_HEIGHT / 2);
+        // Update camera with bounds checking
+        cameraX = Math.max(0, Math.min(player.getCenterX() - (SCREEN_WIDTH / 2), 
+                          world.getMapWidth() * World.TILE_SIZE - SCREEN_WIDTH));
+        cameraY = Math.max(0, Math.min(player.getCenterY() - (SCREEN_HEIGHT / 2), 
+                          world.getMapHeight() * World.TILE_SIZE - SCREEN_HEIGHT));
 
         double dx = player.getCenterX() - spider.getCenterX();
         double dy = player.getCenterY() - spider.getCenterY();
