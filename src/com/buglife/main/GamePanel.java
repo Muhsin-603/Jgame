@@ -106,6 +106,8 @@ public void restartGame() {
         if (currentState == GameState.PLAYING) {
             player.update(world);
             for (Spider spider : spiders) {
+                if(spider != null){
+                
                 spider.update(player,world);
 
                 // Check collision with each spider
@@ -119,6 +121,7 @@ public void restartGame() {
                 }
 
             }
+        }
             // Update camera with bounds checking
             cameraX = Math.max(0, Math.min(player.getCenterX() - (SCREEN_WIDTH / 2),
                     world.getMapWidth() * World.TILE_SIZE - SCREEN_WIDTH));

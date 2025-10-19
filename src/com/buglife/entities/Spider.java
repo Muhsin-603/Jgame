@@ -29,7 +29,8 @@ public class Spider {
     private int currentTargetIndex = 0;
     private boolean isMovingForward = true;
     // Add these new fields to Spider.java
-    private List<Point> breadcrumbTrail; // The memory of the chase
+    //private List<Point> breadcrumbTrail; // The memory of the chase
+    private Point returnPoint;
     private int loseSightTimer; // A countdown for when it loses the player
     private Player targetPlayer; // A reference to the player it's hunting
 
@@ -46,7 +47,8 @@ public class Spider {
         // Convert the tile-based path to a pixel-based path
         this.patrolPath = new ArrayList<>();
         this.currentState = SpiderState.PATROLLING;
-        this.breadcrumbTrail = new ArrayList<>();
+        //this.breadcrumbTrail = new ArrayList<>();
+        this.returnPoint = new Point();
         for (Point tilePoint : tilePath) {
             int pixelX = tilePoint.x * World.TILE_SIZE + (World.TILE_SIZE / 2);
             int pixelY = tilePoint.y * World.TILE_SIZE + (World.TILE_SIZE / 2);
@@ -135,40 +137,43 @@ public class Spider {
             doPatrol(world);
             // While patrolling, constantly look for the player.
             if (canSeePlayer(targetPlayer, world)) {
-                System.out.println("SPIDER: I SEE YOU!");
+                System.out.println("SPIDER: TARGET ACQUIRED!");
+                // Drop a GPS pin at our current location. THIS is our post.
+                this.returnPoint = new Point(getCenterX(), getCenterY());
                 currentState = SpiderState.CHASING;
-                breadcrumbTrail.clear(); // Start a fresh trail
             }
             break;
 
-        case CHASING:
+        
             // Add a breadcrumb to the trail every so often.
-            if (animationTick % 30 == 0) { // Drop a crumb every half second
-                breadcrumbTrail.add(new Point(getCenterX(), getCenterY()));
-            }
-
+            case CHASING:
             if (canSeePlayer(targetPlayer, world)) {
-                // If we can still see the player, hunt him!
                 chase(targetPlayer);
-                loseSightTimer = 300; // Reset the "give up" timer (5 seconds * 60 fps)
+                loseSightTimer = 300; // Reset the 5-second "give up" timer
             } else {
-                // We lost him! Start the countdown to giving up.
+                // We lost him! Start the countdown.
                 loseSightTimer--;
                 if (loseSightTimer <= 0) {
-                    System.out.println("SPIDER: WHERE DID HE GO? RETURNING...");
+                    System.out.println("SPIDER: TARGET LOST. RETURNING TO POST.");
                     currentState = SpiderState.RETURNING;
                 }
             }
             break;
 
+        
         case RETURNING:
-            if (breadcrumbTrail.isEmpty()) {
+            // Check if we've made it back to our post.
+            double dx = returnPoint.x - getCenterX();
+            double dy = returnPoint.y - getCenterY();
+            double distanceToPost = Math.sqrt(dx * dx + dy * dy);
+
+            if (distanceToPost < 5) {
                 // We're back! Resume normal patrol.
-                System.out.println("SPIDER: BACK ON PATROL.");
+                System.out.println("SPIDER: RESUMING PATROL.");
                 currentState = SpiderState.PATROLLING;
             } else {
-                // Follow the breadcrumbs home.
-                returnToPatrol();
+                // If not, take the shortest path back.
+                returnToPost();
             }
             break;
         }
@@ -198,25 +203,20 @@ public class Spider {
         }
     }
 
-    private void returnToPatrol() {
-        // Get the last breadcrumb in the trail as our target
-        Point target = breadcrumbTrail.get(breadcrumbTrail.size() - 1);
-        double dx = target.x - getCenterX();
-        double dy = target.y - getCenterY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
+    private void returnToPost() {
+    double dx = returnPoint.x - getCenterX();
+    double dy = returnPoint.y - getCenterY();
+    double distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance < 5) {
-            // We've reached a breadcrumb. Remove it and target the next one.
-            breadcrumbTrail.remove(breadcrumbTrail.size() - 1);
-        } else {
-            // Move towards the breadcrumb
-            double moveX = (dx / distance) * speed;
-            double moveY = (dy / distance) * speed;
-            x += moveX;
-            y += moveY;
-            rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
-        }
+    if (distance > 1) {
+        // Move directly towards our saved return point.
+        double moveX = (dx / distance) * speed;
+        double moveY = (dy / distance) * speed;
+        x += moveX;
+        y += moveY;
+        rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
     }
+}
 
     private void chase(Player player) {
         // Simple "move towards player" logic
