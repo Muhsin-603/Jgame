@@ -29,7 +29,7 @@ public class Spider {
     private int currentTargetIndex = 0;
     private boolean isMovingForward = true;
     // Add these new fields to Spider.java
-    //private List<Point> breadcrumbTrail; // The memory of the chase
+    // private List<Point> breadcrumbTrail; // The memory of the chase
     private Point returnPoint;
     private int loseSightTimer; // A countdown for when it loses the player
     private Player targetPlayer; // A reference to the player it's hunting
@@ -47,7 +47,7 @@ public class Spider {
         // Convert the tile-based path to a pixel-based path
         this.patrolPath = new ArrayList<>();
         this.currentState = SpiderState.PATROLLING;
-        //this.breadcrumbTrail = new ArrayList<>();
+        // this.breadcrumbTrail = new ArrayList<>();
         this.returnPoint = new Point();
         for (Point tilePoint : tilePath) {
             int pixelX = tilePoint.x * World.TILE_SIZE + (World.TILE_SIZE / 2);
@@ -144,9 +144,8 @@ public class Spider {
             }
             break;
 
-        
-            // Add a breadcrumb to the trail every so often.
-            case CHASING:
+        // Add a breadcrumb to the trail every so often.
+        case CHASING:
             if (canSeePlayer(targetPlayer, world)) {
                 chase(targetPlayer);
                 loseSightTimer = 300; // Reset the 5-second "give up" timer
@@ -160,7 +159,6 @@ public class Spider {
             }
             break;
 
-        
         case RETURNING:
             // Check if we've made it back to our post.
             double dx = returnPoint.x - getCenterX();
@@ -204,18 +202,22 @@ public class Spider {
     }
 
     private void returnToPost() {
-    double dx = returnPoint.x - getCenterX();
-    double dy = returnPoint.y - getCenterY();
-    double distance = Math.sqrt(dx * dx + dy * dy);
+        double dx = returnPoint.x - getCenterX();
+        double dy = returnPoint.y - getCenterY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
 
-    if (distance > 1) {
-        // Move directly towards our saved return point.
-        double moveX = (dx / distance) * speed;
-        double moveY = (dy / distance) * speed;
-        x += moveX;
-        y += moveY;
-        rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
+        if (distance > 1) {
+            // Move directly towards our saved return point.
+            double moveX = (dx / distance) * speed;
+            double moveY = (dy / distance) * speed;
+            x += moveX;
+            y += moveY;
+            rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
+        }
     }
+    // Add this simple method to Spider.java
+public boolean isChasing() {
+    return this.currentState == SpiderState.CHASING;
 }
 
     private void chase(Player player) {

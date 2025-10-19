@@ -105,19 +105,24 @@ public void restartGame() {
 
         if (currentState == GameState.PLAYING) {
             player.update(world);
-            for (Spider spider : spiders) {
-                if(spider != null){
+            for (Spider currentSpider : spiders) {
+                if(currentSpider != null){
                 
-                spider.update(player,world);
+                currentSpider.update(player,world);
 
                 // Check collision with each spider
-                double dx = player.getCenterX() - spider.getCenterX();
-                double dy = player.getCenterY() - spider.getCenterY();
+                double dx = player.getCenterX() - currentSpider.getCenterX();
+                double dy = player.getCenterY() - currentSpider.getCenterY();
                 double distance = Math.sqrt(dx * dx + dy * dy);
-                double requiredDistance = player.getRadius() + spider.getRadius();
+                double requiredDistance = player.getRadius() + currentSpider.getRadius();
 
                 if (distance < requiredDistance) {
+                    if (currentSpider.isChasing()) { // We'll add this method next
+                        player.getWebbed();
+                    } else {
+        // If it just bumps into you while patrolling, it's just a little damage.
                     player.takeDamage(1);
+                }
                 }
 
             }
@@ -249,6 +254,9 @@ public void restartGame() {
                     player.movingLeft = true;
                 if (key == KeyEvent.VK_D)
                     player.movingRight = true;
+                if (key == KeyEvent.VK_SPACE) {
+            player.struggle();
+        }
             } else if (currentState == GameState.GAME_OVER) {
                 // --- Game Over controls ---
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {

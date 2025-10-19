@@ -5,6 +5,9 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
+
+import src.com.buglife.world.World;
+
 import java.awt.geom.AffineTransform;
 
 public class Player {
@@ -28,9 +31,10 @@ public class Player {
     private List<BufferedImage> walkDownFrames;
     private List<BufferedImage> walkUpFrames;
     private List<BufferedImage> walkRightFrames;
+    private int webbedTimer = 0;
 
     public enum PlayerState {
-        IDLE_DOWN, WALKING_DOWN, WALKING_UP, WALKING_HORIZONTAL
+        IDLE_DOWN, WALKING_DOWN, WALKING_UP, WALKING_HORIZONTAL, WEBBED
     }
 
     public void heal(int amount) {
@@ -41,19 +45,28 @@ public class Player {
     }
     // Add this method anywhere inside your Player class
 
-public void reset() {
-    // Reset to the default starting position and state
-    this.x = 200;
-    this.y = 200;
-    this.health = 100; // Assuming health is a field in Player
-    this.currentState = PlayerState.IDLE_DOWN;
-    
-    // Make sure it's not moving
-    this.movingUp = false;
-    this.movingDown = false;
-    this.movingLeft = false;
-    this.movingRight = false;
-}
+    public void reset() {
+        // Reset to the default starting position and state
+        this.x = 200;
+        this.y = 200;
+        this.health = 100; // Assuming health is a field in Player
+        this.currentState = PlayerState.IDLE_DOWN;
+
+        // Make sure it's not moving
+        this.movingUp = false;
+        this.movingDown = false;
+        this.movingLeft = false;
+        this.movingRight = false;
+    }
+
+    // Add this method to Player.java
+    public void getWebbed() {
+        if (currentState != PlayerState.WEBBED) {
+            System.out.println("PLAYER: I'M TRAPPED!");
+            currentState = PlayerState.WEBBED;
+            webbedTimer = 300; // Trapped for 5 seconds (5 * 60 fps)
+        }
+    }
 
     public void render(Graphics g) {
         // --- PART 1: DRAW THE PLAYER (This part is the same) ---
@@ -173,6 +186,14 @@ public void reset() {
         }
     }
 
+    // Add this method to Player.java
+    public void struggle() {
+        if (currentState == PlayerState.WEBBED) {
+            webbedTimer -= 10; // Each key press shaves a bit off the timer!
+            System.out.println("Struggling! Time left: " + webbedTimer);
+        }
+    }
+
     /*
      * private void loadSprites() { try { // Using the path that worked for you
      * before! sprite_walk1 =
@@ -187,84 +208,79 @@ public void reset() {
      * the main game loop.
      */
     // The new update method now takes the World as an argument
-    public void update(src.com.buglife.world.World world) {
-        // Calculate how far we WILL move this frame
-
-        PlayerState previousState = currentState;
-        if (movingUp) {
-            currentState = PlayerState.WALKING_UP;
-        } else if (movingDown) {
-            currentState = PlayerState.WALKING_DOWN;
-        } else if (movingLeft || movingRight) {
-            currentState = PlayerState.WALKING_HORIZONTAL;
-            isFacingLeft = movingLeft;
-        } else {
-            currentState = PlayerState.IDLE_DOWN;
+    public void update(World world) {
+    // --- First, check for paralysis ---
+    if (currentState == PlayerState.WEBBED) {
+        // If we're webbed, our ONLY job is to count down the timer.
+        webbedTimer--;
+        if (webbedTimer <= 0) {
+            System.out.println("PLAYER: I'M FREE!");
+            currentState = PlayerState.IDLE_DOWN; // Freedom!
         }
+        // THE EJECTION! If we are webbed, we cannot do anything else. End of story.
+        return; 
+    }
 
-        // If we changed state, reset the animation to the first frame
-        if (previousState != currentState) {
-            currentFrame = 0;
-            animationTick = 0;
-        }
+    // --- If we are NOT webbed, proceed with normal life ---
+    
+    // 1. State Management: Decide which animation to play.
+    PlayerState previousState = currentState;
+    if (movingUp) {
+        currentState = PlayerState.WALKING_UP;
+    } else if (movingDown) {
+        currentState = PlayerState.WALKING_DOWN;
+    } else if (movingLeft || movingRight) {
+        currentState = PlayerState.WALKING_HORIZONTAL;
+        isFacingLeft = movingLeft;
+    } else {
+        currentState = PlayerState.IDLE_DOWN;
+    }
 
-        double nextX = x, nextY = y;
-        if (movingUp)
-            nextY -= speed;
-        if (movingDown)
-            nextY += speed;
-        if (movingLeft)
-            nextX -= speed;
-        if (movingRight)
-            nextX += speed;
+    if (previousState != currentState) {
+        currentFrame = 0;
+        animationTick = 0;
+    }
 
-        // We check for wall collision only if the player is actually trying to move.
-        if (nextX != x || nextY != y) {
-            int nextLeft = (int) nextX;
-            int nextRight = (int) nextX + width - 1;
-            int nextTop = (int) nextY;
-            int nextBottom = (int) nextY + height - 1;
+    // 2. Movement & Wall Collision
+    // (Your existing wall collision logic is perfect here)
+    double nextX = x, nextY = y;
+    if (movingUp) nextY -= speed;
+    if (movingDown) nextY += speed;
+    if (movingLeft) nextX -= speed;
+    if (movingRight) nextX += speed;
 
-            boolean topLeftSolid = world.isTileSolid(nextLeft, nextTop);
-            boolean topRightSolid = world.isTileSolid(nextRight, nextTop);
-            boolean bottomLeftSolid = world.isTileSolid(nextLeft, nextBottom);
-            boolean bottomRightSolid = world.isTileSolid(nextRight, nextBottom);
+    if (nextX != x || nextY != y) {
+        int nextLeft = (int) nextX;
+        int nextRight = (int) nextX + width - 1;
+        int nextTop = (int) nextY;
+        int nextBottom = (int) nextY + height - 1;
 
-            // Only commit the move if the path is clear.
-            if (!topLeftSolid && !topRightSolid && !bottomLeftSolid && !bottomRightSolid) {
-                x = (int) nextX;
-                y = (int) nextY;
-            }
-        }
-        healthDrainTimer++;
-
-        if (healthDrainTimer > 120) {
-
-            takeDamage(1);
-
-            healthDrainTimer = 0;
-
-        }
-
-        // --- Animation logic (this part stays the same) ---
-        boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
-
-        if (isMoving) { // <-- THE FIX! Only animate if we are moving.
-            animationTick++;
-            if (animationTick > animationSpeed) {
-                animationTick = 0;
-                currentFrame++;
-
-                List<BufferedImage> currentAnimation = getActiveAnimation();
-                if (currentFrame >= currentAnimation.size()) {
-                    currentFrame = 0; // Loop the animation
-                }
-            }
-        } else {
-            // If we're not moving, reset to the first frame of the animation
-            currentFrame = 0;
+        if (!world.isTileSolid(nextLeft, nextTop) && !world.isTileSolid(nextRight, nextTop) &&
+            !world.isTileSolid(nextLeft, nextBottom) && !world.isTileSolid(nextRight, nextBottom)) {
+            x = (int) nextX;
+            y = (int) nextY;
         }
     }
+    
+    // 3. Health Drain (runs only when not webbed)
+    healthDrainTimer++;
+    if (healthDrainTimer > 120) {
+        takeDamage(1);
+        healthDrainTimer = 0;
+    }
+
+    // 4. Animation
+    boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
+    if (isMoving) {
+        animationTick++;
+        if (animationTick > animationSpeed) {
+            animationTick = 0;
+            currentFrame = (currentFrame + 1) % getActiveAnimation().size();
+        }
+    } else {
+        currentFrame = 0;
+    }
+}
 
     private List<BufferedImage> getActiveAnimation() {
         switch (currentState) {
