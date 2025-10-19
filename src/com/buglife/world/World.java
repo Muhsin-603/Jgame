@@ -1,9 +1,8 @@
 package src.com.buglife.world;
 
 import javax.imageio.ImageIO;
-
+import java.io.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.*;
@@ -52,8 +51,44 @@ public class World {
 
     public World() {
         loadTileTypes();
-        loadMap();
+        loadMapFromFile("/res/maps/level1.txt");
     }
+
+    private void loadMapFromFile(String filePath) {
+        List<List<Integer>> mapRows = new ArrayList<>();
+        try {
+            InputStream is = getClass().getResourceAsStream(filePath);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue; // Skip empty lines
+
+                List<Integer> row = new ArrayList<>();
+                String[] numbers = line.trim().split("\\s+"); // Split by one or more spaces
+                for (String num : numbers) {
+                    row.add(Integer.parseInt(num));
+                }
+                mapRows.add(row);
+            }
+            reader.close();
+
+        } catch (Exception e) {
+            System.err.println("CRITICAL FAILURE: Could not load map file: " + filePath);
+            e.printStackTrace();
+            return;
+        }
+
+        // Convert our flexible list into a rigid 2D array for performance
+        int height = mapRows.size();
+        int width = mapRows.get(0).size();
+        this.mapData = new int[height][width];
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                this.mapData[row][col] = mapRows.get(row).get(col);
+            }
+        }
+    } 
 
     private void loadTileTypes() {
         tileTypes = new Tile[10]; // We have 2 types of tiles right now
@@ -94,7 +129,7 @@ public class World {
 
     // In World.java
 
-    private void loadMap() {
+    /*private void loadMap() {
     // A larger, more open level with a dangerous pantry section.
     // 1 = Outer Wall, 9 = Inner Obstacle, 2 = Invisible Spider Path
     this.mapData = new int[][]{
@@ -112,7 +147,7 @@ public class World {
         {1, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
     };
-}
+}*/
 
     // In World.java
 

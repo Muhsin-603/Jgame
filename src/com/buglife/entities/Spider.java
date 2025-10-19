@@ -145,10 +145,7 @@ public class Spider {
                           world.isTileSolid(left, bottom) ||
                           world.isTileSolid(right, bottom);
 
-        if (collision) {
-            System.out.println("WALL COLLISION DETECTED at position: (" + 
-                             (int)checkX + ", " + (int)checkY + ")");
-        }
+        
 
         return collision;
     }
