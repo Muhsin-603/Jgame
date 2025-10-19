@@ -43,9 +43,16 @@ public class GamePanel extends JPanel {
         patrolPath2.add(new Point(14, 6));    
         patrolPath2.add(new Point(14, 3));
         
+        List<Point> patrolPath3 = new ArrayList<>();
+        patrolPath3.add(new Point(18, 5));    // Start in first open floor tile
+        patrolPath3.add(new Point(18, 3));    
+        patrolPath3.add(new Point(20, 3));
+        patrolPath3.add(new Point(18, 3));
+        patrolPath3.add(new Point(18, 5));
         //new spider creation
         spiders.add(new Spider(patrolPath1));
         spiders.add(new Spider(patrolPath2));
+        spiders.add(new Spider(patrolPath3));
 
 
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
