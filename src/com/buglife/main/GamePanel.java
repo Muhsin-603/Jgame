@@ -106,7 +106,7 @@ public void restartGame() {
         if (currentState == GameState.PLAYING) {
             player.update(world);
             for (Spider spider : spiders) {
-                spider.update(world);
+                spider.update(player,world);
 
                 // Check collision with each spider
                 double dx = player.getCenterX() - spider.getCenterX();
