@@ -8,10 +8,13 @@ This project is more than a game; it's a war journal. It chronicles a descent in
 
 * **Custom Java Game Engine:** Built from the ground up using Java Swing, featuring a stable 60 FPS game loop and a custom rendering pipeline.
 * **Dynamic Tiled World:** Explore vast, complex mazes built from a simple 2D array. The world is efficiently rendered using a smart camera with viewport culling to ensure high performance.
-* **Intelligent, Level-Driven Enemy AI:**
-    * The enemy spider's patrol route is not hard-coded; it is **drawn directly onto the tilemap** using a special tile ID.
-    * The spider autonomously finds and follows this "secret road," allowing for complex, designer-made patrol patterns.
-    * The AI now features **wall-collision avoidance**, preventing it from cheating and phasing through solid objects.
+* **Advanced Enemy AI System:**
+    * Spiders now feature multiple patrol paths and can be duplicated with different routes
+    * Intelligent wall collision detection with detailed collision logging
+    * Smooth movement and rotation system with pixel-perfect positioning
+    * Smart pathfinding that follows predefined waypoints
+    * Can be configured with custom paths for different difficulty levels
+    * Features wall avoidance and automatic path correction
 * **Advanced Player Controller:**
     * A multi-directional **animation state machine** for fluid, direction-based sprites (up, down, left/right).
     * The player is a unified "div" object, ensuring visuals and hitboxes are perfectly locked and rendered.
@@ -30,6 +33,22 @@ This project is more than a game; it's a war journal. It chronicles a descent in
 3.  **Configure the Classpath:** Ensure both the `src` and `res` folders are marked as "Source Roots". This is the most critical step and the hiding place of many ghosts.
 4.  **Locate and run `Game.java`** (`src/com/buglife/main/Game.java`).
 5.  Survive.
+
+## 🔧 Technical Implementation
+
+### Spider AI System
+* **Multiple Spider Support**: Create any number of spiders with unique patrol paths
+* **Collision Detection**: Advanced wall collision system with logging
+* **Path System**: Configurable waypoint-based movement system
+* **Smooth Movement**: Pixel-perfect positioning and rotation
+* **Debug Features**: Collision logging and position tracking
+
+### Game Mechanics
+* **Tile-Based World**: Efficient tile rendering with different types (floor, wall, obstacles)
+* **Entity System**: Modular entity system for players, spiders, and items
+* **Camera System**: Smooth camera following with bounds checking
+* **Animation System**: Frame-based sprite animation system
+* **Collision System**: Multi-level collision detection (entity-entity, entity-wall)
 
 ## 📜 The Bug Hunter's Log: The Weekend War
 
