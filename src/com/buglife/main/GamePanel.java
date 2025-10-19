@@ -85,11 +85,11 @@ public class GamePanel extends JPanel {
         this.player = new Player(200, 200, 32, 32);
 
         // --- 2. Vaporize the OLD spider army ---
-        spiders.clear();
+        //spiders.clear();
 
         // --- 3. Rebuild the NEW spider army from the blueprints ---
         // (This is the logic that was missing!)
-        List<Point> path1 = new ArrayList<>();
+        /*List<Point> path1 = new ArrayList<>();
         path1.add(new Point(7, 7));
         path1.add(new Point(18, 7));
         spiders.add(new Spider(path1));
@@ -99,12 +99,14 @@ public class GamePanel extends JPanel {
         path2.add(new Point(14, 6));
         spiders.add(new Spider(path2));
 
-        List<Point> path3 = new ArrayList<>();
-        path3.add(new Point(18, 5));
-        path3.add(new Point(18, 3));
-        path3.add(new Point(26, 3));
-        path3.add(new Point(26, 8));
-        spiders.add(new Spider(path3));
+        List<Point> patrolPath3 = new ArrayList<>();
+        patrolPath3.add(new Point(18, 5)); // Start in first open floor tile
+        patrolPath3.add(new Point(18, 3));
+        patrolPath3.add(new Point(26, 3));
+        patrolPath3.add(new Point(26, 8));
+        patrolPath3.add(new Point(26, 3));
+        patrolPath3.add(new Point(18, 3));
+        patrolPath3.add(new Point(18, 5));*/
 
         // --- 4. Respawn the food ---
         spawnFood();
