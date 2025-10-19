@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
-//import java.io.*;
 import java.awt.geom.AffineTransform;
 
 public class Player {
@@ -31,10 +30,7 @@ public class Player {
     private List<BufferedImage> walkRightFrames;
 
     public enum PlayerState {
-        IDLE_DOWN,
-        WALKING_DOWN,
-        WALKING_UP,
-        WALKING_HORIZONTAL
+        IDLE_DOWN, WALKING_DOWN, WALKING_UP, WALKING_HORIZONTAL
     }
 
     public void heal(int amount) {
@@ -45,31 +41,28 @@ public class Player {
     }
 
     public void render(Graphics g) {
-    // --- PART 1: DRAW THE PLAYER (This part is the same) ---
-    List<BufferedImage> currentAnimation = getActiveAnimation();
-    if (currentAnimation == null || currentAnimation.isEmpty() || currentFrame >= currentAnimation.size()) {
-        // If something is wrong, draw a magenta square so we KNOW
-        g.setColor(Color.MAGENTA);
-        g.fillRect(this.x, this.y, this.width, this.height);
-        return;
+        // --- PART 1: DRAW THE PLAYER (This part is the same) ---
+        List<BufferedImage> currentAnimation = getActiveAnimation();
+        if (currentAnimation == null || currentAnimation.isEmpty() || currentFrame >= currentAnimation.size()) {
+            // If something is wrong, draw a magenta square so we KNOW
+            g.setColor(Color.MAGENTA);
+            g.fillRect(this.x, this.y, this.width, this.height);
+            return;
+        }
+
+        BufferedImage imageToDraw = currentAnimation.get(currentFrame);
+
+        int drawX = this.x;
+        int drawWidth = this.width;
+
+        if (!isFacingLeft && currentState == PlayerState.WALKING_HORIZONTAL) {
+            drawX = this.x + this.width;
+            drawWidth = -this.width;
+        }
+
+        g.drawImage(imageToDraw, drawX, this.y, drawWidth, this.height, null);
+
     }
-
-    BufferedImage imageToDraw = currentAnimation.get(currentFrame);
-    
-    int drawX = this.x;
-    int drawWidth = this.width;
-
-    if (!isFacingLeft && currentState == PlayerState.WALKING_HORIZONTAL) {
-        drawX = this.x + this.width;
-        drawWidth = -this.width;
-    }
-
-    g.drawImage(imageToDraw, drawX, this.y, drawWidth, this.height, null);
-
-    
-
-    
-}
 
     // Add this method to your Player.java class
 
@@ -134,7 +127,8 @@ public class Player {
         walkRightFrames = new ArrayList<>();
 
         try {
-            BufferedImage spriteSheet = ImageIO.read(getClass().getResourceAsStream("/res/sprites/player/loose sprites.png"));
+            BufferedImage spriteSheet = ImageIO
+                    .read(getClass().getResourceAsStream("/res/sprites/player/loose sprites.png"));
             final int SPRITE_WIDTH = 16;
             final int SPRITE_HEIGHT = 16;
 
@@ -144,13 +138,17 @@ public class Player {
             walkUpFrames.add(spriteSheet.getSubimage(1 * SPRITE_WIDTH, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
 
             // Walk Down (Second Row, facing us)
-            walkDownFrames.add(spriteSheet.getSubimage(0 * SPRITE_WIDTH, 1 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
-            walkDownFrames.add(spriteSheet.getSubimage(1 * SPRITE_WIDTH, 1 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
-            
+            walkDownFrames
+                    .add(spriteSheet.getSubimage(0 * SPRITE_WIDTH, 1 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+            walkDownFrames
+                    .add(spriteSheet.getSubimage(1 * SPRITE_WIDTH, 1 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+
             // Walk Right (Third Row, facing right)
-            walkRightFrames.add(spriteSheet.getSubimage(0 * SPRITE_WIDTH, 2 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
-            walkRightFrames.add(spriteSheet.getSubimage(1 * SPRITE_WIDTH, 2 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
-            
+            walkRightFrames
+                    .add(spriteSheet.getSubimage(0 * SPRITE_WIDTH, 2 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+            walkRightFrames
+                    .add(spriteSheet.getSubimage(1 * SPRITE_WIDTH, 2 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+
             // Idle (first frame of walking down)
             idleDownFrames.add(walkDownFrames.get(0));
 
@@ -161,22 +159,17 @@ public class Player {
     }
 
     /*
-     * private void loadSprites() {
-     * try {
-     * // Using the path that worked for you before!
-     * sprite_walk1 =
+     * private void loadSprites() { try { // Using the path that worked for you
+     * before! sprite_walk1 =
      * ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug.png"));
      * sprite_walk2 =
-     * ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug_mov_1.png"));
-     * } catch (IOException e) {
-     * e.printStackTrace();
-     * }
-     * }
+     * ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug_mov_1.png")); }
+     * catch (IOException e) { e.printStackTrace(); } }
      */
 
     /**
-     * Updates the player's position based on movement flags.
-     * This will be called in the main game loop.
+     * Updates the player's position based on movement flags. This will be called in
+     * the main game loop.
      */
     // The new update method now takes the World as an argument
     public void update(src.com.buglife.world.World world) {
@@ -200,40 +193,33 @@ public class Player {
             animationTick = 0;
         }
 
-        double nextX = x;
-        double nextY = y;
-
-        if (movingUp) {
+        double nextX = x, nextY = y;
+        if (movingUp)
             nextY -= speed;
-        }
-        if (movingDown) {
+        if (movingDown)
             nextY += speed;
-        }
-        if (movingLeft) {
+        if (movingLeft)
             nextX -= speed;
-        }
-        if (movingRight) {
+        if (movingRight)
             nextX += speed;
-        }
 
-        // --- NEW COLLISION CHECK ---
-        // Get the player's collision bounding box at the *next* position
-        int nextLeft = (int) nextX;
-        int nextRight = (int) nextX + width - 1;
-        int nextTop = (int) nextY;
-        int nextBottom = (int) nextY + height - 1;
+        // We check for wall collision only if the player is actually trying to move.
+        if (nextX != x || nextY != y) {
+            int nextLeft = (int) nextX;
+            int nextRight = (int) nextX + width - 1;
+            int nextTop = (int) nextY;
+            int nextBottom = (int) nextY + height - 1;
 
-        // Check all four corners for a collision in the next position
-        boolean topLeftSolid = world.isTileSolid(nextLeft, nextTop);
-        boolean topRightSolid = world.isTileSolid(nextRight, nextTop);
-        boolean bottomLeftSolid = world.isTileSolid(nextLeft, nextBottom);
-        boolean bottomRightSolid = world.isTileSolid(nextRight, nextBottom);
+            boolean topLeftSolid = world.isTileSolid(nextLeft, nextTop);
+            boolean topRightSolid = world.isTileSolid(nextRight, nextTop);
+            boolean bottomLeftSolid = world.isTileSolid(nextLeft, nextBottom);
+            boolean bottomRightSolid = world.isTileSolid(nextRight, nextBottom);
 
-        // If NONE of the corners are about to hit a solid tile, the move is safe!
-        if (!topLeftSolid && !topRightSolid && !bottomLeftSolid && !bottomRightSolid) {
-            // Commit the move
-            x = (int) nextX;
-            y = (int) nextY;
+            // Only commit the move if the path is clear.
+            if (!topLeftSolid && !topRightSolid && !bottomLeftSolid && !bottomRightSolid) {
+                x = (int) nextX;
+                y = (int) nextY;
+            }
         }
         healthDrainTimer++;
 
@@ -267,14 +253,14 @@ public class Player {
 
     private List<BufferedImage> getActiveAnimation() {
         switch (currentState) {
-            case WALKING_UP:
-                return walkUpFrames;
-            case WALKING_DOWN:
-                return walkDownFrames;
-            case WALKING_HORIZONTAL:
-                return walkRightFrames;
-            default:
-                return idleDownFrames;
+        case WALKING_UP:
+            return walkUpFrames;
+        case WALKING_DOWN:
+            return walkDownFrames;
+        case WALKING_HORIZONTAL:
+            return walkRightFrames;
+        default:
+            return idleDownFrames;
         }
     }
 

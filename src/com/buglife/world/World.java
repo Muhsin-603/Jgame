@@ -1,9 +1,12 @@
 package src.com.buglife.world;
 
 import javax.imageio.ImageIO;
-import java.awt.Graphics;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.awt.*;
 
 public class World {
     public static final int TILE_SIZE = 64; // The size of each tile in pixels
@@ -11,10 +14,11 @@ public class World {
     private Tile[] tileTypes; // An array to hold our different tile types (floor, wall, etc.)
     private int[][] mapData; // The 2D array that is our level design
 
-    public int getMapWidth(){
+    public int getMapWidth() {
         return mapData[0].length;
     }
-    public int getMapHeight(){
+
+    public int getMapHeight() {
         return mapData.length;
     }
 
@@ -62,40 +66,76 @@ public class World {
             BufferedImage wallImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall.png"));
             tileTypes[1] = new Tile(wallImage, true);
             BufferedImage wallImage1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall_5.png"));
-            tileTypes[2] = new Tile(wallImage1, true);
+            tileTypes[9] = new Tile(wallImage1, true);
+
+            tileTypes[2] = new Tile(floorImage, false);
 
         } catch (IOException e) {
             System.err.println("Could not load tile images!");
             e.printStackTrace();
         }
     }
+    // Add this method to World.java
 
-    private void loadMap() {
-        // This is our hard-coded level! 1=wall, 0=floor.
-        // Feel free to go crazy and design a bigger room.
-        this.mapData = new int[][] {
-                { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-                { 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1 },
-                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-                { 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1 },
-                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-                { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
-        };
-    }
-
-    public void render(Graphics g, int cameraX, int cameraY) {
+    public List<Point> findSpiderPath() {
+        List<Point> path = new ArrayList<>();
         for (int row = 0; row < mapData.length; row++) {
             for (int col = 0; col < mapData[row].length; col++) {
+                if (mapData[row][col] == 2) {
+                    // We add the TILE grid coordinates, not pixels
+                    path.add(new Point(col, row));
+                }
+            }
+        }
+        // This simple version just adds them in reading order.
+        // More complex versions could sort them to make a clean path.
+        return path;
+    }
+
+    // In World.java
+
+    private void loadMap() {
+        this.mapData = new int[][] { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 1 }, // <---
+                                                                                                                  // The
+                                                                                                                  // top
+                                                                                                                  // of
+                                                                                                                  // the
+                                                                                                                  // 'S'
+                { 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1 }, { 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1 },
+                { 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 1 }, // <--- The middle of the 'S'
+                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1 }, { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1 },
+                { 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 1 }, // <--- The bottom of the 'S'
+                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+    }
+
+    // In World.java
+
+    public void render(Graphics g, int cameraX, int cameraY, int screenWidth, int screenHeight) {
+        // 1. Calculate the range of tiles that are visible on screen.
+        int startCol = cameraX / TILE_SIZE;
+        int endCol = (cameraX + screenWidth) / TILE_SIZE + 1; // +1 to prevent gaps at the edge
+        int startRow = cameraY / TILE_SIZE;
+        int endRow = (cameraY + screenHeight) / TILE_SIZE + 1;
+
+        // 2. Make sure we don't try to draw tiles that don't exist off the map edge.
+        startCol = Math.max(0, startCol);
+        endCol = Math.min(getMapWidth(), endCol);
+        startRow = Math.max(0, startRow);
+        endRow = Math.min(getMapHeight(), endRow);
+
+        // 3. Now, loop ONLY through the visible tiles!
+        for (int row = startRow; row < endRow; row++) {
+            for (int col = startCol; col < endCol; col++) {
                 int tileID = mapData[row][col];
                 Tile tileToDraw = tileTypes[tileID];
 
-                // Calculate where to draw the tile on the screen
-                int tileX = col * TILE_SIZE - cameraX;
-                int tileY = row * TILE_SIZE - cameraY;
-
-                g.drawImage(tileToDraw.image, tileX, tileY, TILE_SIZE, TILE_SIZE, null);
+                if (tileToDraw != null && tileToDraw.image != null) {
+                    // Calculate where to draw the tile on the screen
+                    int tileX = col * TILE_SIZE - cameraX;
+                    int tileY = row * TILE_SIZE - cameraY;
+                    g.drawImage(tileToDraw.image, tileX, tileY, TILE_SIZE, TILE_SIZE, null);
+                }
             }
         }
     }
