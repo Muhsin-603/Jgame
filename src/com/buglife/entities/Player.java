@@ -34,7 +34,7 @@ public class Player {
     }
 
     public void heal(int amount) {
-        this.health += amount;
+        this.health = Math.min(100, this.health + amount);
         if (this.health > 100) {
             this.health = 100;
         }
