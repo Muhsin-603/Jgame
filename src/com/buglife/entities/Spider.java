@@ -30,18 +30,14 @@ public class Spider {
     // private boolean isMovingForward = true;
 
     public Spider(List<Point> tilePath) {
-        // Convert the tile-based path to a pixel-based path
-        this.patrolPath = new ArrayList<>();
-        for (Point tilePoint : tilePath) {
-            int pixelX = tilePoint.x * World.TILE_SIZE + (World.TILE_SIZE / 2);
-            int pixelY = tilePoint.y * World.TILE_SIZE + (World.TILE_SIZE / 2);
-            this.patrolPath.add(new Point(pixelX, pixelY));
-        }
-
-        // Spawn at the first point in the path
-        if (!this.patrolPath.isEmpty()) {
-            this.x = this.patrolPath.get(0).x - (width / 2);
-            this.y = this.patrolPath.get(0).y - (height / 2);
+        this.patrolPath = tilePath;  // Store the original tile coordinates
+        
+        // Start at the first point
+        if (!tilePath.isEmpty()) {
+            Point start = tilePath.get(0);
+            this.x = start.x * World.TILE_SIZE;  // Convert to pixel position
+            this.y = start.y * World.TILE_SIZE;
+            this.currentTargetIndex = 0;
         }
 
         loadSprites();
@@ -65,39 +61,52 @@ public class Spider {
     public void update(World world) {
         if (patrolPath == null || patrolPath.isEmpty()) return;
 
+        // Get current target
         Point target = patrolPath.get(currentTargetIndex);
-        double dx = target.x - getCenterX();
-        double dy = target.y - getCenterY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
+        int targetX = target.x * World.TILE_SIZE;
+        int targetY = target.y * World.TILE_SIZE;
 
-        // --- THE CHILL-OUT PROTOCOL ---
-        if (distance > speed) {
-            // We are moving, so calculate movement and rotation.
-            double moveX = (dx / distance) * speed;
-            double moveY = (dy / distance) * speed;
-            
-            // Check for walls before committing to the move.
-            double nextX = x + moveX;
-            double nextY = y + moveY;
-            // ... (Your wall collision logic here) ...
-            
-            // If path is clear, commit the move.
-            x = nextX;
-            y = nextY;
-            
-            // Only update rotation if we are actually moving.
-            this.rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
+        // Calculate next position
+        double newX = x;
+        double newY = y;
 
-        } else {
-            // We have arrived. Just pick the next target and do nothing else.
+        // Calculate horizontal movement
+        if (Math.abs(x - targetX) > speed) {
+            newX += (x < targetX) ? speed : -speed;
+        }
+
+        // Check horizontal movement for collision
+        if (!checkWallCollision(world, newX, y)) {
+            x = newX;
+        }
+
+        // Calculate vertical movement
+        if (Math.abs(y - targetY) > speed) {
+            newY += (y < targetY) ? speed : -speed;
+        }
+
+        // Check vertical movement for collision
+        if (!checkWallCollision(world, x, newY)) {
+            y = newY;
+        }
+
+        // Check if we reached target
+        if (Math.abs(x - targetX) <= speed && Math.abs(y - targetY) <= speed) {
+            x = targetX;
+            y = targetY;
             currentTargetIndex = (currentTargetIndex + 1) % patrolPath.size();
         }
 
-        // Animate
+        // Update rotation based on movement direction
+        if (x != targetX || y != targetY) {
+            rotationAngle = Math.toDegrees(Math.atan2(targetY - y, targetX - x));
+        }
+
+        // Update animation
         animationTick++;
-        if (animationTick > animationSpeed) {
+        if (animationTick >= animationSpeed) {
+            animationTick = 0;
             currentFrame = (currentFrame + 1) % TOTAL_FRAMES;
-            animationTick = 0;  // Reset the tick counter
         }
     }
 
@@ -121,6 +130,27 @@ public class Spider {
     public double getRadius() {
         // My radius is just half my width!
         return width / 2.0;
+    }
+
+    // Check if spider is colliding with a wall
+    private boolean checkWallCollision(World world, double checkX, double checkY) {
+        // Check all four corners
+        int left = (int)checkX;
+        int right = (int)(checkX + width - 1);
+        int top = (int)checkY;
+        int bottom = (int)(checkY + height - 1);
+
+        boolean collision = world.isTileSolid(left, top) ||
+                          world.isTileSolid(right, top) ||
+                          world.isTileSolid(left, bottom) ||
+                          world.isTileSolid(right, bottom);
+
+        if (collision) {
+            System.out.println("WALL COLLISION DETECTED at position: (" + 
+                             (int)checkX + ", " + (int)checkY + ")");
+        }
+
+        return collision;
     }
 
     // Collision Helpers

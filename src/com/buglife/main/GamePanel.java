@@ -31,37 +31,24 @@ public class GamePanel extends JPanel {
     public static final int SCREEN_HEIGHT = 768;
 
     public GamePanel() {
-        
-        player = new Player(200, 200, 48, 32);
         world = new World();
-
-        List<Point> spiderTrack = world.findSpiderPath();
-        if (spiderTrack != null && !spiderTrack.isEmpty()) {
-            this.spider = new Spider(spiderTrack);
-        }
-
+        
+        // Create path following only floor tiles (ID 0)
+        List<Point> patrolPath = new ArrayList<>();
+        patrolPath.add(new Point(7, 7));    // Start in first open floor tile
+        patrolPath.add(new Point(18, 7));    
+        patrolPath.add(new Point(7, 7));
+        
+        this.spider = new Spider(patrolPath);
         
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
         this.player = new Player(100, 100, 32, 32);
-
+        
         this.food = new Food(600, 500, 20);
         spawnFood();
-
+        
         addKeyListener(new KeyInputAdapter());
-        // Inside your GamePanel constructor
-
-        // --- A NEW, LEGAL GPS ROUTE ---
-        List<Point> patrolPath = new ArrayList<>();
-        patrolPath.add(new Point(10, 8)); // Start in the safe central corridor
-        patrolPath.add(new Point(17, 8)); // Move right into the pillar room
-        patrolPath.add(new Point(17, 10)); // Move down
-        patrolPath.add(new Point(22, 10)); // Move to the far right
-        patrolPath.add(new Point(22, 2)); // Go all the way up
-        patrolPath.add(new Point(14, 2)); // Patrol left along the top
-        patrolPath.add(new Point(14, 5)); // Dip down into the middle
-
-        this.spider = new Spider(patrolPath);
     }
 
     // Add this method anywhere inside your Spider.java class
