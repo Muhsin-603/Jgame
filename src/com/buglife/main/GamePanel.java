@@ -21,7 +21,7 @@ import java.awt.Color;
 // Your class declaration will look something like this
 public class GamePanel extends JPanel {
 
-    private Spider spider;
+    private List<Spider> spiders = new ArrayList<>();
     private Player player;
     private Food food;
     private World world;
@@ -32,15 +32,22 @@ public class GamePanel extends JPanel {
 
     public GamePanel() {
         world = new World();
+        //spider path creation
+        List<Point> patrolPath1 = new ArrayList<>();
+        patrolPath1.add(new Point(7, 7));    // Start in first open floor tile
+        patrolPath1.add(new Point(18, 7));    
+        patrolPath1.add(new Point(7, 7));
+
+        List<Point> patrolPath2 = new ArrayList<>();
+        patrolPath2.add(new Point(14, 3));    // Start in first open floor tile
+        patrolPath2.add(new Point(14, 6));    
+        patrolPath2.add(new Point(14, 3));
         
-        // Create path following only floor tiles (ID 0)
-        List<Point> patrolPath = new ArrayList<>();
-        patrolPath.add(new Point(7, 7));    // Start in first open floor tile
-        patrolPath.add(new Point(18, 7));    
-        patrolPath.add(new Point(7, 7));
-        
-        this.spider = new Spider(patrolPath);
-        
+        //new spider creation
+        spiders.add(new Spider(patrolPath1));
+        spiders.add(new Spider(patrolPath2));
+
+
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
         this.player = new Player(100, 100, 32, 32);
@@ -56,19 +63,24 @@ public class GamePanel extends JPanel {
     public void updateGame() {
 
         player.update(world);
-        spider.update(world);if (spider != null) {
-            spider.update(world);
+        for(Spider spider : spiders) {
+        spider.update(world);
+        
+        // Check collision with each spider
+        double dx = player.getCenterX() - spider.getCenterX();
+        double dy = player.getCenterY() - spider.getCenterY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        double requiredDistance = player.getRadius() + spider.getRadius();
+        
+        if (distance < requiredDistance) {
+            player.takeDamage(1);
         }
+    }
         // Update camera with bounds checking
         cameraX = Math.max(0, Math.min(player.getCenterX() - (SCREEN_WIDTH / 2), 
                           world.getMapWidth() * World.TILE_SIZE - SCREEN_WIDTH));
         cameraY = Math.max(0, Math.min(player.getCenterY() - (SCREEN_HEIGHT / 2), 
                           world.getMapHeight() * World.TILE_SIZE - SCREEN_HEIGHT));
-
-        double dx = player.getCenterX() - spider.getCenterX();
-        double dy = player.getCenterY() - spider.getCenterY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
-        double requiredDistance = player.getRadius() + spider.getRadius();
 
         
         // 2. Create the spider and give it the track
@@ -86,9 +98,6 @@ public class GamePanel extends JPanel {
             }
         }
 
-        if (distance < requiredDistance) {
-            player.takeDamage(1);
-        }
     }
 
     public void spawnFood() {
@@ -127,7 +136,9 @@ public class GamePanel extends JPanel {
         g2d.translate(-cameraX, -cameraY);
 
         player.render(g2d);
+        for(Spider spider : spiders) {
         spider.draw(g2d);
+    }
         if (food != null) {
             food.draw(g2d);
         }
