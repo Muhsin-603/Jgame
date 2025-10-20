@@ -197,7 +197,7 @@ public class GamePanel extends JPanel {
             Graphics2D g2d = (Graphics2D) g.create();
             g2d.translate(-cameraX, -cameraY);
 
-            player.render(g2d);
+            player.render(g2d, world);
             for (Spider spider : spiders) {
                 spider.draw(g2d);
             }

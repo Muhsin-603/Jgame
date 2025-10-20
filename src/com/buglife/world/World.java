@@ -109,6 +109,10 @@ public class World {
             
             BufferedImage waterImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/puddle.png"));
             tileTypes[4] = new Tile(waterImage, true);
+
+            BufferedImage shadowImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/shadow_tile.png"));
+            tileTypes[5] = new Tile(shadowImage, false);
+            
             
             tileTypes[2] = new Tile(floorImage, false);
 

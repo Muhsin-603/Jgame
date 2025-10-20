@@ -16,13 +16,12 @@ public class Player {
     private int width, height;
     private double currentSpeed; // How fast we are moving RIGHT NOW
     private final double NORMAL_SPEED = 3.0; // The default speed
-    private final double SLOW_SPEED = 1.0;   // The speed when stuck!
+    private final double SLOW_SPEED = 1.0; // The speed when stuck!
     private int health = 100;
     private int collisionRadius;
     private int healthDrainTimer = 0;
     private boolean isFacingLeft = false;
-     // This is the DEATH clock
-    
+    // This is the DEATH clock
 
     private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
     private int animationTick = 0;
@@ -38,11 +37,9 @@ public class Player {
     private int webbedTimer = 0;
     private int webStrength = 0;
 
-    
     public boolean isWebbed() {
-    return this.currentState == PlayerState.WEBBED;
+        return this.currentState == PlayerState.WEBBED;
     }
-    
 
     public enum PlayerState {
         IDLE_DOWN, WALKING_DOWN, WALKING_UP, WALKING_HORIZONTAL, WEBBED
@@ -72,28 +69,42 @@ public class Player {
 
     // Add this method to Player.java
     public void getWebbed() {
-    if (currentState != PlayerState.WEBBED) {
-        //System.out.println("PLAYER: I'M TRAPPED!");
-        currentState = PlayerState.WEBBED;
-        
-        webbedTimer = 300; // You have 5 seconds to live...
-        webStrength = 4;   // ...and 4 taps to escape. Good luck.
-        this.currentFrame = 0;
-    }
-}
+        if (currentState != PlayerState.WEBBED) {
+            // System.out.println("PLAYER: I'M TRAPPED!");
+            currentState = PlayerState.WEBBED;
 
-    public void render(Graphics g) {
-        // --- PART 1: DRAW THE PLAYER (This part is the same) ---
-        List<BufferedImage> currentAnimation = getActiveAnimation();
-        if (currentAnimation == null || currentAnimation.isEmpty() || currentFrame >= currentAnimation.size()) {
-            // If something is wrong, draw a magenta square so we KNOW
-            g.setColor(Color.MAGENTA);
-            g.fillRect(this.x, this.y, this.width, this.height);
-            return;
+            webbedTimer = 300; // You have 5 seconds to live...
+            webStrength = 4; // ...and 4 taps to escape. Good luck.
+            this.currentFrame = 0;
+        }
+    }
+
+    public void render(Graphics g, World world) {
+    List<BufferedImage> currentAnimation = getActiveAnimation();
+    if (currentAnimation == null || currentAnimation.isEmpty() || currentFrame >= currentAnimation.size()) {
+        // Failsafe: if animation is broken, draw a bright, angry square.
+        g.setColor(Color.MAGENTA);
+        g.fillRect(this.x, this.y, this.width, this.height);
+        return;
+    }
+
+    BufferedImage imageToDraw = currentAnimation.get(currentFrame);
+    
+    // 1. Create our professional art kit.
+    Graphics2D g2d = (Graphics2D) g.create();
+
+    try {
+        // 2. The ONE true stealth check.
+        int playerTileCol = getCenterX() / World.TILE_SIZE;
+        int playerTileRow = getCenterY() / World.TILE_SIZE;
+        int tileID = world.getTileIdAt(playerTileCol, playerTileRow);
+
+        // If we are on a shadow tile (ID 5), become semi-transparent.
+        if (tileID == 5) {
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
         }
 
-        BufferedImage imageToDraw = currentAnimation.get(currentFrame);
-
+        // 3. The Magic Mirror sprite flip.
         int drawX = this.x;
         int drawWidth = this.width;
 
@@ -102,9 +113,14 @@ public class Player {
             drawWidth = -this.width;
         }
 
-        g.drawImage(imageToDraw, drawX, this.y, drawWidth, this.height, null);
+        // 4. Draw using the PROFESSIONAL art kit that understands transparency!
+        g2d.drawImage(imageToDraw, drawX, this.y, drawWidth, this.height, null);
 
+    } finally {
+        // 5. Always throw away the art kit to keep the rest of the game clean.
+        g2d.dispose();
     }
+}
 
     // Add this method to your Player.java class
 
@@ -202,17 +218,17 @@ public class Player {
 
     // Add this method to Player.java
     public void struggle() {
-    if (currentState == PlayerState.WEBBED) {
-        webStrength--; // Chip away at the web's strength
-        System.out.println("Struggling! Taps left: " + webStrength);
+        if (currentState == PlayerState.WEBBED) {
+            webStrength--; // Chip away at the web's strength
+            System.out.println("Struggling! Taps left: " + webStrength);
 
-        if (webStrength <= 0) {
-            // The lock is broken!
-            //System.out.println("PLAYER: I'M FREE!");
-            currentState = PlayerState.IDLE_DOWN; // FREEDOM!
+            if (webStrength <= 0) {
+                // The lock is broken!
+                // System.out.println("PLAYER: I'M FREE!");
+                currentState = PlayerState.IDLE_DOWN; // FREEDOM!
+            }
         }
     }
-}
 
     /*
      * private void loadSprites() { try { // Using the path that worked for you
@@ -240,18 +256,18 @@ public class Player {
             this.currentSpeed = NORMAL_SPEED;
         }
 
-if (currentState == PlayerState.WEBBED) {
-    // If we're webbed, the timer ticks down...
-    webbedTimer--;
+        if (currentState == PlayerState.WEBBED) {
+            // If we're webbed, the timer ticks down...
+            webbedTimer--;
 
-    // --- THE NEW DEATH SENTENCE ---
-    if (webbedTimer <= 0) {
-        //System.out.println("SPIDER: DINNER IS SERVED.");
-        this.health = 0; // The timer ran out. You are dead.
-    }
-    // If webbed, you can do nothing else.
-    return; 
-}
+            // --- THE NEW DEATH SENTENCE ---
+            if (webbedTimer <= 0) {
+                // System.out.println("SPIDER: DINNER IS SERVED.");
+                this.health = 0; // The timer ran out. You are dead.
+            }
+            // If webbed, you can do nothing else.
+            return;
+        }
 
         // --- If we are NOT webbed, proceed with normal life ---
 

@@ -77,6 +77,11 @@ public class Spider {
         double dx = player.getCenterX() - getCenterX();
         double dy = player.getCenterY() - getCenterY();
         double distance = Math.sqrt(dx * dx + dy * dy);
+        int playerTileCol = player.getCenterX() / World.TILE_SIZE;
+        int playerTileRow = player.getCenterY() / World.TILE_SIZE;
+        if (world.getTileIdAt(playerTileCol, playerTileRow) == 5) { // Is it a shadow tile?
+            return false; // I can't see anything!
+        }
 
         int detectionRadius = 300; // How far the spider can see
         if (distance > detectionRadius) {
