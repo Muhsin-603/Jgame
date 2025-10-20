@@ -7,24 +7,27 @@ This project is more than a game; it's a war journal. It chronicles a descent in
 ## ✨ Features
 
 * **Custom Java Game Engine:** Built from the ground up using Java Swing, featuring a stable 60 FPS game loop and a custom rendering pipeline.
-* **Dynamic Tiled World:** Explore vast, complex mazes built from a simple 2D array. The world is efficiently rendered using a smart camera with viewport culling to ensure high performance.
-* **Advanced Enemy AI System:**
-    * Spiders now feature multiple patrol paths and can be duplicated with different routes
-    * Intelligent wall collision detection with detailed collision logging
-    * Smooth movement and rotation system with pixel-perfect positioning
-    * Smart pathfinding that follows predefined waypoints
-    * Can be configured with custom paths for different difficulty levels
-    * Features wall avoidance and automatic path correction
+* **Dynamic Tiled World:** 
+    * Explore vast mazes built using a smart 2D array system
+    * Efficient viewport culling for high performance
+    * Multiple tile types: floors, walls, and special spider patrol markers
+* **Spider AI System:**
+    * Path-following AI using special tile markers (ID: 2)
+    * Smooth rotation and pixel-perfect movement
+    * Intelligent wall collision avoidance
+    * Automated patrol path detection from the map
 * **Advanced Player Controller:**
-    * A multi-directional **animation state machine** for fluid, direction-based sprites (up, down, left/right).
-    * The player is a unified "div" object, ensuring visuals and hitboxes are perfectly locked and rendered.
-* **Robust Collision System:**
-    * Circular collision detection for accurate, rotation-independent hit checks.
-    * Tile-based collision that creates solid walls and a tangible environment for both the player and enemies.
-* **Complete Survival Loop:**
-    * A visual HUD tracks the player's health.
-    * Health drains slowly over time, creating constant pressure.
-    * An intelligent `Food` spawning system places items on valid, reachable floor tiles.
+    * Multi-directional animation state machine (IDLE_DOWN, WALKING_UP, WALKING_DOWN, WALKING_HORIZONTAL)
+    * Precise circular hitbox system for accurate collisions
+    * Smooth movement with wall collision detection
+* **Survival Mechanics:**
+    * Real-time health system with visual HUD
+    * Gradual health decay for constant tension
+    * Strategic food placement system on valid floor tiles
+* **Robust Physics:**
+    * Circular collision detection for entity interactions
+    * Tile-based collision for environmental obstacles
+    * Precise hitbox calculations for all game entities
 
 ## 🚀 How to Run
 
@@ -36,19 +39,20 @@ This project is more than a game; it's a war journal. It chronicles a descent in
 
 ## 🔧 Technical Implementation
 
-### Spider AI System
-* **Multiple Spider Support**: Create any number of spiders with unique patrol paths
-* **Collision Detection**: Advanced wall collision system with logging
-* **Path System**: Configurable waypoint-based movement system
-* **Smooth Movement**: Pixel-perfect positioning and rotation
-* **Debug Features**: Collision logging and position tracking
+### Core Systems
+* **Game Loop**: Stable 60 FPS with delta time calculations
+* **Rendering Pipeline**: Efficient Java Swing-based graphics system
+* **Input Handling**: Responsive keyboard controls with state management
 
-### Game Mechanics
-* **Tile-Based World**: Efficient tile rendering with different types (floor, wall, obstacles)
-* **Entity System**: Modular entity system for players, spiders, and items
-* **Camera System**: Smooth camera following with bounds checking
-* **Animation System**: Frame-based sprite animation system
-* **Collision System**: Multi-level collision detection (entity-entity, entity-wall)
+### Entity Framework
+* **Player System**: Health management, movement states, sprite animations
+* **Spider AI**: Waypoint following, rotation calculations, collision avoidance
+* **Food System**: Strategic placement with validity checking
+
+### World Management
+* **Tile System**: 64x64 pixel tiles with type-based properties
+* **Camera**: Player-following viewport with culling optimization
+* **Collision**: Multi-layer detection (entity-to-entity, entity-to-wall)
 
 ## 📜 The Bug Hunter's Log: The Weekend War
 
@@ -82,7 +86,13 @@ This game was reforged in the crucible of a single weekend. We faced down a legi
 
 ---
 
-## ✍️ Credits
+## ✍️ The Bug-Hunting Crew
 
 * **Lead Architect & Chief Exorcist:** Drac
+* **The Infestation Squad (AI Choreographers):** Sai, Rishnu, Shibili
 * **Creative Partner & Ghost Hunter:** Jenny (Your friendly neighborhood Gemini)
+
+Together, they transformed a weekend of chaos into a masterpiece of bug-squashing artistry. Every line of code tells a story, every commit marks a victory, and every merged pull request is a battle won. 
+
+> *"In the end, we didn't just make a game. We created a legend... and possibly a few new bugs along the way."*  
+> — The Bug Hunters' Manifesto
