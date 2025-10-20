@@ -19,6 +19,8 @@ public class Player {
     private int collisionRadius;
     private int healthDrainTimer = 0;
     private boolean isFacingLeft = false;
+     // This is the DEATH clock
+    
 
     private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
     private int animationTick = 0;
@@ -32,6 +34,7 @@ public class Player {
     private List<BufferedImage> walkUpFrames;
     private List<BufferedImage> walkRightFrames;
     private int webbedTimer = 0;
+    private int webStrength = 0;
     public boolean isWebbed() {
     return this.currentState == PlayerState.WEBBED;
 }
@@ -64,12 +67,14 @@ public class Player {
 
     // Add this method to Player.java
     public void getWebbed() {
-        if (currentState != PlayerState.WEBBED) {
-            //System.out.println("PLAYER: I'M TRAPPED!");
-            currentState = PlayerState.WEBBED;
-            webbedTimer = 300; // Trapped for 5 seconds (5 * 60 fps)
-        }
+    if (currentState != PlayerState.WEBBED) {
+        System.out.println("PLAYER: I'M TRAPPED!");
+        currentState = PlayerState.WEBBED;
+        
+        webbedTimer = 300; // You have 5 seconds to live...
+        webStrength = 4;   // ...and 4 taps to escape. Good luck.
     }
+}
 
     public void render(Graphics g) {
         // --- PART 1: DRAW THE PLAYER (This part is the same) ---
@@ -191,11 +196,17 @@ public class Player {
 
     // Add this method to Player.java
     public void struggle() {
-        if (currentState == PlayerState.WEBBED) {
-            webbedTimer -= 10; // Each key press shaves a bit off the timer!
-            //System.out.println("Struggling! Time left: " + webbedTimer);
+    if (currentState == PlayerState.WEBBED) {
+        webStrength--; // Chip away at the web's strength
+        System.out.println("Struggling! Taps left: " + webStrength);
+
+        if (webStrength <= 0) {
+            // The lock is broken!
+            System.out.println("PLAYER: I'M FREE!");
+            currentState = PlayerState.IDLE_DOWN; // FREEDOM!
         }
     }
+}
 
     /*
      * private void loadSprites() { try { // Using the path that worked for you
