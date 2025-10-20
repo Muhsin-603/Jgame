@@ -6,28 +6,57 @@ This project is more than a game; it's a war journal. It chronicles a descent in
 
 ## ✨ Features
 
-* **Custom Java Game Engine:** Built from the ground up using Java Swing, featuring a stable 60 FPS game loop and a custom rendering pipeline.
-* **Dynamic Tiled World:** 
-    * Explore vast mazes built using a smart 2D array system
-    * Efficient viewport culling for high performance
-    * Multiple tile types: floors, walls, and special spider patrol markers
-* **Spider AI System:**
-    * Path-following AI using special tile markers (ID: 2)
+* **Custom Java Game Engine:**
+    * Built from the ground up using Java Swing
+    * Stable 60 FPS game loop with delta-time calculations
+    * Custom rendering pipeline with sprite management
+    * Complete state management system (MAIN_MENU, PLAYING, GAME_OVER)
+
+* **Full UI & Game Loop:**
+    * Interactive main menu with New Game, Resume, and Quit options
+    * Seamless game state transitions
+    * Game Over screen with instant restart capability
+    * Pause and resume functionality
+
+* **Dynamic Tiled World:**
+    * Complex mazes loaded from external .txt files
+    * Rapid level design capabilities
+    * Smart camera system with viewport culling
+    * Multiple interactive tile types
+
+* **Intelligent, Multi-State Enemy AI:**
+    * Advanced patrol system with configurable routes
+    * Line-of-sight detection with vision cones
+    * Dynamic state switching between patrol and chase modes
+    * Smart pathfinding for returning to patrol routes
     * Smooth rotation and pixel-perfect movement
-    * Intelligent wall collision avoidance
-    * Automated patrol path detection from the map
+    * Wall avoidance and obstacle navigation
 * **Advanced Player Controller:**
-    * Multi-directional animation state machine (IDLE_DOWN, WALKING_UP, WALKING_DOWN, WALKING_HORIZONTAL)
-    * Precise circular hitbox system for accurate collisions
-    * Smooth movement with wall collision detection
-* **Survival Mechanics:**
-    * Real-time health system with visual HUD
-    * Gradual health decay for constant tension
-    * Strategic food placement system on valid floor tiles
-* **Robust Physics:**
+    * Multi-directional animation state machine
+    * Fluid sprite animations from sprite sheets
+    * Precise movement and collision detection
+    * Dynamic interaction with environment
+
+* **Stealth & Trap Mechanics:**
+    * Spider web trap system with paralysis effect
+    * Skill-based escape mechanics
+    * Timed key-press challenge system
+    * 5-second escape window
+    * Progressive difficulty scaling
+
+* **Survival Systems:**
+    * Real-time health management
+    * Visual HUD with status effects
+    * Strategic food placement system
+    * Constant tension through health decay
+    * Multiple challenge levels
+
+* **Robust Physics Engine:**
     * Circular collision detection for entity interactions
-    * Tile-based collision for environmental obstacles
+    * Tile-based environmental collision system
     * Precise hitbox calculations for all game entities
+    * Smart bounded camera following
+    * Optimized collision checks with spatial partitioning
 
 ## 🚀 How to Run
 
@@ -82,7 +111,6 @@ This game was reforged in the crucible of a single weekend. We faced down a legi
 * ✅ Load map data from external `.txt` files to become a true level designer.
 
 #### Planned Next Steps
-* **Map Management:** Load map data from external `.txt` files to become a true level designer.
 
 * **New Threats:** Bring on the ultimate horror: the `Human`!
 
