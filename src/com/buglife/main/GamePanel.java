@@ -80,10 +80,6 @@ public class GamePanel extends JPanel {
         addKeyListener(new KeyInputAdapter());
     }
 
-    // Add this new method anywhere in GamePanel.java
-    // In GamePanel.java
-
-    // In GamePanel.java
 
     public void restartGame() {
         System.out.println("Resetting the nightmare...");
@@ -105,7 +101,7 @@ public class GamePanel extends JPanel {
         currentState = GameState.PLAYING;
     }
 
-    // Add this method anywhere inside your Spider.java class
+
 
     public void updateGame() {
 
