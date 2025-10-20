@@ -68,11 +68,12 @@ public class Player {
     // Add this method to Player.java
     public void getWebbed() {
     if (currentState != PlayerState.WEBBED) {
-        System.out.println("PLAYER: I'M TRAPPED!");
+        //System.out.println("PLAYER: I'M TRAPPED!");
         currentState = PlayerState.WEBBED;
         
         webbedTimer = 300; // You have 5 seconds to live...
         webStrength = 4;   // ...and 4 taps to escape. Good luck.
+        this.currentFrame = 0;
     }
 }
 
@@ -202,7 +203,7 @@ public class Player {
 
         if (webStrength <= 0) {
             // The lock is broken!
-            System.out.println("PLAYER: I'M FREE!");
+            //System.out.println("PLAYER: I'M FREE!");
             currentState = PlayerState.IDLE_DOWN; // FREEDOM!
         }
     }
