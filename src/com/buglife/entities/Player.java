@@ -32,6 +32,9 @@ public class Player {
     private List<BufferedImage> walkUpFrames;
     private List<BufferedImage> walkRightFrames;
     private int webbedTimer = 0;
+    public boolean isWebbed() {
+    return this.currentState == PlayerState.WEBBED;
+}
 
     public enum PlayerState {
         IDLE_DOWN, WALKING_DOWN, WALKING_UP, WALKING_HORIZONTAL, WEBBED
@@ -209,78 +212,82 @@ public class Player {
      */
     // The new update method now takes the World as an argument
     public void update(World world) {
-    // --- First, check for paralysis ---
-    if (currentState == PlayerState.WEBBED) {
-        // If we're webbed, our ONLY job is to count down the timer.
-        webbedTimer--;
-        if (webbedTimer <= 0) {
-            System.out.println("PLAYER: I'M FREE!");
-            currentState = PlayerState.IDLE_DOWN; // Freedom!
+        // --- First, check for paralysis ---
+        if (currentState == PlayerState.WEBBED) {
+            // If we're webbed, our ONLY job is to count down the timer.
+            webbedTimer--;
+            if (webbedTimer <= 0) {
+                System.out.println("PLAYER: I'M FREE!");
+                currentState = PlayerState.IDLE_DOWN; // Freedom!
+            }
+            // THE EJECTION! If we are webbed, we cannot do anything else. End of story.
+            return;
         }
-        // THE EJECTION! If we are webbed, we cannot do anything else. End of story.
-        return; 
-    }
 
-    // --- If we are NOT webbed, proceed with normal life ---
-    
-    // 1. State Management: Decide which animation to play.
-    PlayerState previousState = currentState;
-    if (movingUp) {
-        currentState = PlayerState.WALKING_UP;
-    } else if (movingDown) {
-        currentState = PlayerState.WALKING_DOWN;
-    } else if (movingLeft || movingRight) {
-        currentState = PlayerState.WALKING_HORIZONTAL;
-        isFacingLeft = movingLeft;
-    } else {
-        currentState = PlayerState.IDLE_DOWN;
-    }
+        // --- If we are NOT webbed, proceed with normal life ---
 
-    if (previousState != currentState) {
-        currentFrame = 0;
-        animationTick = 0;
-    }
-
-    // 2. Movement & Wall Collision
-    // (Your existing wall collision logic is perfect here)
-    double nextX = x, nextY = y;
-    if (movingUp) nextY -= speed;
-    if (movingDown) nextY += speed;
-    if (movingLeft) nextX -= speed;
-    if (movingRight) nextX += speed;
-
-    if (nextX != x || nextY != y) {
-        int nextLeft = (int) nextX;
-        int nextRight = (int) nextX + width - 1;
-        int nextTop = (int) nextY;
-        int nextBottom = (int) nextY + height - 1;
-
-        if (!world.isTileSolid(nextLeft, nextTop) && !world.isTileSolid(nextRight, nextTop) &&
-            !world.isTileSolid(nextLeft, nextBottom) && !world.isTileSolid(nextRight, nextBottom)) {
-            x = (int) nextX;
-            y = (int) nextY;
+        // 1. State Management: Decide which animation to play.
+        PlayerState previousState = currentState;
+        if (movingUp) {
+            currentState = PlayerState.WALKING_UP;
+        } else if (movingDown) {
+            currentState = PlayerState.WALKING_DOWN;
+        } else if (movingLeft || movingRight) {
+            currentState = PlayerState.WALKING_HORIZONTAL;
+            isFacingLeft = movingLeft;
+        } else {
+            currentState = PlayerState.IDLE_DOWN;
         }
-    }
-    
-    // 3. Health Drain (runs only when not webbed)
-    healthDrainTimer++;
-    if (healthDrainTimer > 120) {
-        takeDamage(1);
-        healthDrainTimer = 0;
-    }
 
-    // 4. Animation
-    boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
-    if (isMoving) {
-        animationTick++;
-        if (animationTick > animationSpeed) {
+        if (previousState != currentState) {
+            currentFrame = 0;
             animationTick = 0;
-            currentFrame = (currentFrame + 1) % getActiveAnimation().size();
         }
-    } else {
-        currentFrame = 0;
+
+        // 2. Movement & Wall Collision
+        // (Your existing wall collision logic is perfect here)
+        double nextX = x, nextY = y;
+        if (movingUp)
+            nextY -= speed;
+        if (movingDown)
+            nextY += speed;
+        if (movingLeft)
+            nextX -= speed;
+        if (movingRight)
+            nextX += speed;
+
+        if (nextX != x || nextY != y) {
+            int nextLeft = (int) nextX;
+            int nextRight = (int) nextX + width - 1;
+            int nextTop = (int) nextY;
+            int nextBottom = (int) nextY + height - 1;
+
+            if (!world.isTileSolid(nextLeft, nextTop) && !world.isTileSolid(nextRight, nextTop)
+                    && !world.isTileSolid(nextLeft, nextBottom) && !world.isTileSolid(nextRight, nextBottom)) {
+                x = (int) nextX;
+                y = (int) nextY;
+            }
+        }
+
+        // 3. Health Drain (runs only when not webbed)
+        healthDrainTimer++;
+        if (healthDrainTimer > 120) {
+            takeDamage(1);
+            healthDrainTimer = 0;
+        }
+
+        // 4. Animation
+        boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
+        if (isMoving) {
+            animationTick++;
+            if (animationTick > animationSpeed) {
+                animationTick = 0;
+                currentFrame = (currentFrame + 1) % getActiveAnimation().size();
+            }
+        } else {
+            currentFrame = 0;
+        }
     }
-}
 
     private List<BufferedImage> getActiveAnimation() {
         switch (currentState) {

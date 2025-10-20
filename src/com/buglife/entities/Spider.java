@@ -8,6 +8,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+
+//import src.com.buglife.entities.Player.PlayerState;
 import src.com.buglife.world.World;
 import java.awt.Point;
 
@@ -40,8 +42,10 @@ public class Spider {
         CHASING, // The "I see you!" bloodlust mode
         RETURNING // The "Where did he go?" confused mode
     }
+    
 
     private SpiderState currentState; // A variable to hold the spider's current mood
+    
 
     public Spider(List<Point> tilePath) {
         // Convert the tile-based path to a pixel-based path
@@ -144,13 +148,20 @@ public class Spider {
             }
             break;
 
-        // Add a breadcrumb to the trail every so often.
         case CHASING:
+            // --- NEW "MISSION ACCOMPLISHED" CHECK ---
+            // First, check if our target is already webbed.
+            if (targetPlayer.isWebbed()) {
+                System.out.println("SPIDER: PREY CAPTURED. RETURNING TO POST.");
+                currentState = SpiderState.RETURNING; // My job here is done.
+                break; // Immediately exit the CHASING logic.
+            }
+
+            // If the player isn't webbed, continue the hunt as normal.
             if (canSeePlayer(targetPlayer, world)) {
                 chase(targetPlayer);
-                loseSightTimer = 300; // Reset the 5-second "give up" timer
+                loseSightTimer = 300;
             } else {
-                // We lost him! Start the countdown.
                 loseSightTimer--;
                 if (loseSightTimer <= 0) {
                     System.out.println("SPIDER: TARGET LOST. RETURNING TO POST.");
@@ -215,10 +226,11 @@ public class Spider {
             rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
         }
     }
+
     // Add this simple method to Spider.java
-public boolean isChasing() {
-    return this.currentState == SpiderState.CHASING;
-}
+    public boolean isChasing() {
+        return this.currentState == SpiderState.CHASING;
+    }
 
     private void chase(Player player) {
         // Simple "move towards player" logic
