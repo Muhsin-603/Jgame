@@ -261,14 +261,15 @@ public void restartGame() {
             if (currentState == GameState.PLAYING) {
                 int key = e.getKeyCode();
 
-                if (key == KeyEvent.VK_W)
+                if (key == KeyEvent.VK_W || key == KeyEvent.VK_UP )
                     player.movingUp = true;
-                if (key == KeyEvent.VK_S)
+                if (key == KeyEvent.VK_S || key == KeyEvent.VK_DOWN)
                     player.movingDown = true;
-                if (key == KeyEvent.VK_A)
+                if (key == KeyEvent.VK_A || key == KeyEvent.VK_LEFT)
                     player.movingLeft = true;
-                if (key == KeyEvent.VK_D)
+                if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT)
                     player.movingRight = true;
+                
                 if (key == KeyEvent.VK_SPACE) {
             player.struggle();
         }
@@ -284,14 +285,18 @@ public void restartGame() {
         public void keyReleased(KeyEvent e) {
             int key = e.getKeyCode();
 
-            if (key == KeyEvent.VK_W)
+            if (key == KeyEvent.VK_W || key == KeyEvent.VK_UP) {
                 player.movingUp = false;
-            if (key == KeyEvent.VK_S)
+            }
+            if (key == KeyEvent.VK_S || key == KeyEvent.VK_DOWN) {
                 player.movingDown = false;
-            if (key == KeyEvent.VK_A)
+            }
+            if (key == KeyEvent.VK_A || key == KeyEvent.VK_LEFT) {
                 player.movingLeft = false;
-            if (key == KeyEvent.VK_D)
+            }
+            if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT) {
                 player.movingRight = false;
+            }
         }
     }
 }
