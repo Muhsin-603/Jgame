@@ -14,7 +14,7 @@ public class Player {
     // Player attributes
     private int x, y;
     private int width, height;
-    private double speed = 4.0;
+    private double speed = 3.5;
     private int health = 100;
     private int collisionRadius;
     private int healthDrainTimer = 0;

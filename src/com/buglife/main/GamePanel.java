@@ -6,6 +6,7 @@ import src.com.buglife.entities.Food;
 // Make sure to import your new Player class!
 import src.com.buglife.entities.Player;
 import src.com.buglife.entities.Spider;
+import src.com.buglife.ui.MainMenu;
 import src.com.buglife.world.World;
 import java.awt.Point;
 import java.util.ArrayList;
@@ -30,15 +31,19 @@ public class GamePanel extends JPanel {
     private Random rand = new Random();
     public static final int SCREEN_WIDTH = 1024;
     public static final int SCREEN_HEIGHT = 768;
+    private MainMenu mainMenu;
 
     public enum GameState {
-        PLAYING, GAME_OVER
+        MAIN_MENU, PLAYING, GAME_OVER
     }
 
     private GameState currentState;
 
     public GamePanel() {
         world = new World();
+
+        mainMenu = new MainMenu();
+        currentState = GameState.MAIN_MENU;
         // spider path creation
         List<Point> patrolPath1 = new ArrayList<>();
         patrolPath1.add(new Point(7, 7)); // Start in first open floor tile
@@ -62,7 +67,8 @@ public class GamePanel extends JPanel {
         spiders.add(new Spider(patrolPath1));
         spiders.add(new Spider(patrolPath2));
         spiders.add(new Spider(patrolPath3));
-        currentState = GameState.PLAYING;
+        // This is the fix that brings your game to life!
+        currentState = GameState.MAIN_MENU;
 
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
@@ -79,25 +85,25 @@ public class GamePanel extends JPanel {
 
     // In GamePanel.java
 
-public void restartGame() {
-    System.out.println("Resetting the nightmare...");
+    public void restartGame() {
+        System.out.println("Resetting the nightmare...");
 
-    // 1. Reset the player.
-    player.reset();
+        // 1. Reset the player.
+        player.reset();
 
-    // 2. Reset every spider in our existing army.
-    for (Spider spider : spiders) {
-        if (spider != null) {
-            spider.reset();
+        // 2. Reset every spider in our existing army.
+        for (Spider spider : spiders) {
+            if (spider != null) {
+                spider.reset();
+            }
         }
+
+        // 3. Respawn the food.
+        spawnFood();
+
+        // 4. Set the scene back to the beginning.
+        currentState = GameState.PLAYING;
     }
-
-    // 3. Respawn the food.
-    spawnFood();
-
-    // 4. Set the scene back to the beginning.
-    currentState = GameState.PLAYING;
-}
 
     // Add this method anywhere inside your Spider.java class
 
@@ -106,27 +112,27 @@ public void restartGame() {
         if (currentState == GameState.PLAYING) {
             player.update(world);
             for (Spider currentSpider : spiders) {
-                if(currentSpider != null){
-                
-                currentSpider.update(player,world);
+                if (currentSpider != null) {
 
-                // Check collision with each spider
-                double dx = player.getCenterX() - currentSpider.getCenterX();
-                double dy = player.getCenterY() - currentSpider.getCenterY();
-                double distance = Math.sqrt(dx * dx + dy * dy);
-                double requiredDistance = player.getRadius() + currentSpider.getRadius();
+                    currentSpider.update(player, world);
 
-                if (distance < requiredDistance) {
-                    if (currentSpider.isChasing()) { // We'll add this method next
-                        player.getWebbed();
-                    } else {
-        // If it just bumps into you while patrolling, it's just a little damage.
-                    player.takeDamage(1);
+                    // Check collision with each spider
+                    double dx = player.getCenterX() - currentSpider.getCenterX();
+                    double dy = player.getCenterY() - currentSpider.getCenterY();
+                    double distance = Math.sqrt(dx * dx + dy * dy);
+                    double requiredDistance = player.getRadius() + currentSpider.getRadius();
+
+                    if (distance < requiredDistance) {
+                        if (currentSpider.isChasing()) { // We'll add this method next
+                            player.getWebbed();
+                        } else {
+                            // If it just bumps into you while patrolling, it's just a little damage.
+                            player.takeDamage(1);
+                        }
+                    }
+
                 }
-                }
-
             }
-        }
             // Update camera with bounds checking
             cameraX = Math.max(0, Math.min(player.getCenterX() - (SCREEN_WIDTH / 2),
                     world.getMapWidth() * World.TILE_SIZE - SCREEN_WIDTH));
@@ -214,20 +220,20 @@ public void restartGame() {
             g.setColor(Color.WHITE);
             g.drawRect(10, 10, 200, 20);
             if (player.isWebbed()) {
-            // Upgrade our drawing tool
-            Graphics2D hintG2d = (Graphics2D) g;
+                // Upgrade our drawing tool
+                Graphics2D hintG2d = (Graphics2D) g;
 
-            // Set the font and color for our panic button sign
-            hintG2d.setColor(Color.WHITE);
-            hintG2d.setFont(new Font("Consolas", Font.BOLD, 40));
-            
-            // The message of hope (or despair)
-            String struggleMsg = "PRESS [SPACE] TO STRUGGLE!";
-            
-            // Center it on the screen
-            int msgWidth = hintG2d.getFontMetrics().stringWidth(struggleMsg);
-            hintG2d.drawString(struggleMsg, (SCREEN_WIDTH - msgWidth) / 2, SCREEN_HEIGHT - 100);
-        }
+                // Set the font and color for our panic button sign
+                hintG2d.setColor(Color.WHITE);
+                hintG2d.setFont(new Font("Consolas", Font.BOLD, 40));
+
+                // The message of hope (or despair)
+                String struggleMsg = "PRESS [SPACE] TO STRUGGLE!";
+
+                // Center it on the screen
+                int msgWidth = hintG2d.getFontMetrics().stringWidth(struggleMsg);
+                hintG2d.drawString(struggleMsg, (SCREEN_WIDTH - msgWidth) / 2, SCREEN_HEIGHT - 100);
+            }
         } else if (currentState == GameState.GAME_OVER) {
             // --- If the game is over, draw the final scene! ---
             // 1. A dark, semi-transparent overlay to set the mood
@@ -248,55 +254,88 @@ public void restartGame() {
             int restartWidth = g.getFontMetrics().stringWidth(restartMsg);
             g.drawString(restartMsg, (SCREEN_WIDTH - restartWidth) / 2, SCREEN_HEIGHT / 2 + 50);
 
+        } else if (currentState == GameState.MAIN_MENU) {
+            // --- DRAW THE MAIN MENU ---
+            mainMenu.draw(g);
         }
     }
 
     // An inner class for handling key inputs. This is a clean way to do it.
     // Inside GamePanel.java
 
+    // Inside GamePanel.java
+
     private class KeyInputAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
+            int key = e.getKeyCode();
 
-            if (currentState == GameState.PLAYING) {
-                int key = e.getKeyCode();
-
-                if (key == KeyEvent.VK_W || key == KeyEvent.VK_UP )
+            // The actor checks which scene they're in...
+            if (currentState == GameState.MAIN_MENU) {
+                // --- SCENE 1: THE MAIN MENU ---
+                if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) {
+                    mainMenu.moveUp();
+                }
+                if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
+                    mainMenu.moveDown();
+                }
+                if (key == KeyEvent.VK_ENTER) {
+                    String selectedOption = mainMenu.options[mainMenu.currentSelection];
+                    if (selectedOption.equals("New Game")) {
+                        restartGame();
+                    }
+                    if (selectedOption.equals("Resume")) {
+                        // We need to check if a game is actually in progress!
+                        // For now, let's just switch to playing.
+                        currentState = GameState.PLAYING;
+                    }
+                    if (selectedOption.equals("Quit")) {
+                        System.exit(0);
+                    }
+                }
+            } else if (currentState == GameState.PLAYING) {
+                // --- SCENE 2: THE ACTION ---
+                if (key == KeyEvent.VK_W || key == KeyEvent.VK_UP) {
                     player.movingUp = true;
-                if (key == KeyEvent.VK_S || key == KeyEvent.VK_DOWN)
+                    // We need to make sure the player object isn't null!
+                    // if (player != null) player.setRotationAngle(0);
+                }
+                if (key == KeyEvent.VK_S || key == KeyEvent.VK_DOWN) {
                     player.movingDown = true;
-                if (key == KeyEvent.VK_A || key == KeyEvent.VK_LEFT)
+                    // if (player != null) player.setRotationAngle(180);
+                }
+                if (key == KeyEvent.VK_A || key == KeyEvent.VK_LEFT) {
                     player.movingLeft = true;
-                if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT)
+                }
+                if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT) {
                     player.movingRight = true;
-                
+                }
                 if (key == KeyEvent.VK_SPACE) {
-            player.struggle();
-        }
+                    player.struggle();
+                }
             } else if (currentState == GameState.GAME_OVER) {
-                // --- Game Over controls ---
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                // --- SCENE 3: THE TRAGIC ENDING ---
+                if (key == KeyEvent.VK_ENTER) {
                     restartGame();
                 }
             }
         }
 
+        // You should also update your keyReleased to only work when playing!
         @Override
         public void keyReleased(KeyEvent e) {
-            int key = e.getKeyCode();
-
-            if (key == KeyEvent.VK_W || key == KeyEvent.VK_UP) {
-                player.movingUp = false;
-            }
-            if (key == KeyEvent.VK_S || key == KeyEvent.VK_DOWN) {
-                player.movingDown = false;
-            }
-            if (key == KeyEvent.VK_A || key == KeyEvent.VK_LEFT) {
-                player.movingLeft = false;
-            }
-            if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT) {
-                player.movingRight = false;
+            if (currentState == GameState.PLAYING) {
+                int key = e.getKeyCode();
+                if (key == KeyEvent.VK_W || key == KeyEvent.VK_UP)
+                    player.movingUp = false;
+                if (key == KeyEvent.VK_S || key == KeyEvent.VK_DOWN)
+                    player.movingDown = false;
+                if (key == KeyEvent.VK_A || key == KeyEvent.VK_LEFT)
+                    player.movingLeft = false;
+                if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT)
+                    player.movingRight = false;
             }
         }
     }
+
 }
