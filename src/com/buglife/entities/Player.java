@@ -65,7 +65,7 @@ public class Player {
     // Add this method to Player.java
     public void getWebbed() {
         if (currentState != PlayerState.WEBBED) {
-            System.out.println("PLAYER: I'M TRAPPED!");
+            //System.out.println("PLAYER: I'M TRAPPED!");
             currentState = PlayerState.WEBBED;
             webbedTimer = 300; // Trapped for 5 seconds (5 * 60 fps)
         }
@@ -193,7 +193,7 @@ public class Player {
     public void struggle() {
         if (currentState == PlayerState.WEBBED) {
             webbedTimer -= 10; // Each key press shaves a bit off the timer!
-            System.out.println("Struggling! Time left: " + webbedTimer);
+            //System.out.println("Struggling! Time left: " + webbedTimer);
         }
     }
 
@@ -213,16 +213,20 @@ public class Player {
     // The new update method now takes the World as an argument
     public void update(World world) {
         // --- First, check for paralysis ---
-        if (currentState == PlayerState.WEBBED) {
-            // If we're webbed, our ONLY job is to count down the timer.
-            webbedTimer--;
-            if (webbedTimer <= 0) {
-                System.out.println("PLAYER: I'M FREE!");
-                currentState = PlayerState.IDLE_DOWN; // Freedom!
-            }
-            // THE EJECTION! If we are webbed, we cannot do anything else. End of story.
-            return;
-        }
+        // Inside Player.java's update() method...
+
+if (currentState == PlayerState.WEBBED) {
+    // If we're webbed, the timer ticks down...
+    webbedTimer--;
+
+    // --- THE NEW DEATH SENTENCE ---
+    if (webbedTimer <= 0) {
+        //System.out.println("SPIDER: DINNER IS SERVED.");
+        this.health = 0; // The timer ran out. You are dead.
+    }
+    // If webbed, you can do nothing else.
+    return; 
+}
 
         // --- If we are NOT webbed, proceed with normal life ---
 

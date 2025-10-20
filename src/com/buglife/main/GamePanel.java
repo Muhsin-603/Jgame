@@ -213,6 +213,21 @@ public void restartGame() {
             // A border to make it look clean
             g.setColor(Color.WHITE);
             g.drawRect(10, 10, 200, 20);
+            if (player.isWebbed()) {
+            // Upgrade our drawing tool
+            Graphics2D hintG2d = (Graphics2D) g;
+
+            // Set the font and color for our panic button sign
+            hintG2d.setColor(Color.WHITE);
+            hintG2d.setFont(new Font("Consolas", Font.BOLD, 40));
+            
+            // The message of hope (or despair)
+            String struggleMsg = "PRESS [SPACE] TO STRUGGLE!";
+            
+            // Center it on the screen
+            int msgWidth = hintG2d.getFontMetrics().stringWidth(struggleMsg);
+            hintG2d.drawString(struggleMsg, (SCREEN_WIDTH - msgWidth) / 2, SCREEN_HEIGHT - 100);
+        }
         } else if (currentState == GameState.GAME_OVER) {
             // --- If the game is over, draw the final scene! ---
             // 1. A dark, semi-transparent overlay to set the mood
