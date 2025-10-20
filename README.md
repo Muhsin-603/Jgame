@@ -78,10 +78,12 @@ This game was reforged in the crucible of a single weekend. We faced down a legi
 #### Current Progress
 * ✅ All core features from the "Features" list are implemented and stable.
 * ✅ The foundational engine for a 2D tile-based game is complete.
+* ✅ Implement a "Game Over" screen, a main menu, and a restart
+* ✅ Load map data from external `.txt` files to become a true level designer.
 
 #### Planned Next Steps
 * **Map Management:** Load map data from external `.txt` files to become a true level designer.
-* **UI/UX:** Implement a "Game Over" screen, a main menu, and a restart mechanic.
+
 * **New Threats:** Bring on the ultimate horror: the `Human`!
 
 ---
