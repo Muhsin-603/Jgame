@@ -103,6 +103,8 @@ public class World {
             BufferedImage wallImage1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall_5.png"));
             tileTypes[9] = new Tile(wallImage1, true);
 
+            BufferedImage stickyImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sticky_floor.png"));
+            tileTypes[3] = new Tile(stickyImage, false);
             tileTypes[2] = new Tile(floorImage, false);
 
         } catch (IOException e) {

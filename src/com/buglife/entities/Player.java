@@ -14,7 +14,9 @@ public class Player {
     // Player attributes
     private int x, y;
     private int width, height;
-    private double speed = 3.5;
+    private double currentSpeed; // How fast we are moving RIGHT NOW
+    private final double NORMAL_SPEED = 3.0; // The default speed
+    private final double SLOW_SPEED = 1.0;   // The speed when stuck!
     private int health = 100;
     private int collisionRadius;
     private int healthDrainTimer = 0;
@@ -35,9 +37,12 @@ public class Player {
     private List<BufferedImage> walkRightFrames;
     private int webbedTimer = 0;
     private int webStrength = 0;
+
+    
     public boolean isWebbed() {
     return this.currentState == PlayerState.WEBBED;
-}
+    }
+    
 
     public enum PlayerState {
         IDLE_DOWN, WALKING_DOWN, WALKING_UP, WALKING_HORIZONTAL, WEBBED
@@ -226,6 +231,14 @@ public class Player {
     public void update(World world) {
         // --- First, check for paralysis ---
         // Inside Player.java's update() method...
+        int currentTileCol = getCenterX() / World.TILE_SIZE;
+        int currentTileRow = getCenterY() / World.TILE_SIZE;
+        int tileID = world.getTileIdAt(currentTileCol, currentTileRow);
+        if (tileID == 3) { // If it's our sticky tile ID
+            this.currentSpeed = SLOW_SPEED;
+        } else {
+            this.currentSpeed = NORMAL_SPEED;
+        }
 
 if (currentState == PlayerState.WEBBED) {
     // If we're webbed, the timer ticks down...
@@ -264,13 +277,13 @@ if (currentState == PlayerState.WEBBED) {
         // (Your existing wall collision logic is perfect here)
         double nextX = x, nextY = y;
         if (movingUp)
-            nextY -= speed;
+            nextY -= currentSpeed;
         if (movingDown)
-            nextY += speed;
+            nextY += currentSpeed;
         if (movingLeft)
-            nextX -= speed;
+            nextX -= currentSpeed;
         if (movingRight)
-            nextX += speed;
+            nextX += currentSpeed;
 
         if (nextX != x || nextY != y) {
             int nextLeft = (int) nextX;
