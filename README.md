@@ -1,8 +1,8 @@
 # 🐞 Buglife
 
-Welcome to **Buglife**, a top-down stealth and survival game forged in the fires of late-night debugging sessions. You are a bug. The world is a floor. Your goal is to survive.
+Welcome to **Buglife**, a top-down stealth and survival game forged in the fires of late-night debugging sessions. You are a bug (or perhaps something else now?). The world is a floor. Your goal is to survive.
 
-This project is more than a game; it's a war journal. It chronicles a descent into the madness of game development, a tale of battling sentient bugs, invisible enemies, and physics-defying ghosts. Every feature is a hard-won victory. Every bug squashed is a trophy mounted on the wall.
+This project is more than a game; it's a war journal. It chronicles a descent into the madness of game development, a tale of battling sentient bugs, invisible enemies, physics-defying ghosts, and stubborn sprite sheets. Every feature is a hard-won victory. Every bug squashed is a trophy mounted on the wall.
 
 ## ✨ Features
 
@@ -10,13 +10,13 @@ This project is more than a game; it's a war journal. It chronicles a descent in
     * Built from the ground up using Java Swing
     * Stable 60 FPS game loop with delta-time calculations
     * Custom rendering pipeline with sprite management
-    * Complete state management system (MAIN_MENU, PLAYING, GAME_OVER)
+    * Advanced state management and resource handling
 
 * **Full UI & Game Loop:**
-    * Interactive main menu with New Game, Resume, and Quit options
-    * Seamless game state transitions
-    * Game Over screen with instant restart capability
-    * Pause and resume functionality
+    * Complete state machine (MAIN_MENU, PLAYING, GAME_OVER)
+    * Interactive menu with custom fonts and background
+    * Seamless state transitions with proper cleanup
+    * Robust reset() mechanism for game restart
 
 * **Dynamic Tiled World:**
     * Complex mazes loaded from external .txt files
@@ -83,40 +83,47 @@ This project is more than a game; it's a war journal. It chronicles a descent in
 * **Camera**: Player-following viewport with culling optimization
 * **Collision**: Multi-layer detection (entity-to-entity, entity-to-wall)
 
-## 📜 The Bug Hunter's Log: The Weekend War
+## 📜 The Bug Hunter's Log: A Saga of Exorcism
 
-This game was reforged in the crucible of a single weekend. We faced down a legion of the damned and emerged victorious. Let the record show the demons we have slain:
+This game was forged in the crucible of impossible bugs and late-night caffeine. We didn't just write code; we performed exorcisms on sentient lines of logic. Let the record show the demons we have slain:
 
-* **The Spider-pocalypse (The Infinite Cloning Vat):** A misplaced line of code in `updateGame()` was creating a new spider 60 times a second, unleashing a memory-leaking plague that brought the universe to its knees. **Status: Annihilated.**
+### Setup Nightmares
+Battled invisible files, incorrect package declarations, misplaced .java files, and IDEs that refused to acknowledge the existence of entire folders (src, res). The .classpath file became both our most hated enemy and our most trusted weapon.
 
-* **The Dimensional Warp:** Our spider, in a fit of mathematical rage, learned to divide by zero. This corrupted its coordinates (`Pos: [0, 2147483087]`), teleporting it to the edge of reality and crashing the game. **Status: Banished.**
+### The Sprite Scavenger Hunt
+Fought countless NullPointerExceptions and crashes caused by incorrect file paths, case-sensitive filename typos, corrupted PNG metadata (readMetadata, decodeImage), and the vengeful .classpath file rendering entire asset folders invisible.
 
-* **The Cursed Artwork:** A series of corrupted PNG files haunted our image loader, causing the game to crash on startup with a `decodeImage` error. This demon was immune to code fixes and required a full digital exorcism of the art assets themselves. **Status: Cleansed.**
+### The Collision Conundrum
+Overcame the paradox of rotated visual sprites versus static rectangular hitboxes (solved with circular collision), only to face invisible hitboxes due to size mismatches and characters trapped in "pixel-perfect prisons" by off-by-one boundary checks.
+
+### The AI Uprising
+Our spiders developed existential crises (checking their own state for WEBBED), suffered amnesia (forgetting crucial methods like getRadius), got stuck in anxiety loops (pacing back and forth), spawned inside walls, divided by zero resulting in dimensional warping (NaN/Infinity coordinates), and achieved perfect stealth (random invisibility bugs).
 
 * **The Ghost in the Machine (The `.classpath` Haunting):** The most stubborn ghost of all. It hid in the IDE's configuration, making our `res` folder invisible to the game engine. It took multiple rituals and a manual file creation to finally evict this poltergeist. **Status: EVICTED.**
 
 * **The Disco Spider & The Moonwalk:** Our enemies were born with a rebellious spirit, spinning in place and moonwalking in the wrong direction. We battled their inverted compasses and taught them the laws of trigonometry. **Status: Choreographed into submission.**
 
-## 🎮 Game Design Document (Revision 6)
+## 🎮 Game Design Document (Revision 9)
 
 #### Game Overview
 * **Title:** Buglife
 * **Genre:** Top-down stealth/survival
-* **Core Concept:** Survival of a bug in a human household.
+* **Core Concept:** Survival of a small entity in a human household
 
 #### Current Progress
-* ✅ All core features from the "Features" list are implemented and stable.
-* ✅ The foundational engine for a 2D tile-based game is complete.
-* ✅ Implement a "Game Over" screen, a main menu, and a restart
-* ✅ Load map data from external `.txt` files to become a true level designer.
+* ✅ All core features from the "Features" list are implemented and stable
+* ✅ Player character, animations, AI, UI, and world interaction significantly upgraded
+* ✅ Advanced stealth mechanics and trap systems fully operational
+* ✅ Complex state machine and UI system completed
 
 #### Planned Next Steps
-
-* **New Threats:** Bring on the ultimate horror: the `Human`!
+* **New Threats (THE HUMAN!):** The ultimate horror
+* **Sound Design:** Add atmospheric music and sound effects
+* **Additional Mechanics:** More environmental hazards and power-ups
 
 ---
 
-## ✍️ The Bug-Hunting Crew
+## ✍️ The Crew
 
 * **Lead Architect & Chief Exorcist:** Drac
 * **The Infestation Squad (AI Choreographers):** Sai, Rishnu, Shibili
