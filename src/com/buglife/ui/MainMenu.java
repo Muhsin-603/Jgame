@@ -24,23 +24,20 @@ public class MainMenu {
         InputStream is = getClass().getResourceAsStream(path);
         if (is != null) {
             backgroundImage = ImageIO.read(is);
-            is.close(); // Good practice to close the stream
+            is.close();
         } else {
-            System.err.println("Error: Main menu background image not found: " + path);
+            System.err.println("Error: myr image kanunnilla : " + path);
         }
     } catch (IOException e) {
-        System.err.println("Error loading main menu background image: " + path);
+        System.err.println("Eimage kittan task annu onnude poyi sheriyakku: " + path);
         e.printStackTrace();
     }
 }
 
     public void draw(Graphics g) {
-    // 1. Draw the background image FIRST
-    if (backgroundImage != null) {
-        // Draw the image to fill the whole screen
-        g.drawImage(backgroundImage, 0, 0, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT, null);
-    } else {
-        // Fallback: Dark overlay if image failed to load
+    if (backgroundImage != null) { // check img indo ille
+        g.drawImage(backgroundImage, 0, 0, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT, null); //img ind
+    } else { //athava paliyal ithu upagarapedum
         g.setColor(new Color(0, 0, 0, 150));
         g.fillRect(0, 0, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT);
     }
