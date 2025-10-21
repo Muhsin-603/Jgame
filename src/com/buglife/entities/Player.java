@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
+import java.util.function.IntBinaryOperator;
 
 import src.com.buglife.world.World;
 
@@ -20,7 +21,7 @@ public class Player {
     private int health = 100;
     private int collisionRadius;
     private int healthDrainTimer = 0;
-    
+
     // This is the DEATH clock
 
     private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
@@ -38,22 +39,18 @@ public class Player {
     private int webbedTimer = 0;
     private int webStrength = 0;
     private int webCounter = 4;
-    
 
     public boolean isWebbed() {
-        
+
         return this.currentState == PlayerState.WEBBED;
     }
 
     public enum PlayerState {
-    IDLE_DOWN, // Standing, facing down
-    WALKING_DOWN,
-    WALKING_UP,
-    WALKING_LEFT, // New state
-    WALKING_RIGHT,
-    WEBBED // New state
-    // Maybe add IDLE_UP, IDLE_LEFT, IDLE_RIGHT later? For now, idle is just down.
-}
+        IDLE_DOWN, // Standing, facing down
+        WALKING_DOWN, WALKING_UP, WALKING_LEFT, // New state
+        WALKING_RIGHT, WEBBED // New state
+        // Maybe add IDLE_UP, IDLE_LEFT, IDLE_RIGHT later? For now, idle is just down.
+    }
 
     public void heal(int amount) {
         this.health = Math.min(100, this.health + amount);
@@ -91,31 +88,31 @@ public class Player {
     }
 
     public void render(Graphics g, World world) {
-    List<BufferedImage> currentAnimation = getActiveAnimation();
-    if (currentAnimation == null || currentAnimation.isEmpty() || currentFrame >= currentAnimation.size()) {
-        g.setColor(Color.MAGENTA); // Failsafe
-        g.fillRect(this.x, this.y, this.width, this.height);
-        return;
-    }
-
-    BufferedImage imageToDraw = currentAnimation.get(currentFrame);
-
-    Graphics2D g2d = (Graphics2D) g.create();
-    try {
-        // Stealth transparency check (using world object)
-        int playerTileCol = getCenterX() / World.TILE_SIZE;
-        int playerTileRow = getCenterY() / World.TILE_SIZE;
-        if (world.getTileIdAt(playerTileCol, playerTileRow) == 5) { // Shadow tile ID
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+        List<BufferedImage> currentAnimation = getActiveAnimation();
+        if (currentAnimation == null || currentAnimation.isEmpty() || currentFrame >= currentAnimation.size()) {
+            g.setColor(Color.MAGENTA); // Failsafe
+            g.fillRect(this.x, this.y, this.width, this.height);
+            return;
         }
 
-        // Draw the image normally. No flipping needed!
-        g2d.drawImage(imageToDraw, this.x, this.y, this.width, this.height, null);
+        BufferedImage imageToDraw = currentAnimation.get(currentFrame);
 
-    } finally {
-        g2d.dispose();
+        Graphics2D g2d = (Graphics2D) g.create();
+        try {
+            // Stealth transparency check (using world object)
+            int playerTileCol = getCenterX() / World.TILE_SIZE;
+            int playerTileRow = getCenterY() / World.TILE_SIZE;
+            if (world.getTileIdAt(playerTileCol, playerTileRow) == 5) { // Shadow tile ID
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+            }
+
+            // Draw the image normally. No flipping needed!
+            g2d.drawImage(imageToDraw, this.x, this.y, this.width, this.height, null);
+
+        } finally {
+            g2d.dispose();
+        }
     }
-}
 
     // Add this method to your Player.java class
 
@@ -184,48 +181,51 @@ public class Player {
     try {
         BufferedImage spriteSheet = ImageIO.read(getClass().getResourceAsStream("/res/sprites/player/pla.png"));
 
-        // --- Use the CORRECT dimensions ---
+        // --- Sprite Dimensions ---
         final int SPRITE_WIDTH = 13;
         final int SPRITE_HEIGHT = 28;
 
-        // --- THE DIGITAL SCISSORS - Recalibrated ---
+        // --- !!! YOUR EXACT MEASUREMENTS !!! ---
+        final int PADDING_LEFT = 25; // X offset of the very first sprite
+        final int PADDING_TOP = 15;  // Y offset of the very first sprite
+        final int HORIZONTAL_SPACING = 64; // Calculated pixels between sprite starts horizontally
+        final int VERTICAL_SPACING = 64;   // Calculated pixels between sprite starts vertically
 
-        // Idle Down (Stand - Row 1, Col 1)
-        // Row 0, Col 0
-        idleDownFrames.add(spriteSheet.getSubimage(0 * SPRITE_WIDTH, 0 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+        // Helper function to calculate exact coordinates using your measurements
+        // Calculates X based on padding, column index, and spacing
+        // Calculates Y based on padding, row index, and spacing
+        IntBinaryOperator getX = (col, row) -> PADDING_LEFT + col * HORIZONTAL_SPACING;
+        IntBinaryOperator getY = (col, row) -> PADDING_TOP + row * VERTICAL_SPACING;
 
-        // Walk Down (Row 5, Cols 1-4)
-        // Starts at Row index 4
+        // --- THE DIGITAL SCISSORS - Perfectly Calibrated ---
+
+        // Idle Down (Stand - Row index 0, Col index 0)
+        idleDownFrames.add(spriteSheet.getSubimage(getX.applyAsInt(0, 0), getY.applyAsInt(0, 0), SPRITE_WIDTH, SPRITE_HEIGHT));
+
+        // Walk Down (Row index 4, Cols 0-3)
         for (int i = 0; i < 4; i++) {
-            walkDownFrames.add(spriteSheet.getSubimage(i * SPRITE_WIDTH, 4 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+            walkDownFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 4), getY.applyAsInt(i, 4), SPRITE_WIDTH, SPRITE_HEIGHT));
         }
 
-        // Walk Up (Row 6, Cols 1-4)
-        // Starts at Row index 5
+        // Walk Up (Row index 5, Cols 0-3)
         for (int i = 0; i < 4; i++) {
-            walkUpFrames.add(spriteSheet.getSubimage(i * SPRITE_WIDTH, 5 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+            walkUpFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 5), getY.applyAsInt(i, 5), SPRITE_WIDTH, SPRITE_HEIGHT));
         }
 
-        // Walk Right (Row 7, Cols 1-4)
-        // Starts at Row index 6
+        // Walk Right (Row index 6, Cols 0-3)
         for (int i = 0; i < 4; i++) {
-            walkRightFrames.add(spriteSheet.getSubimage(i * SPRITE_WIDTH, 6 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+            walkRightFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 6), getY.applyAsInt(i, 6), SPRITE_WIDTH, SPRITE_HEIGHT));
         }
 
-        // Walk Left (Row 8, Cols 1-4)
-        // Starts at Row index 7
+        // Walk Left (Row index 7, Cols 0-3)
         for (int i = 0; i < 4; i++) {
-            walkLeftFrames.add(spriteSheet.getSubimage(i * SPRITE_WIDTH, 7 * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT));
+            walkLeftFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 7), getY.applyAsInt(i, 7), SPRITE_WIDTH, SPRITE_HEIGHT));
         }
-        
-        System.out.println("Loaded " + walkDownFrames.size() + " walk down frames."); // Keep this for confirmation
-        System.out.println("Loaded " + walkUpFrames.size() + " walk up frames.");
-        System.out.println("Loaded " + walkLeftFrames.size() + " walk left frames.");
-        System.out.println("Loaded " + walkRightFrames.size() + " walk right frames.");
 
+        System.out.println("Loaded " + walkDownFrames.size() + " walk down frames."); // Keep confirmation prints
 
     } catch (Exception e) {
-        System.err.println("CRASH! Could not slice the NEW player sprite sheet. Double-check dimensions and paths!");
+        System.err.println("CRASH! Could not slice player sheet. Double-check measurements!");
         e.printStackTrace();
     }
 }
@@ -288,23 +288,23 @@ public class Player {
         // 1. State Management: Decide which animation to play.
         PlayerState previousState = currentState;
 
-if (movingUp) {
-    currentState = PlayerState.WALKING_UP;
-} else if (movingDown) {
-    currentState = PlayerState.WALKING_DOWN;
-} else if (movingLeft) { // Separate check for Left
-    currentState = PlayerState.WALKING_LEFT;
-} else if (movingRight) { // Separate check for Right
-    currentState = PlayerState.WALKING_RIGHT;
-} else {
-    // If not moving, stay idle (facing down for now)
-    currentState = PlayerState.IDLE_DOWN;
-}
+        if (movingUp) {
+            currentState = PlayerState.WALKING_UP;
+        } else if (movingDown) {
+            currentState = PlayerState.WALKING_DOWN;
+        } else if (movingLeft) { // Separate check for Left
+            currentState = PlayerState.WALKING_LEFT;
+        } else if (movingRight) { // Separate check for Right
+            currentState = PlayerState.WALKING_RIGHT;
+        } else {
+            // If not moving, stay idle (facing down for now)
+            currentState = PlayerState.IDLE_DOWN;
+        }
 
-if (previousState != currentState) {
-    currentFrame = 0;
-    animationTick = 0;
-}
+        if (previousState != currentState) {
+            currentFrame = 0;
+            animationTick = 0;
+        }
 
         // 2. Movement & Wall Collision
         // (Your existing wall collision logic is perfect here)
@@ -352,15 +352,20 @@ if (previousState != currentState) {
     }
 
     private List<BufferedImage> getActiveAnimation() {
-    switch (currentState) {
-        case WALKING_UP:    return walkUpFrames;
-        case WALKING_DOWN:  return walkDownFrames;
-        case WALKING_LEFT:  return walkLeftFrames; // Use the new list
-        case WALKING_RIGHT: return walkRightFrames; // Use the new list
+        switch (currentState) {
+        case WALKING_UP:
+            return walkUpFrames;
+        case WALKING_DOWN:
+            return walkDownFrames;
+        case WALKING_LEFT:
+            return walkLeftFrames; // Use the new list
+        case WALKING_RIGHT:
+            return walkRightFrames; // Use the new list
         case IDLE_DOWN:
-        default:            return idleDownFrames;
+        default:
+            return idleDownFrames;
+        }
     }
-}
 
     /**
      * Draws the player on the screen.
