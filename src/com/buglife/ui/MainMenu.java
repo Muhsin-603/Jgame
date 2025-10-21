@@ -16,9 +16,26 @@ public class MainMenu {
     public String[] options = {"New Game", "Resume", "Quit"};
     public int currentSelection = 0;
     private BufferedImage backgroundImage;
+    private BufferedImage titleimg;
 
     public MainMenu() {
         loadBackgroundImage("/res/sprites/ui/main_bg.png"); //image location
+        loadTitle("/res/sprites/ui/logo.png");
+    }
+    
+    private void loadTitle(String path) {
+        try {
+            InputStream is = getClass().getResourceAsStream(path);
+            if (is != null) {
+                titleimg = ImageIO.read(is);
+                is.close();
+            } else {
+                System.err.println("Logo adichu poyi guys");
+            }
+        } catch (IOException e) {
+            System.err.println("Logo adichu poyi guys");
+            e.printStackTrace();
+        }
     }
     private void loadBackgroundImage(String path) {
     try {
@@ -30,11 +47,13 @@ public class MainMenu {
             System.err.println("Error: myr image kanunnilla : " + path);
         }
     } catch (IOException e) {
-        System.err.println("Eimage kittan task annu onnude poyi sheriyakku: " + path);
+        System.err.println("image kittan task annu onnude poyi sheriyakku: " + path);
         e.printStackTrace();
     }
 }
 
+    private static final int TITLE_WIDTH = 552;  //title width and height
+    private static final int TITLE_HEIGHT = 160;
     public void draw(Graphics g) {
     // 1. Draw the background image FIRST
     if (backgroundImage != null) {
@@ -45,29 +64,30 @@ public class MainMenu {
         g.fillRect(0, 0, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT);
     }
 
-    // --- Font Selection Logic ---
-    Font titleFont;
+    if (titleimg != null) {
+        int titleX = (GamePanel.SCREEN_WIDTH - TITLE_WIDTH) / 2; // screen width - title width 
+        int titleY = 100;
+        g.drawImage(titleimg, titleX, titleY, TITLE_WIDTH, TITLE_HEIGHT, null);
+    } else {
+        Font titleFont = Game.Tiny5 != null ? Game.Tiny5.deriveFont(Font.BOLD, 90)
+                : new Font("Consolas", Font.BOLD, 90);
+        g.setFont(titleFont);
+        g.setColor(Color.GREEN);
+        String title = "BUGLIFE";
+        int titleWidth = g.getFontMetrics().stringWidth(title);
+        g.drawString(title, (GamePanel.SCREEN_WIDTH - titleWidth) / 2, 200);
+    }
     Font optionFont;
 
     if (Game.Tiny5 != null) {
         // Use the custom font if loaded successfully
-        titleFont = Game.Tiny5.deriveFont(Font.BOLD, 90);
         optionFont = Game.Tiny5.deriveFont(Font.PLAIN, 40);
     } else {
         // Use a default fallback font if custom font failed
         System.err.println("MainMenu: Custom font not loaded, using fallback."); // Optional warning
-        titleFont = new Font("Consolas", Font.BOLD, 90);
         optionFont = new Font("Consolas", Font.PLAIN, 40);
     }
-
-    // 2. Draw Title using the selected font
-    g.setFont(titleFont);
-    g.setColor(Color.GREEN); // Adjust color as needed for visibility
-    String title = "BUGLIFE";
-    int titleWidth = g.getFontMetrics().stringWidth(title);
-    g.drawString(title, (GamePanel.SCREEN_WIDTH - titleWidth) / 2, 200);
-
-    // 3. Draw Menu Options using the selected font
+   // 3. Draw Menu Options using the selected font
     g.setFont(optionFont);
     for (int i = 0; i < options.length; i++) {
         if (i == currentSelection) {
