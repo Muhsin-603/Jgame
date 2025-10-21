@@ -16,8 +16,7 @@ public class MainMenu {
     private BufferedImage backgroundImage;
 
     public MainMenu() {
-    // ... any existing setup ...
-        loadBackgroundImage("/res/sprites/ui/main_bg.png"); // Adjust path if needed
+        loadBackgroundImage("/res/sprites/ui/main_bg.png"); //image location
     }
     private void loadBackgroundImage(String path) {
     try {
