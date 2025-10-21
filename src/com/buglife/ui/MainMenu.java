@@ -7,6 +7,8 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.InputStream;
+
+import src.com.buglife.main.Game;
 import src.com.buglife.main.GamePanel; // To get screen dimensions
 
 
@@ -35,22 +37,39 @@ public class MainMenu {
 }
 
     public void draw(Graphics g) {
-    if (backgroundImage != null) { // check img indo ille
-        g.drawImage(backgroundImage, 0, 0, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT, null); //img ind
-    } else { //athava paliyal ithu upagarapedum
+    // 1. Draw the background image FIRST
+    if (backgroundImage != null) {
+        g.drawImage(backgroundImage, 0, 0, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT, null);
+    } else {
+        // Fallback: Dark overlay if image failed to load
         g.setColor(new Color(0, 0, 0, 150));
         g.fillRect(0, 0, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT);
     }
 
-    // 2. Draw Title and Menu Options on TOP
-    // You might need to adjust colors/positions to look good on the background!
-    g.setColor(Color.GREEN); // Example: Green might show well
-    g.setFont(new Font("Consolas", Font.BOLD, 90));
+    // --- Font Selection Logic ---
+    Font titleFont;
+    Font optionFont;
+
+    if (Game.Tiny5 != null) {
+        // Use the custom font if loaded successfully
+        titleFont = Game.Tiny5.deriveFont(Font.BOLD, 90);
+        optionFont = Game.Tiny5.deriveFont(Font.PLAIN, 40);
+    } else {
+        // Use a default fallback font if custom font failed
+        System.err.println("MainMenu: Custom font not loaded, using fallback."); // Optional warning
+        titleFont = new Font("Consolas", Font.BOLD, 90);
+        optionFont = new Font("Consolas", Font.PLAIN, 40);
+    }
+
+    // 2. Draw Title using the selected font
+    g.setFont(titleFont);
+    g.setColor(Color.GREEN); // Adjust color as needed for visibility
     String title = "BUGLIFE";
     int titleWidth = g.getFontMetrics().stringWidth(title);
     g.drawString(title, (GamePanel.SCREEN_WIDTH - titleWidth) / 2, 200);
 
-    g.setFont(new Font("Consolas", Font.PLAIN, 40));
+    // 3. Draw Menu Options using the selected font
+    g.setFont(optionFont);
     for (int i = 0; i < options.length; i++) {
         if (i == currentSelection) {
             g.setColor(Color.YELLOW); // Highlight selected
