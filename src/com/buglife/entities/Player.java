@@ -60,19 +60,34 @@ public class Player {
     }
     // Add this method anywhere inside your Player class
 
-    public void reset() {
-        // Reset to the default starting position and state
-        this.x = 200;
-        this.y = 200;
-        this.health = 100; // Assuming health is a field in Player
-        this.currentState = PlayerState.IDLE_DOWN;
+    // In Player.java
 
-        // Make sure it's not moving
-        this.movingUp = false;
-        this.movingDown = false;
-        this.movingLeft = false;
-        this.movingRight = false;
-    }
+public void reset() {
+    // Reset position
+    this.x = 200; // Or whatever your default start position is
+    this.y = 200;
+
+    // Reset health
+    this.health = 100;
+
+    // Reset state to default idle
+    this.currentState = PlayerState.IDLE_DOWN;
+    this.currentFrame = 0; // Reset animation frame too
+    this.animationTick = 0;
+
+    // --- THE FIX ---
+    // Reset web status completely
+    this.webbedTimer = 0;
+    this.webStrength = 0;
+    this.webCounter = 0;
+
+    // Make sure movement flags are off
+    this.movingUp = false;
+    this.movingDown = false;
+    this.movingLeft = false;
+    this.movingRight = false;
+    //this.isFacingLeft = false; // Reset facing direction
+}
 
     // Add this method to Player.java
     public void getWebbed() {
@@ -169,66 +184,71 @@ public class Player {
         this.collisionRadius = collisionSize / 2;
         loadAnimations();
     }
-    ///res/sprites/player/pla.png"
+    /// res/sprites/player/pla.png"
 
     private void loadAnimations() {
-    idleDownFrames = new ArrayList<>();
-    walkDownFrames = new ArrayList<>();
-    walkUpFrames = new ArrayList<>();
-    walkLeftFrames = new ArrayList<>();
-    walkRightFrames = new ArrayList<>();
+        idleDownFrames = new ArrayList<>();
+        walkDownFrames = new ArrayList<>();
+        walkUpFrames = new ArrayList<>();
+        walkLeftFrames = new ArrayList<>();
+        walkRightFrames = new ArrayList<>();
 
-    try {
-        BufferedImage spriteSheet = ImageIO.read(getClass().getResourceAsStream("/res/sprites/player/pla.png"));
+        try {
+            BufferedImage spriteSheet = ImageIO.read(getClass().getResourceAsStream("/res/sprites/player/pla.png"));
 
-        // --- Sprite Dimensions ---
-        final int SPRITE_WIDTH = 13;
-        final int SPRITE_HEIGHT = 28;
+            // --- Sprite Dimensions ---
+            final int SPRITE_WIDTH = 13;
+            final int SPRITE_HEIGHT = 28;
 
-        // --- !!! YOUR EXACT MEASUREMENTS !!! ---
-        final int PADDING_LEFT = 25; // X offset of the very first sprite
-        final int PADDING_TOP = 15;  // Y offset of the very first sprite
-        final int HORIZONTAL_SPACING = 64; // Calculated pixels between sprite starts horizontally
-        final int VERTICAL_SPACING = 64;   // Calculated pixels between sprite starts vertically
+            // --- !!! YOUR EXACT MEASUREMENTS !!! ---
+            final int PADDING_LEFT = 25; // X offset of the very first sprite
+            final int PADDING_TOP = 15; // Y offset of the very first sprite
+            final int HORIZONTAL_SPACING = 64; // Calculated pixels between sprite starts horizontally
+            final int VERTICAL_SPACING = 64; // Calculated pixels between sprite starts vertically
 
-        // Helper function to calculate exact coordinates using your measurements
-        // Calculates X based on padding, column index, and spacing
-        // Calculates Y based on padding, row index, and spacing
-        IntBinaryOperator getX = (col, row) -> PADDING_LEFT + col * HORIZONTAL_SPACING;
-        IntBinaryOperator getY = (col, row) -> PADDING_TOP + row * VERTICAL_SPACING;
+            // Helper function to calculate exact coordinates using your measurements
+            // Calculates X based on padding, column index, and spacing
+            // Calculates Y based on padding, row index, and spacing
+            IntBinaryOperator getX = (col, row) -> PADDING_LEFT + col * HORIZONTAL_SPACING;
+            IntBinaryOperator getY = (col, row) -> PADDING_TOP + row * VERTICAL_SPACING;
 
-        // --- THE DIGITAL SCISSORS - Perfectly Calibrated ---
+            // --- THE DIGITAL SCISSORS - Perfectly Calibrated ---
 
-        // Idle Down (Stand - Row index 0, Col index 0)
-        idleDownFrames.add(spriteSheet.getSubimage(getX.applyAsInt(0, 0), getY.applyAsInt(0, 0), SPRITE_WIDTH, SPRITE_HEIGHT));
+            // Idle Down (Stand - Row index 0, Col index 0)
+            idleDownFrames.add(
+                    spriteSheet.getSubimage(getX.applyAsInt(0, 0), getY.applyAsInt(0, 0), SPRITE_WIDTH, SPRITE_HEIGHT));
 
-        // Walk Down (Row index 4, Cols 0-3)
-        for (int i = 0; i < 4; i++) {
-            walkDownFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 4), getY.applyAsInt(i, 4), SPRITE_WIDTH, SPRITE_HEIGHT));
+            // Walk Down (Row index 4, Cols 0-3)
+            for (int i = 0; i < 4; i++) {
+                walkDownFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 4), getY.applyAsInt(i, 4), SPRITE_WIDTH,
+                        SPRITE_HEIGHT));
+            }
+
+            // Walk Up (Row index 5, Cols 0-3)
+            for (int i = 0; i < 4; i++) {
+                walkUpFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 5), getY.applyAsInt(i, 5), SPRITE_WIDTH,
+                        SPRITE_HEIGHT));
+            }
+
+            // Walk Right (Row index 6, Cols 0-3)
+            for (int i = 0; i < 4; i++) {
+                walkRightFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 6), getY.applyAsInt(i, 6), SPRITE_WIDTH,
+                        SPRITE_HEIGHT));
+            }
+
+            // Walk Left (Row index 7, Cols 0-3)
+            for (int i = 0; i < 4; i++) {
+                walkLeftFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 7), getY.applyAsInt(i, 7), SPRITE_WIDTH,
+                        SPRITE_HEIGHT));
+            }
+
+            System.out.println("Loaded " + walkDownFrames.size() + " walk down frames."); // Keep confirmation prints
+
+        } catch (Exception e) {
+            System.err.println("CRASH! Could not slice player sheet. Double-check measurements!");
+            e.printStackTrace();
         }
-
-        // Walk Up (Row index 5, Cols 0-3)
-        for (int i = 0; i < 4; i++) {
-            walkUpFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 5), getY.applyAsInt(i, 5), SPRITE_WIDTH, SPRITE_HEIGHT));
-        }
-
-        // Walk Right (Row index 6, Cols 0-3)
-        for (int i = 0; i < 4; i++) {
-            walkRightFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 6), getY.applyAsInt(i, 6), SPRITE_WIDTH, SPRITE_HEIGHT));
-        }
-
-        // Walk Left (Row index 7, Cols 0-3)
-        for (int i = 0; i < 4; i++) {
-            walkLeftFrames.add(spriteSheet.getSubimage(getX.applyAsInt(i, 7), getY.applyAsInt(i, 7), SPRITE_WIDTH, SPRITE_HEIGHT));
-        }
-
-        System.out.println("Loaded " + walkDownFrames.size() + " walk down frames."); // Keep confirmation prints
-
-    } catch (Exception e) {
-        System.err.println("CRASH! Could not slice player sheet. Double-check measurements!");
-        e.printStackTrace();
     }
-}
 
     // Add this method to Player.java
     public void struggle() {

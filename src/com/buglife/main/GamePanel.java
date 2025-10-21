@@ -72,7 +72,7 @@ public class GamePanel extends JPanel {
 
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
-        this.player = new Player(200, 200, 26, 40);
+        this.player = new Player(200, 200, 32, 32);
 
         this.food = new Food(600, 500, 20);
         spawnFood();
@@ -233,6 +233,7 @@ public class GamePanel extends JPanel {
         } else if (currentState == GameState.GAME_OVER) {
             // --- If the game is over, draw the final scene! ---
             // 1. A dark, semi-transparent overlay to set the mood
+            player.reset();
             g.setColor(new Color(0, 0, 0, 150)); // Black, with transparency
             g.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
