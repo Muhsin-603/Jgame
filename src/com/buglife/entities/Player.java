@@ -36,8 +36,11 @@ public class Player {
     private List<BufferedImage> walkRightFrames;
     private int webbedTimer = 0;
     private int webStrength = 0;
+    private int webCounter = 4;
+    
 
     public boolean isWebbed() {
+        
         return this.currentState == PlayerState.WEBBED;
     }
 
@@ -72,9 +75,10 @@ public class Player {
         if (currentState != PlayerState.WEBBED) {
             // System.out.println("PLAYER: I'M TRAPPED!");
             currentState = PlayerState.WEBBED;
+            webCounter++;
 
             webbedTimer = 300; // You have 5 seconds to live...
-            webStrength = 4; // ...and 4 taps to escape. Good luck.
+            webStrength = webCounter; // ...and 4 taps to escape. Good luck.
             this.currentFrame = 0;
         }
     }
