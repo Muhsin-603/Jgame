@@ -72,7 +72,7 @@ public class GamePanel extends JPanel {
 
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
-        this.player = new Player(100, 100, 32, 32);
+        this.player = new Player(200, 200, 26, 40);
 
         this.food = new Food(600, 500, 20);
         spawnFood();
