@@ -17,6 +17,7 @@ public class MainMenu {
     public int currentSelection = 0;
     private BufferedImage backgroundImage;
     private BufferedImage titleimg;
+    
 
     public MainMenu() {
         loadBackgroundImage("/res/sprites/ui/main_bg.png"); //image location

@@ -278,20 +278,25 @@ public class GamePanel extends JPanel {
             // The actor checks which scene they're in...
             if (currentState == GameState.MAIN_MENU) {
                 // --- SCENE 1: THE MAIN MENU ---
+                
                 if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) {
                     mainMenu.moveUp();
+                    soundManager.playSound("menu");
                 }
                 if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
                     mainMenu.moveDown();
+                    soundManager.playSound("menu");
                 }
                 if (key == KeyEvent.VK_ENTER) {
                     String selectedOption = mainMenu.options[mainMenu.currentSelection];
                     if (selectedOption.equals("New Game")) {
+                        soundManager.stopSound("menuMusic");
                         restartGame();
                     }
                     if (selectedOption.equals("Resume")) {
                         // We need to check if a game is actually in progress!
                         // For now, let's just switch to playing.
+                        soundManager.stopSound("menuMusic");
                         currentState = GameState.PLAYING;
                     }
                     if (selectedOption.equals("Quit")) {
@@ -322,6 +327,9 @@ public class GamePanel extends JPanel {
             } else if (currentState == GameState.GAME_OVER) {
                 // --- SCENE 3: THE TRAGIC ENDING ---
                 if (key == KeyEvent.VK_ENTER) {
+                    soundManager.loopSound("gameMusic");
+                    soundManager.stopSound("menuMusic");
+                    currentState = GameState.MAIN_MENU;
                     restartGame();
                 }
             }

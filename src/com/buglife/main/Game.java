@@ -26,7 +26,9 @@ public class Game implements Runnable {
         
         soundManager = new SoundManager();
         gamePanel = new GamePanel(soundManager);
-        soundManager.loadSound("music", "/res/sounds/background_music.wav"); 
+        soundManager.loadSound("music", "/res/sounds/game_theme.wav");
+        soundManager.playSound("menuMusic"); 
+        soundManager.loopSound("menuMusic");
         
 
         // 2. Create the main window (the JFrame)

@@ -21,6 +21,7 @@ public class SoundManager {
         loadSound("music", "/res/sounds/game_theme.wav");
         loadSound("struggle", "/res/sounds/struggle.wav");
         loadSound("menu", "/res/sounds/menu_selection.wav");
+        loadSound("menuMusic", "/res/sounds/menu_music.wav");
         // Load others as needed
     }
 
