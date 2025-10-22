@@ -85,6 +85,7 @@ public class GamePanel extends JPanel {
 
 
     public void restartGame() {
+        soundManager.loopSound("music");
         System.out.println("Resetting the nightmare...");
 
         // 1. Reset the player.
@@ -109,7 +110,7 @@ public class GamePanel extends JPanel {
     public void updateGame() {
 
         if (currentState == GameState.PLAYING) {
-            player.update(world);
+            player.update(world, soundManager);
             for (Spider currentSpider : spiders) {
                 if (currentSpider != null) {
 
@@ -124,6 +125,7 @@ public class GamePanel extends JPanel {
                     if (distance < requiredDistance) {
                         if (currentSpider.isChasing()) { // We'll add this method next
                             player.getWebbed();
+                            soundManager.playSound("webbed");
                         } else {
                             // If it just bumps into you while patrolling, it's just a little damage.
                             player.takeDamage(1);
@@ -148,10 +150,13 @@ public class GamePanel extends JPanel {
 
                 if (distanceFood < requiredDistanceFood) {
                     player.heal(25); // Heal for a nice chunk of health
+                    soundManager.playSound("eat");
                     spawnFood();
                 }
             }
             if (player.getHealth() <= 0) {
+                soundManager.stopSound("music"); // Stop the background music
+                soundManager.playSound("gameOver"); // Play the death sound
                 currentState = GameState.GAME_OVER; // End the scene!
             }
         }
@@ -196,7 +201,7 @@ public class GamePanel extends JPanel {
             Graphics2D g2d = (Graphics2D) g.create();
             g2d.translate(-cameraX, -cameraY);
 
-            player.render(g2d, world);
+            player.render(g2d, world, soundManager);
             for (Spider spider : spiders) {
                 spider.draw(g2d);
             }
@@ -312,6 +317,7 @@ public class GamePanel extends JPanel {
                 }
                 if (key == KeyEvent.VK_SPACE) {
                     player.struggle();
+                    soundManager.playSound("struggle");
                 }
             } else if (currentState == GameState.GAME_OVER) {
                 // --- SCENE 3: THE TRAGIC ENDING ---

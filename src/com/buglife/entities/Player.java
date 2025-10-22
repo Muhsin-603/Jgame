@@ -7,6 +7,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import java.util.function.IntBinaryOperator;
 
+import src.com.buglife.assets.SoundManager;
 import src.com.buglife.world.World;
 
 import java.awt.geom.AffineTransform;
@@ -102,7 +103,7 @@ public void reset() {
         }
     }
 
-    public void render(Graphics g, World world) {
+    public void render(Graphics g, World world, SoundManager soundManager) {
         List<BufferedImage> currentAnimation = getActiveAnimation();
         if (currentAnimation == null || currentAnimation.isEmpty() || currentFrame >= currentAnimation.size()) {
             g.setColor(Color.MAGENTA); // Failsafe
@@ -278,7 +279,7 @@ public void reset() {
      * the main game loop.
      */
     // The new update method now takes the World as an argument
-    public void update(World world) {
+    public void update(World world, SoundManager soundManager) {
         // --- First, check for paralysis ---
         // Inside Player.java's update() method...
         int currentTileCol = getCenterX() / World.TILE_SIZE;

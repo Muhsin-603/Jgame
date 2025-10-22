@@ -18,6 +18,9 @@ public class SoundManager {
         loadSound("eat", "/res/sounds/eat_sound.wav");
         loadSound("webbed", "/res/sounds/web_sound.wav");
         loadSound("gameOver", "/res/sounds/game_over.wav");
+        loadSound("music", "/res/sounds/game_theme.wav");
+        loadSound("struggle", "/res/sounds/struggle.wav");
+        loadSound("menu", "/res/sounds/menu_selection.wav");
         // Load others as needed
     }
 
