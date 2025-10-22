@@ -1,4 +1,4 @@
-package src.com.buglife.main;
+    package src.com.buglife.main;
 
 import javax.swing.*;
 

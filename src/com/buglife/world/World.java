@@ -102,7 +102,7 @@ public class World {
             tileTypes[1] = new Tile(wallImage, true);
             
             BufferedImage wallImage1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall_5.png"));
-            tileTypes[9] = new Tile(wallImage1, true);
+            tileTypes[2] = new Tile(wallImage1, true);
 
             BufferedImage stickyImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sticky_floor.png"));
             tileTypes[3] = new Tile(stickyImage, false);
@@ -113,8 +113,6 @@ public class World {
             BufferedImage shadowImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/shadow_tile.png"));
             tileTypes[5] = new Tile(shadowImage, false);
             
-            
-            tileTypes[2] = new Tile(floorImage, false);
 
         } catch (IOException e) {
             System.err.println("Could not load tile images!");
