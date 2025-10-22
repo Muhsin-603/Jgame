@@ -17,13 +17,15 @@ public class Player {
     private int x, y;
     private int width, height;
     private double currentSpeed; // How fast we are moving RIGHT NOW
-    private final double NORMAL_SPEED = 3.0; // The default speed
-    private final double SLOW_SPEED = 1.0; // The speed when stuck!
-    private int health = 100;
+    private final double NORMAL_SPEED = 2.0; // The default speed
+    private final double SLOW_SPEED = 0.5; // The speed when stuck!
+    private int hunger = 100;
+    private final int MAX_HUNGER = 100;
     private int collisionRadius;
-    private int healthDrainTimer = 0;
+    private int hungerDrainTimer = 0;
+    private boolean isCrying = false;
     
-    // This is the DEATH clock
+    // This tracks hunger and crying mechanics
 
     private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
     private int animationTick = 0;
@@ -40,6 +42,7 @@ public class Player {
     private int webbedTimer = 0;
     private int webStrength = 0;
     private int webCounter = 4;
+    
 
     public boolean isWebbed() {
 
@@ -53,10 +56,11 @@ public class Player {
         // Maybe add IDLE_UP, IDLE_LEFT, IDLE_RIGHT later? For now, idle is just down.
     }
 
-    public void heal(int amount) {
-        this.health = Math.min(100, this.health + amount);
-        if (this.health > 100) {
-            this.health = 100;
+    public void eat(int amount) {
+        
+        this.hunger += amount;
+        if (this.hunger > 100) {
+            this.hunger = MAX_HUNGER;
         }
     }
     // Add this method anywhere inside your Player class
@@ -68,8 +72,9 @@ public class Player {
         this.x = 200; // Or whatever your default start position is
         this.y = 200;
 
-        // Reset health
-        this.health = 100;
+        // Reset hunger and crying state
+        this.hunger = 100;
+        this.isCrying = false;
 
         // Reset state to default idle
         this.currentState = PlayerState.IDLE_DOWN;
@@ -298,7 +303,7 @@ public class Player {
             // --- THE NEW DEATH SENTENCE ---
             if (webbedTimer <= 0) {
                 // System.out.println("SPIDER: DINNER IS SERVED.");
-                this.health = 0; // The timer ran out. You are dead.
+                takeDamage(); // The timer ran out. You are trapped!
             }
             // If webbed, you can do nothing else.
             return;
@@ -355,11 +360,17 @@ public class Player {
             }
         }
 
-        // 3. Health Drain (runs only when not webbed)
-        healthDrainTimer++;
-        if (healthDrainTimer > 120) {
-            takeDamage(1);
-            healthDrainTimer = 0;
+        // 3. Hunger Drain (runs only when not webbed)
+        hungerDrainTimer++;
+        if (hungerDrainTimer > 120) {
+            this.hunger--;
+            hungerDrainTimer = 0;
+            // Check if hunger is depleted
+            if (this.hunger <= 0) {
+                this.hunger = 0;
+                System.out.println("PLAYER: WAAAAAAH!");
+                this.isCrying = true;
+            }
         }
 
         // 4. Animation
@@ -446,15 +457,22 @@ public class Player {
         return new Rectangle(x, y, width, height);
     }
 
-    public void takeDamage(int amount) {
-        // System.out.println("!!! DAMAGE METHOD CALLED !!!");
-        this.health -= amount;
-        if (health < 0)
-            health = 0;
-
+    public void decreaseHunger(int amount) {
+        this.hunger -= amount;
+        if (hunger < 0)
+            hunger = 0;
     }
 
-    public int getHealth() {
-        return this.health;
+    public void takeDamage() {
+        // For future implementation of damage mechanics
+        this.isCrying = true;
+    }
+
+    public int getHunger() {
+        return this.hunger;
+    }
+
+    public boolean isCrying() {
+        return this.isCrying;
     }
 }

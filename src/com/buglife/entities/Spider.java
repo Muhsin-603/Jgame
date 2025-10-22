@@ -42,10 +42,8 @@ public class Spider {
         CHASING, // The "I see you!" bloodlust mode
         RETURNING // The "Where did he go?" confused mode
     }
-    
 
     private SpiderState currentState; // A variable to hold the spider's current mood
-    
 
     public Spider(List<Point> tilePath) {
         // Convert the tile-based path to a pixel-based path
@@ -113,11 +111,25 @@ public class Spider {
             e.printStackTrace();
         }
     }
+    // In Spider.java
+
+    public SpiderState getCurrentState() {
+        return this.currentState;
+    }
+
+    // Method to force the spider into chase mode when alerted
+    public void startChasing(Player targetPlayer) {
+        if (currentState == SpiderState.PATROLLING) { // Only switch if currently patrolling
+            this.targetPlayer = targetPlayer; // Make sure it knows who to chase
+            this.returnPoint = new Point(getCenterX(), getCenterY()); // Set return point
+            this.currentState = SpiderState.CHASING;
+        }
+    }
 
     // Add this method anywhere inside your Spider class
 
     public void reset() {
-        //System.out.println("Spider is resetting to its starting position.");
+        // System.out.println("Spider is resetting to its starting position.");
 
         // Teleport back to the first point in the patrol path
         if (patrolPath != null && !patrolPath.isEmpty()) {
@@ -146,7 +158,7 @@ public class Spider {
             doPatrol(world);
             // While patrolling, constantly look for the player.
             if (canSeePlayer(targetPlayer, world)) {
-                //System.out.println("SPIDER: TARGET ACQUIRED!");
+                // System.out.println("SPIDER: TARGET ACQUIRED!");
                 // Drop a GPS pin at our current location. THIS is our post.
                 this.returnPoint = new Point(getCenterX(), getCenterY());
                 currentState = SpiderState.CHASING;
@@ -157,7 +169,7 @@ public class Spider {
             // --- NEW "MISSION ACCOMPLISHED" CHECK ---
             // First, check if our target is already webbed.
             if (targetPlayer.isWebbed()) {
-                //System.out.println("SPIDER: PREY CAPTURED. RETURNING TO POST.");
+                // System.out.println("SPIDER: PREY CAPTURED. RETURNING TO POST.");
                 currentState = SpiderState.RETURNING; // My job here is done.
                 break; // Immediately exit the CHASING logic.
             }
@@ -169,7 +181,7 @@ public class Spider {
             } else {
                 loseSightTimer--;
                 if (loseSightTimer <= 0) {
-                    //System.out.println("SPIDER: TARGET LOST. RETURNING TO POST.");
+                    // System.out.println("SPIDER: TARGET LOST. RETURNING TO POST.");
                     currentState = SpiderState.RETURNING;
                 }
             }
@@ -183,7 +195,7 @@ public class Spider {
 
             if (distanceToPost < 5) {
                 // We're back! Resume normal patrol.
-                //System.out.println("SPIDER: RESUMING PATROL.");
+                // System.out.println("SPIDER: RESUMING PATROL.");
                 currentState = SpiderState.PATROLLING;
             } else {
                 // If not, take the shortest path back.

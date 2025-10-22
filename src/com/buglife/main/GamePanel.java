@@ -83,7 +83,6 @@ public class GamePanel extends JPanel {
         addKeyListener(new KeyInputAdapter());
     }
 
-
     public void restartGame() {
         soundManager.loopSound("music");
         System.out.println("Resetting the nightmare...");
@@ -105,9 +104,30 @@ public class GamePanel extends JPanel {
         currentState = GameState.PLAYING;
     }
 
-
-
     public void updateGame() {
+
+        if (player.isCrying()) {
+            // Alert nearby spiders!
+            int alertRadius = 500; // How far the cry can be heard
+            for (Spider spider : spiders) {
+                if (spider != null) {
+                    // Calculate distance to this spider
+                    double dx = player.getCenterX() - spider.getCenterX();
+                    double dy = player.getCenterY() - spider.getCenterY();
+                    double distance = Math.sqrt(dx * dx + dy * dy);
+
+                    // If spider is within hearing range and not already chasing/returning
+                    if (distance < alertRadius && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
+                        System.out.println("SPIDER HEARD CRY! INVESTIGATING!");
+                        spider.startChasing(player); // We'll add this method to Spider
+                    }
+                }
+            }
+            // Note: The game currently pauses if the player is crying in Player.update().
+            // You might want the game to continue so the alerted spiders can approach.
+            // Consider removing the "return;" from the isCrying check in Player.update()
+            // if you want spiders to converge on the crying player.
+        }
 
         if (currentState == GameState.PLAYING) {
             player.update(world, soundManager);
@@ -128,7 +148,7 @@ public class GamePanel extends JPanel {
                             soundManager.playSound("webbed");
                         } else {
                             // If it just bumps into you while patrolling, it's just a little damage.
-                            player.takeDamage(1);
+                            player.decreaseHunger(1);
                         }
                     }
 
@@ -149,12 +169,12 @@ public class GamePanel extends JPanel {
                 double requiredDistanceFood = player.getRadius() + food.getRadius();
 
                 if (distanceFood < requiredDistanceFood) {
-                    player.heal(25); // Heal for a nice chunk of health
+                    player.eat(25); // Heal for a nice chunk of health
                     soundManager.playSound("eat");
                     spawnFood();
                 }
             }
-            if (player.getHealth() <= 0) {
+            if (player.getHunger() <= 0 && !player.isCrying()) {
                 soundManager.stopSound("music"); // Stop the background music
                 soundManager.playSound("gameOver"); // Play the death sound
                 currentState = GameState.GAME_OVER; // End the scene!
@@ -216,12 +236,12 @@ public class GamePanel extends JPanel {
             g.fillRect(10, 10, 200, 20); // x, y, width, height
 
             // The current health (the red part)
-            g.setColor(Color.RED);
+            g.setColor(Color.ORANGE);
             // The width of this rectangle depends on the player's health!
-            g.fillRect(10, 10, player.getHealth() * 2, 20); // health * 2 because 100 * 2 = 200 width
+            g.fillRect(10, 10, player.getHunger() * 2, 20); // health * 2 because 100 * 2 = 200 width
 
             // A border to make it look clean
-            g.setColor(Color.WHITE);
+            g.setColor(Color.BLACK);
             g.drawRect(10, 10, 200, 20);
             if (player.isWebbed()) {
                 // Upgrade our drawing tool
@@ -278,7 +298,7 @@ public class GamePanel extends JPanel {
             // The actor checks which scene they're in...
             if (currentState == GameState.MAIN_MENU) {
                 // --- SCENE 1: THE MAIN MENU ---
-                
+
                 if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) {
                     mainMenu.moveUp();
                     soundManager.playSound("menu");
