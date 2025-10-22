@@ -496,6 +496,13 @@ public class Player {
         this.rotationAngle = angle;
     }
 
+    public int getX() {
+        return this.x;
+    }
+    public int getY(){
+        return this.y;
+    }
+
     /**
      * Returns the player's collision bounds. Super useful later!
      * 
