@@ -107,7 +107,7 @@ public class World {
             BufferedImage stickyImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sticky_floor.png"));
             tileTypes[3] = new Tile(stickyImage, false);
             
-            BufferedImage waterImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/puddle.png"));
+            BufferedImage waterImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/puddle2.png"));
             tileTypes[4] = new Tile(waterImage, true);
 
             BufferedImage shadowImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/shadow_tile.png"));
