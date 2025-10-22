@@ -2,6 +2,7 @@ package src.com.buglife.main;
 
 import java.util.Random;
 
+import src.com.buglife.assets.SoundManager;
 import src.com.buglife.entities.Food;
 // Make sure to import your new Player class!
 import src.com.buglife.entities.Player;
@@ -32,6 +33,7 @@ public class GamePanel extends JPanel {
     public static final int SCREEN_WIDTH = 1024;
     public static final int SCREEN_HEIGHT = 768;
     private MainMenu mainMenu;
+    private SoundManager soundManager;
 
     public enum GameState {
         MAIN_MENU, PLAYING, GAME_OVER
@@ -39,8 +41,9 @@ public class GamePanel extends JPanel {
 
     private GameState currentState;
 
-    public GamePanel() {
+    public GamePanel(SoundManager sm) {
         world = new World();
+        this.soundManager = sm;
 
         mainMenu = new MainMenu();
         currentState = GameState.MAIN_MENU;

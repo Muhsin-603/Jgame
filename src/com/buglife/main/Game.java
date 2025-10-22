@@ -1,6 +1,9 @@
 package src.com.buglife.main;
 
 import javax.swing.*;
+
+import src.com.buglife.assets.SoundManager;
+
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
@@ -14,11 +17,17 @@ public class Game implements Runnable {
     private Thread gameThread;
     private final int FPS = 60; // Our target frames per second
     public static Font Tiny5;
+    private SoundManager soundManager;
+    
 
     public Game() {
         // 1. Create the panel that will hold all our game objects
         loadCustomFont();
-        gamePanel = new GamePanel();
+        
+        soundManager = new SoundManager();
+        gamePanel = new GamePanel(soundManager);
+        soundManager.loadSound("music", "/res/sounds/background_music.wav"); 
+        
 
         // 2. Create the main window (the JFrame)
         window = new JFrame();
@@ -39,6 +48,7 @@ public class Game implements Runnable {
         // Let the panel listen for key presses
         gamePanel.requestFocus(); 
     }
+    
     private void loadCustomFont() {
         try {
             // Get the font file from our resources folder
