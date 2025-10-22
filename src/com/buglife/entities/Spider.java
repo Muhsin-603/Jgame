@@ -187,7 +187,9 @@ public class Spider {
             // First, check if our target is already webbed.
             if (targetPlayer.isWebbed()) {
                 // System.out.println("SPIDER: PREY CAPTURED. RETURNING TO POST.");
-                currentState = SpiderState.RETURNING; // My job here is done.
+                currentState = SpiderState.RETURNING;// My job here is done.
+                soundManager.stopSound("chasing");
+                soundManager.playSound("music"); 
                 break; // Immediately exit the CHASING logic.
             }
 
@@ -205,6 +207,8 @@ public class Spider {
                     if (loseSightTimer <= 0) {
                         // System.out.println("SPIDER: TARGET LOST. RETURNING TO POST.");
                         currentState = SpiderState.RETURNING;
+                        soundManager.stopSound("chasing");
+                        soundManager.playSound("music");
                     }
                 }
                 break;
@@ -219,6 +223,8 @@ public class Spider {
                 // We're back! Resume normal patrol.
                 // System.out.println("SPIDER: RESUMING PATROL.");
                 currentState = SpiderState.PATROLLING;
+                soundManager.stopSound("chasing");
+                soundManager.playSound("music");
             } else {
                 // If not, take the shortest path back.
                 returnToPost();
