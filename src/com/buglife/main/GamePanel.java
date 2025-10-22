@@ -157,9 +157,23 @@ public class GamePanel extends JPanel {
                     double requiredDistance = player.getRadius() + currentSpider.getRadius();
 
                     if (distance < requiredDistance) {
+                        if (player.getHunger() <= 0) {
+                            System.out.println("GAME OVER: Player caught with zero hunger!");
+                            soundManager.stopSound("music"); // Stop background music
+                            soundManager.playSound("gameOver"); // Play game over sound
+                            currentState = GameState.GAME_OVER; // Set game state to GAME_OVER
+                            return; // Exit updateGame immediately
+                        }
                         if (currentSpider.isChasing()) { // We'll add this method next
-                            player.getWebbed();
-                            soundManager.playSound("webbed");
+                            if (player.isCrying()) { // check baby is crying if crying then game over
+                                soundManager.stopSound("music");
+                                soundManager.playSound("gameover");
+                                currentState = GameState.GAME_OVER;
+                                return;
+                            } else { // normally get webbed
+                                player.getWebbed();
+                                soundManager.playSound("webbed");
+                            }
                         } else {
                             // If it just bumps into you while patrolling, it's just a little damage.
                             player.decreaseHunger(1);
