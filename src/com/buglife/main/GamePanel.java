@@ -327,8 +327,9 @@ public class GamePanel extends JPanel {
             } else if (currentState == GameState.GAME_OVER) {
                 // --- SCENE 3: THE TRAGIC ENDING ---
                 if (key == KeyEvent.VK_ENTER) {
-                    soundManager.loopSound("gameMusic");
+                    soundManager.loopSound("gameOver");
                     soundManager.stopSound("menuMusic");
+                    soundManager.stopSound("music");
                     currentState = GameState.MAIN_MENU;
                     restartGame();
                 }
