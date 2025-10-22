@@ -26,6 +26,8 @@ public class Player {
     private boolean isCrying = false;
     private int cryDeathTimer = 0; // Timer for death by hunger after crying starts
     private final int CRY_DEATH_DURATION = 20 * 60;
+    private boolean isLowHungerWarningPlayed = false;
+    private final int LOW_HUNGER_THRESHOLD = 0;
 
     // This tracks hunger and crying mechanics
 
@@ -279,6 +281,16 @@ public class Player {
      * ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug_mov_1.png")); }
      * catch (IOException e) { e.printStackTrace(); } }
      */
+    private void checkLowHunger(SoundManager soundManager) {
+        int hungerPercentage = (hunger*100)/MAX_HUNGER;
+
+        if(hungerPercentage <= LOW_HUNGER_THRESHOLD && !isLowHungerWarningPlayed) {
+            soundManager.playSound("lowhunger");
+            isLowHungerWarningPlayed = true;
+        } else if(hungerPercentage > LOW_HUNGER_THRESHOLD) {
+            isLowHungerWarningPlayed = false;
+        }
+    }
 
     /**
      * Updates the player's position based on movement flags. This will be called in
@@ -344,6 +356,7 @@ public class Player {
                 }
             }
         }
+        checkLowHunger(soundManager);
 
         if (currentState != PlayerState.WEBBED) {
             // --- If we are NOT webbed, proceed with normal life ---
