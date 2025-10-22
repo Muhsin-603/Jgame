@@ -24,7 +24,9 @@ public class Player {
     private int collisionRadius;
     private int hungerDrainTimer = 0;
     private boolean isCrying = false;
-    
+    private int cryDeathTimer = 0; // Timer for death by hunger after crying starts
+    private final int CRY_DEATH_DURATION = 20 * 60;
+
     // This tracks hunger and crying mechanics
 
     private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
@@ -42,7 +44,6 @@ public class Player {
     private int webbedTimer = 0;
     private int webStrength = 0;
     private int webCounter = 4;
-    
 
     public boolean isWebbed() {
 
@@ -57,7 +58,7 @@ public class Player {
     }
 
     public void eat(int amount) {
-        
+
         this.hunger += amount;
         if (this.hunger > 100) {
             this.hunger = MAX_HUNGER;
@@ -297,25 +298,59 @@ public class Player {
         }
 
         if (currentState == PlayerState.WEBBED) {
-            // If we're webbed, the timer ticks down...
-            webbedTimer--;
-
-            // --- THE NEW DEATH SENTENCE ---
-            if (webbedTimer <= 0) {
-                // System.out.println("SPIDER: DINNER IS SERVED.");
-                takeDamage(); // The timer ran out. You are trapped!
+            // --- Webbed Logic (Check for instant death first) ---
+            if (isCrying) { // If caught while already crying
+                System.out.println("PLAYER: Caught while crying! Instant death.");
+                this.hunger = 0; // Set hunger to 0 (or health if you reintroduced it)
+                // No need to return here, let GamePanel handle the Game Over state next frame
+            } else {
+                // Normal webbed countdown
+                webbedTimer--;
+                if (webbedTimer <= 0) {
+                    System.out.println("PLAYER: I'M FREE!");
+                    currentState = PlayerState.IDLE_DOWN;
+                }
+                return; // Still can't move while webbed (unless instantly dead)
             }
-            // If webbed, you can do nothing else.
-            return;
         }
 
-        // --- If we are NOT webbed, proceed with normal life ---
+        if (isCrying) {
+            // If crying, the death timer ticks down
+            cryDeathTimer--;
+            System.out.println("Crying! Time until death: " + cryDeathTimer / 60); // Debug print seconds left
 
-        // 1. State Management: Decide which animation to play.
-        PlayerState previousState = currentState;
+            if (cryDeathTimer <= 0) {
+                System.out.println("PLAYER: Died from hunger/crying.");
+                this.hunger = 0; // Ensure hunger is 0 for Game Over check
+            }
+            // Player can potentially still move while crying (unless you want them frozen?)
+            // If you want them frozen while crying, add a 'return;' here.
+        } else {
+            // --- Normal Hunger Drain (Only if NOT crying) ---
+            hungerDrainTimer++;
+            if (hungerDrainTimer > 180) { // Drain 1 hunger every 3 seconds
+                this.hunger--;
+                hungerDrainTimer = 0;
+                // System.out.println("Hunger: " + this.hunger); // Optional debug
 
-        
-            
+                if (this.hunger <= 0) {
+                    this.hunger = 0;
+                    if (!isCrying) { // Start crying ONLY if not already crying
+                        System.out.println("PLAYER: WAAAAAAH! Hunger is zero!");
+                        this.isCrying = true;
+                        this.cryDeathTimer = CRY_DEATH_DURATION; // Start the 20-second death timer
+                        // Maybe play a continuous cry sound loop here? soundManager.loopSound("cry");
+                    }
+                }
+            }
+        }
+
+        if (currentState != PlayerState.WEBBED) {
+            // --- If we are NOT webbed, proceed with normal life ---
+
+            // 1. State Management: Decide which animation to play.
+            PlayerState previousState = currentState;
+
             if (movingUp) {
                 currentState = PlayerState.WALKING_UP;
             } else if (movingDown) {
@@ -328,61 +363,61 @@ public class Player {
                 // If not moving, stay idle (facing down for now)
                 currentState = PlayerState.IDLE_DOWN;
             }
-        
 
-        if (previousState != currentState) {
-            currentFrame = 0;
-            animationTick = 0;
-        }
-
-        // 2. Movement & Wall Collision
-        // (Your existing wall collision logic is perfect here)
-        double nextX = x, nextY = y;
-        if (movingUp)
-            nextY -= currentSpeed;
-        if (movingDown)
-            nextY += currentSpeed;
-        if (movingLeft)
-            nextX -= currentSpeed;
-        if (movingRight)
-            nextX += currentSpeed;
-
-        if (nextX != x || nextY != y) {
-            int nextLeft = (int) nextX;
-            int nextRight = (int) nextX + width - 1;
-            int nextTop = (int) nextY;
-            int nextBottom = (int) nextY + height - 1;
-
-            if (!world.isTileSolid(nextLeft, nextTop) && !world.isTileSolid(nextRight, nextTop)
-                    && !world.isTileSolid(nextLeft, nextBottom) && !world.isTileSolid(nextRight, nextBottom)) {
-                x = (int) nextX;
-                y = (int) nextY;
-            }
-        }
-
-        // 3. Hunger Drain (runs only when not webbed)
-        hungerDrainTimer++;
-        if (hungerDrainTimer > 120) {
-            this.hunger--;
-            hungerDrainTimer = 0;
-            // Check if hunger is depleted
-            if (this.hunger <= 0) {
-                this.hunger = 0;
-                System.out.println("PLAYER: WAAAAAAH!");
-                this.isCrying = true;
-            }
-        }
-
-        // 4. Animation
-        boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
-        if (isMoving) {
-            animationTick++;
-            if (animationTick > animationSpeed) {
+            if (previousState != currentState) {
+                currentFrame = 0;
                 animationTick = 0;
-                currentFrame = (currentFrame + 1) % getActiveAnimation().size();
             }
-        } else {
-            currentFrame = 0;
+
+            // 2. Movement & Wall Collision
+            // (Your existing wall collision logic is perfect here)
+            double nextX = x, nextY = y;
+            if (movingUp)
+                nextY -= currentSpeed;
+            if (movingDown)
+                nextY += currentSpeed;
+            if (movingLeft)
+                nextX -= currentSpeed;
+            if (movingRight)
+                nextX += currentSpeed;
+
+            if (nextX != x || nextY != y) {
+                int nextLeft = (int) nextX;
+                int nextRight = (int) nextX + width - 1;
+                int nextTop = (int) nextY;
+                int nextBottom = (int) nextY + height - 1;
+
+                if (!world.isTileSolid(nextLeft, nextTop) && !world.isTileSolid(nextRight, nextTop)
+                        && !world.isTileSolid(nextLeft, nextBottom) && !world.isTileSolid(nextRight, nextBottom)) {
+                    x = (int) nextX;
+                    y = (int) nextY;
+                }
+            }
+
+            // 3. Hunger Drain (runs only when not webbed)
+            hungerDrainTimer++;
+            if (hungerDrainTimer > 120) {
+                this.hunger--;
+                hungerDrainTimer = 0;
+                // Check if hunger is depleted
+                if (this.hunger <= 0) {
+                    this.hunger = 0;
+                    System.out.println("PLAYER: WAAAAAAH!");
+                    this.isCrying = true;
+                }
+            }
+
+            // 4. Animation
+            boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
+            if (isMoving) {
+                animationTick++;
+                if (animationTick > animationSpeed) {
+                    animationTick = 0;
+                    currentFrame = (currentFrame + 1) % getActiveAnimation().size();
+                }
+            } else {
+                currentFrame = 0;
+            }
         }
     }
 
