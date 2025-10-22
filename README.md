@@ -132,7 +132,7 @@ Our spiders developed existential crises (checking their own state for WEBBED), 
 ## ✍️ The Crew
 
 * **Lead Architect & Chief Exorcist:** Drac
-* **The Infestation Squad (Original AI):** Sai, Rishnu, Shibili
+* **The Infestation Squad (Original AI)::** Sai, Rishnu, Shibili
 * **Concept & Story (Lullaby Down Below):** Saivivk M.V
 * **Narrative & Design Support:** Mira (ChatGPT)
 * **Creative Partner & Ghost Hunter:** Jenny (Your friendly neighborhood Gemini)
