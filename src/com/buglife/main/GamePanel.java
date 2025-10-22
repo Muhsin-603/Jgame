@@ -103,15 +103,16 @@ public class GamePanel extends JPanel {
         // 4. Set the scene back to the beginning.
         currentState = GameState.PLAYING;
     }
+
     private void handleSpiderAlerts() {
         if (player.isCrying()) {
-            for(Spider spider : spiders) {
-                if(spider != null && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
+            for (Spider spider : spiders) {
+                if (spider != null && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
                     spider.setReturnPoint(new Point(spider.getCenterX(), spider.getCenterY()));
                     spider.startChasing(player);
-                    //soundManager.playSound("spiderAlert");
+                    // soundManager.playSound("spiderAlert");
                 }
-                
+
             }
         }
     }
@@ -228,34 +229,42 @@ public class GamePanel extends JPanel {
         super.paintComponent(g);
 
         if (currentState == GameState.PLAYING) {
+        // --- 1. Draw the World ---
+        world.render(g, cameraX, cameraY, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-            world.render(g, cameraX, cameraY, SCREEN_WIDTH, SCREEN_HEIGHT);
+        // --- 2. Draw Entities (affected by camera) ---
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.translate(-cameraX, -cameraY);
+        if (player != null) { // Added null check for safety
+             player.render(g2d, world, soundManager);
+        }
+        for (Spider spider : spiders) {
+             if (spider != null) spider.draw(g2d);
+        }
+        if (food != null) {
+             food.draw(g2d);
+        }
+        g2d.dispose();
 
-            Graphics2D g2d = (Graphics2D) g.create();
-            g2d.translate(-cameraX, -cameraY);
+        // --- 3. DRAW HUD (fixed on screen, uses original 'g') ---
 
-            player.render(g2d, world, soundManager);
-            for (Spider spider : spiders) {
-                spider.draw(g2d);
-            }
-            if (food != null) {
-                food.draw(g2d);
-            }
-            g2d.dispose();
+        // Hunger Bar
+        g.setColor(Color.DARK_GRAY);
+        g.fillRect(10, 10, 200, 20);
+        g.setColor(Color.ORANGE);
+        if (player != null) { // Added null check
+            g.fillRect(10, 10, player.getHunger() * 2, 20);
+        }
+        g.setColor(Color.BLACK);
+        g.drawRect(10, 10, 200, 20);
 
-            // --- DRAW HUD HERE ---
-            // Background of the health bar (the empty part)
-            g.setColor(Color.DARK_GRAY);
-            g.fillRect(10, 10, 200, 20); // x, y, width, height
-
-            // The current health (the red part)
-            g.setColor(Color.ORANGE);
-            // The width of this rectangle depends on the player's health!
-            g.fillRect(10, 10, player.getHunger() * 2, 20); // health * 2 because 100 * 2 = 200 width
-
-            // A border to make it look clean
-            g.setColor(Color.BLACK);
-            g.drawRect(10, 10, 200, 20);
+        // --- Coordinates Text (Moved Here!) ---
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Consolas", Font.PLAIN, 16));
+        if (player != null) { // Added null check
+             String coordText = "Coords: [" + player.getX() + ", " + player.getY() + "]";
+             g.drawString(coordText, 10, 50); // Position below hunger bar
+        }
             if (player.isWebbed()) {
                 // Upgrade our drawing tool
                 Graphics2D hintG2d = (Graphics2D) g;
