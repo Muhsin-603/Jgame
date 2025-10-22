@@ -6,6 +6,7 @@ import src.com.buglife.assets.SoundManager;
 import src.com.buglife.entities.Food;
 // Make sure to import your new Player class!
 import src.com.buglife.entities.Player;
+import src.com.buglife.entities.Snail;
 import src.com.buglife.entities.Spider;
 import src.com.buglife.ui.MainMenu;
 import src.com.buglife.world.World;
@@ -34,6 +35,8 @@ public class GamePanel extends JPanel {
     public static final int SCREEN_HEIGHT = 768;
     private MainMenu mainMenu;
     private SoundManager soundManager;
+    
+    private Snail snail;
 
     public enum GameState {
         MAIN_MENU, PLAYING, GAME_OVER
@@ -44,6 +47,8 @@ public class GamePanel extends JPanel {
     public GamePanel(SoundManager sm) {
         world = new World();
         this.soundManager = sm;
+        player = new Player(200, 200, 32, 32); // Create player first
+        snail = new Snail(205, 205, player);
 
         mainMenu = new MainMenu();
         currentState = GameState.MAIN_MENU;
@@ -86,6 +91,11 @@ public class GamePanel extends JPanel {
     public void restartGame() {
         soundManager.loopSound("music");
         System.out.println("Resetting the nightmare...");
+        // In restartGame()
+if (snail != null) {
+     // Re-position or re-create the snail. Simple reset:
+     snail = new Snail(150, 150, player); // Recreate it near the player
+}
 
         // 1. Reset the player.
         player.reset();
@@ -143,6 +153,8 @@ public class GamePanel extends JPanel {
         }
 
         if (currentState == GameState.PLAYING) {
+            // In updateGame() -> inside the if (currentState == GameState.PLAYING) block
+            if (snail != null) {snail.update(world);}
             player.update(world, soundManager);
             handleSpiderAlerts();
             for (Spider currentSpider : spiders) {
@@ -243,6 +255,7 @@ public class GamePanel extends JPanel {
         super.paintComponent(g);
 
         if (currentState == GameState.PLAYING) {
+            
         // --- 1. Draw the World ---
         world.render(g, cameraX, cameraY, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -257,6 +270,9 @@ public class GamePanel extends JPanel {
         }
         if (food != null) {
              food.draw(g2d);
+        }
+        if (snail != null) {
+            snail.draw(g2d);
         }
         g2d.dispose();
 
