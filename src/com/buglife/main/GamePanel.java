@@ -103,6 +103,18 @@ public class GamePanel extends JPanel {
         // 4. Set the scene back to the beginning.
         currentState = GameState.PLAYING;
     }
+    private void handleSpiderAlerts() {
+        if (player.isCrying()) {
+            for(Spider spider : spiders) {
+                if(spider != null && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
+                    spider.setReturnPoint(new Point(spider.getCenterX(), spider.getCenterY()));
+                    spider.startChasing(player);
+                    //soundManager.playSound("spiderAlert");
+                }
+                
+            }
+        }
+    }
 
     public void updateGame() {
 
@@ -131,6 +143,7 @@ public class GamePanel extends JPanel {
 
         if (currentState == GameState.PLAYING) {
             player.update(world, soundManager);
+            handleSpiderAlerts();
             for (Spider currentSpider : spiders) {
                 if (currentSpider != null) {
 

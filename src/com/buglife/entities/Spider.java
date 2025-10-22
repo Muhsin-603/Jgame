@@ -44,6 +44,9 @@ public class Spider {
     }
 
     private SpiderState currentState; // A variable to hold the spider's current mood
+    public void setReturnPoint(Point p) {
+        this.returnPoint = p;
+    }
 
     public Spider(List<Point> tilePath) {
         // Convert the tile-based path to a pixel-based path
@@ -152,6 +155,12 @@ public class Spider {
     public void update(Player player, World world) {
         this.targetPlayer = player;
 
+        if(player.isCrying()) {
+            if(currentState == SpiderState.PATROLLING) {
+                this.returnPoint = new Point(getCenterX(),getCenterY());
+                currentState = SpiderState.CHASING;
+            }
+        }
         // The State Machine: The spider's brain.
         switch (currentState) {
         case PATROLLING:
@@ -174,19 +183,24 @@ public class Spider {
                 break; // Immediately exit the CHASING logic.
             }
 
-            // If the player isn't webbed, continue the hunt as normal.
-            if (canSeePlayer(targetPlayer, world)) {
+            if (player.isCrying()) {
+                speed = 3;
                 chase(targetPlayer);
-                loseSightTimer = 300;
             } else {
-                loseSightTimer--;
-                if (loseSightTimer <= 0) {
-                    // System.out.println("SPIDER: TARGET LOST. RETURNING TO POST.");
-                    currentState = SpiderState.RETURNING;
+                speed = 2;
+                // If the player isn't webbed, continue the hunt as normal.
+                if (canSeePlayer(targetPlayer, world)) {
+                    chase(targetPlayer);
+                    loseSightTimer = 300;
+                } else {
+                    loseSightTimer--;
+                    if (loseSightTimer <= 0) {
+                        // System.out.println("SPIDER: TARGET LOST. RETURNING TO POST.");
+                        currentState = SpiderState.RETURNING;
+                    }
                 }
+                break;
             }
-            break;
-
         case RETURNING:
             // Check if we've made it back to our post.
             double dx = returnPoint.x - getCenterX();
