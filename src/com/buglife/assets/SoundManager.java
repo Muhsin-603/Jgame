@@ -3,7 +3,7 @@ package src.com.buglife.assets;
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
-import java.net.URL;
+//import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +14,7 @@ public class SoundManager {
     public SoundManager() {
         soundClips = new HashMap<>();
         // Pre-load sounds you'll use often
-        loadSound("footstep", "/res/sounds/player_step.wav");
+        
         loadSound("eat", "/res/sounds/eat_sound.wav");
         loadSound("webbed", "/res/sounds/web_sound.wav");
         loadSound("gameOver", "/res/sounds/game_over.wav");

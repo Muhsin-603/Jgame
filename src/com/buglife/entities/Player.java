@@ -22,7 +22,7 @@ public class Player {
     private int health = 100;
     private int collisionRadius;
     private int healthDrainTimer = 0;
-
+    
     // This is the DEATH clock
 
     private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
@@ -63,32 +63,32 @@ public class Player {
 
     // In Player.java
 
-public void reset() {
-    // Reset position
-    this.x = 200; // Or whatever your default start position is
-    this.y = 200;
+    public void reset() {
+        // Reset position
+        this.x = 200; // Or whatever your default start position is
+        this.y = 200;
 
-    // Reset health
-    this.health = 100;
+        // Reset health
+        this.health = 100;
 
-    // Reset state to default idle
-    this.currentState = PlayerState.IDLE_DOWN;
-    this.currentFrame = 0; // Reset animation frame too
-    this.animationTick = 0;
+        // Reset state to default idle
+        this.currentState = PlayerState.IDLE_DOWN;
+        this.currentFrame = 0; // Reset animation frame too
+        this.animationTick = 0;
 
-    // --- THE FIX ---
-    // Reset web status completely
-    this.webbedTimer = 0;
-    this.webStrength = 0;
-    this.webCounter = 0;
+        // --- THE FIX ---
+        // Reset web status completely
+        this.webbedTimer = 0;
+        this.webStrength = 0;
+        this.webCounter = 0;
 
-    // Make sure movement flags are off
-    this.movingUp = false;
-    this.movingDown = false;
-    this.movingLeft = false;
-    this.movingRight = false;
-    //this.isFacingLeft = false; // Reset facing direction
-}
+        // Make sure movement flags are off
+        this.movingUp = false;
+        this.movingDown = false;
+        this.movingLeft = false;
+        this.movingRight = false;
+        // this.isFacingLeft = false; // Reset facing direction
+    }
 
     // Add this method to Player.java
     public void getWebbed() {
@@ -309,18 +309,21 @@ public void reset() {
         // 1. State Management: Decide which animation to play.
         PlayerState previousState = currentState;
 
-        if (movingUp) {
-            currentState = PlayerState.WALKING_UP;
-        } else if (movingDown) {
-            currentState = PlayerState.WALKING_DOWN;
-        } else if (movingLeft) { // Separate check for Left
-            currentState = PlayerState.WALKING_LEFT;
-        } else if (movingRight) { // Separate check for Right
-            currentState = PlayerState.WALKING_RIGHT;
-        } else {
-            // If not moving, stay idle (facing down for now)
-            currentState = PlayerState.IDLE_DOWN;
-        }
+        
+            
+            if (movingUp) {
+                currentState = PlayerState.WALKING_UP;
+            } else if (movingDown) {
+                currentState = PlayerState.WALKING_DOWN;
+            } else if (movingLeft) { // Separate check for Left
+                currentState = PlayerState.WALKING_LEFT;
+            } else if (movingRight) { // Separate check for Right
+                currentState = PlayerState.WALKING_RIGHT;
+            } else {
+                // If not moving, stay idle (facing down for now)
+                currentState = PlayerState.IDLE_DOWN;
+            }
+        
 
         if (previousState != currentState) {
             currentFrame = 0;
