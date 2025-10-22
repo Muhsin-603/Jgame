@@ -273,12 +273,12 @@ public class GamePanel extends JPanel {
         g.drawRect(10, 10, 200, 20);
 
         // --- Coordinates Text (Moved Here!) ---
-        g.setColor(Color.WHITE);
+        /*g.setColor(Color.WHITE);
         g.setFont(new Font("Consolas", Font.PLAIN, 16));
         if (player != null) { // Added null check
              String coordText = "Coords: [" + player.getX() + ", " + player.getY() + "]";
              g.drawString(coordText, 10, 50); // Position below hunger bar
-        }
+        }*/
             if (player.isWebbed()) {
                 // Upgrade our drawing tool
                 Graphics2D hintG2d = (Graphics2D) g;
