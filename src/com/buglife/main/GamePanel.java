@@ -80,7 +80,7 @@ public class GamePanel extends JPanel {
 
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
-        this.player = new Player(200, 200, 32, 32);
+        this.player = new Player(594, 2484, 32, 32);
 
         this.food = new Food(600, 500, 20);
         spawnFood();
@@ -119,7 +119,7 @@ if (snail != null) {
             for (Spider spider : spiders) {
                 if (spider != null && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
                     spider.setReturnPoint(new Point(spider.getCenterX(), spider.getCenterY()));
-                    spider.startChasing(player);
+                    spider.startChasing(player, soundManager);
                     // soundManager.playSound("spiderAlert");
                 }
 
@@ -142,7 +142,7 @@ if (snail != null) {
                     // If spider is within hearing range and not already chasing/returning
                     if (distance < alertRadius && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
                         System.out.println("SPIDER HEARD CRY! INVESTIGATING!");
-                        spider.startChasing(player); // We'll add this method to Spider
+                        spider.startChasing(player, soundManager); // We'll add this method to Spider
                     }
                 }
             }
@@ -160,7 +160,7 @@ if (snail != null) {
             for (Spider currentSpider : spiders) {
                 if (currentSpider != null) {
 
-                    currentSpider.update(player, world);
+                    currentSpider.update(player, world, soundManager);
 
                     // Check collision with each spider
                     double dx = player.getCenterX() - currentSpider.getCenterX();
@@ -289,12 +289,12 @@ if (snail != null) {
         g.drawRect(10, 10, 200, 20);
 
         // --- Coordinates Text (Moved Here!) ---
-        g.setColor(Color.WHITE);
+        /*g.setColor(Color.WHITE);
         g.setFont(new Font("Consolas", Font.PLAIN, 16));
         if (player != null) { // Added null check
              String coordText = "Coords: [" + player.getX() + ", " + player.getY() + "]";
              g.drawString(coordText, 10, 50); // Position below hunger bar
-        }
+        }*/
             if (player.isWebbed()) {
                 // Upgrade our drawing tool
                 Graphics2D hintG2d = (Graphics2D) g;

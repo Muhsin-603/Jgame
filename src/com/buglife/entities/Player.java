@@ -72,8 +72,8 @@ public class Player {
 
     public void reset() {
         // Reset position
-        this.x = 200; // Or whatever your default start position is
-        this.y = 200;
+        this.x = 594; // Or whatever your default start position is
+        this.y = 2484;
 
         // Reset hunger and crying state
         this.hunger = 100;
