@@ -23,6 +23,7 @@ public class SoundManager {
         loadSound("menu", "/res/sounds/menu_selection.wav");
         loadSound("menuMusic", "/res/sounds/menu_music.wav");
         loadSound("lowhunger", "/res/sounds/low_hunger.wav");
+        loadSound("chasing", "/res/sounds/chasing.wav");
         // Load others as needed
     }
 
