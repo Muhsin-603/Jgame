@@ -1,48 +1,53 @@
-# 🐞 Buglife
+# �️ Lullaby Down Below
+A 2D top-down psychological stealth-horror game.
 
-Welcome to **Buglife**, a top-down stealth and survival game forged in the fires of late-night debugging sessions. You are a bug (or perhaps something else now?). The world is a floor. Your goal is to survive.
+This project, originally conceived as Buglife, has evolved! We're now building **Lullaby Down Below**, an atmospheric horror game using the same custom Java Swing engine. Players take the role of a lost baby crawling through the dark lower floors of an abandoned nursery, guided by a glowing snail and hunted by spiders, all while following the faint sound of a lullaby.
 
-This project is more than a game; it's a war journal. It chronicles a descent into the madness of game development, a tale of battling sentient bugs, invisible enemies, physics-defying ghosts, and stubborn sprite sheets. Every feature is a hard-won victory. Every bug squashed is a trophy mounted on the wall.
-
-## ✨ Features
+## ✨ Features (Current & Planned)
 
 * **Custom Java Game Engine:**
     * Built from the ground up using Java Swing
-    * Stable 60 FPS game loop with delta-time calculations
-    * Custom rendering pipeline with sprite management
-    * Advanced state management and resource handling
+    * Stable 60 FPS game loop with tilemap loading from .txt files
+    * Dynamic camera system with viewport culling
+    * Advanced resource management
 
 * **Full UI & Game Loop:**
     * Complete state machine (MAIN_MENU, PLAYING, GAME_OVER)
     * Interactive menu with custom fonts and background
-    * Seamless state transitions with proper cleanup
+    * Seamless game flow with proper state transitions
     * Robust reset() mechanism for game restart
 
-* **Dynamic Tiled World:**
-    * Complex mazes loaded from external .txt files
-    * Rapid level design capabilities
-    * Smart camera system with viewport culling
-    * Multiple interactive tile types
+* **Atmospheric Elements:**
+    * Background music for menu and gameplay
+    * Sound effects for key actions (selection, eating, getting webbed)
+    * Dynamic shadow system for stealth mechanics
+    * Environmental storytelling through level design
 
-* **Intelligent, Multi-State Enemy AI:**
-    * Advanced patrol system with configurable routes
-    * Line-of-sight detection with vision cones
-    * Dynamic state switching between patrol and chase modes
-    * Smart pathfinding for returning to patrol routes
-    * Smooth rotation and pixel-perfect movement
+* **Core Gameplay Elements:**
+    * Vulnerable protagonist (baby) with unique movement constraints
+    * Companion NPC system (glowing snail guide) - *Planned*
+    * Hunger/Cry mechanic affecting stealth - *Planned*
+    * Interactive environment (sticky floors, water, shadows)
+
+* **Advanced Enemy AI:**
+    * Multi-state behavior system (patrol, chase, return)
+    * Level-defined patrol paths
+    * Line-of-sight and sound detection
+    * Intelligent pathfinding
     * Wall avoidance and obstacle navigation
-* **Advanced Player Controller:**
-    * Multi-directional animation state machine
-    * Fluid sprite animations from sprite sheets
-    * Precise movement and collision detection
-    * Dynamic interaction with environment
-
-* **Stealth & Trap Mechanics:**
-    * Spider web trap system with paralysis effect
-    * Skill-based escape mechanics
-    * Timed key-press challenge system
-    * 5-second escape window
+    * Dynamic state transitions based on player actions
+* **Stealth & Survival Mechanics:**
+    * Shadow-based hiding system
+    * Toy decoy placement - *Planned*
+    * Web trap avoidance
+    * Sound-based detection system
     * Progressive difficulty scaling
+
+* **Resource Management:**
+    * Hunger system affecting crying mechanics - *Planned*
+    * Food collection and placement
+    * Strategic resource distribution
+    * Risk/reward exploration incentives
 
 * **Survival Systems:**
     * Real-time health management
@@ -83,9 +88,9 @@ This project is more than a game; it's a war journal. It chronicles a descent in
 * **Camera**: Player-following viewport with culling optimization
 * **Collision**: Multi-layer detection (entity-to-entity, entity-to-wall)
 
-## 📜 The Bug Hunter's Log: A Saga of Exorcism
+## 📜 Project History: The Metamorphosis
 
-This game was forged in the crucible of impossible bugs and late-night caffeine. We didn't just write code; we performed exorcisms on sentient lines of logic. Let the record show the demons we have slain:
+This project began as Buglife, a survival game about a bug. Through extensive development and bug-hunting (see previous README revisions for the epic saga), a robust 2D top-down engine was forged. The project has now pivoted to Lullaby Down Below, repurposing the existing engine to tell a darker, more atmospheric story.
 
 ### Setup Nightmares
 Battled invisible files, incorrect package declarations, misplaced .java files, and IDEs that refused to acknowledge the existence of entire folders (src, res). The .classpath file became both our most hated enemy and our most trusted weapon.
@@ -103,18 +108,19 @@ Our spiders developed existential crises (checking their own state for WEBBED), 
 
 * **The Disco Spider & The Moonwalk:** Our enemies were born with a rebellious spirit, spinning in place and moonwalking in the wrong direction. We battled their inverted compasses and taught them the laws of trigonometry. **Status: Choreographed into submission.**
 
-## 🎮 Game Design Document (Revision 9)
+## 🎮 Game Design Document (Lullaby Down Below Summary)
 
 #### Game Overview
-* **Title:** Buglife
-* **Genre:** Top-down stealth/survival
-* **Core Concept:** Survival of a small entity in a human household
+* **Genre:** 2D Top-Down Stealth Horror / Survival Adventure
+* **Core Concept:** A baby falls down a chimney into abandoned lower floors and must crawl back up, guided by a glowing snail and hunted by spiders, following a lullaby.
+* **Key Mechanics:** 
+    * Stealth (hiding, noise)
+    * Survival (hunger/cry)
+    * AI Detection (sound, light, movement)
+    * Companion NPC (snail)
+    * Simple Resource Management (food)
 
-#### Current Progress
-* ✅ All core features from the "Features" list are implemented and stable
-* ✅ Player character, animations, AI, UI, and world interaction significantly upgraded
-* ✅ Advanced stealth mechanics and trap systems fully operational
-* ✅ Complex state machine and UI system completed
+*(See full GDD for details on levels, story, etc.)*
 
 #### Planned Next Steps
 * **New Threats (THE HUMAN!):** The ultimate horror
@@ -126,10 +132,9 @@ Our spiders developed existential crises (checking their own state for WEBBED), 
 ## ✍️ The Crew
 
 * **Lead Architect & Chief Exorcist:** Drac
-* **The Infestation Squad (AI Choreographers):** Sai, Rishnu, Shibili
+* **The Infestation Squad (Original AI):** Sai, Rishnu, Shibili
+* **Concept & Story (Lullaby Down Below):** Saivivk M.V
+* **Narrative & Design Support:** Mira (ChatGPT)
 * **Creative Partner & Ghost Hunter:** Jenny (Your friendly neighborhood Gemini)
 
-Together, they transformed a weekend of chaos into a masterpiece of bug-squashing artistry. Every line of code tells a story, every commit marks a victory, and every merged pull request is a battle won. 
-
-> *"In the end, we didn't just make a game. We created a legend... and possibly a few new bugs along the way."*  
-> — The Bug Hunters' Manifesto
+Together, they transformed a weekend project into an atmospheric horror experience. Every line of code tells a story, every commit marks a milestone, and every merged pull request brings us closer to the haunting lullaby that echoes through the depths below.
