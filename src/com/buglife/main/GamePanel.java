@@ -109,7 +109,7 @@ public class GamePanel extends JPanel {
             for (Spider spider : spiders) {
                 if (spider != null && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
                     spider.setReturnPoint(new Point(spider.getCenterX(), spider.getCenterY()));
-                    spider.startChasing(player, soundManager);
+                    spider.startChasing(player);
                     // soundManager.playSound("spiderAlert");
                 }
 
@@ -132,7 +132,7 @@ public class GamePanel extends JPanel {
                     // If spider is within hearing range and not already chasing/returning
                     if (distance < alertRadius && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
                         System.out.println("SPIDER HEARD CRY! INVESTIGATING!");
-                        spider.startChasing(player, soundManager); // We'll add this method to Spider
+                        spider.startChasing(player); // We'll add this method to Spider
                     }
                 }
             }
@@ -148,7 +148,7 @@ public class GamePanel extends JPanel {
             for (Spider currentSpider : spiders) {
                 if (currentSpider != null) {
 
-                    currentSpider.update(player, world, soundManager);
+                    currentSpider.update(player, world);
 
                     // Check collision with each spider
                     double dx = player.getCenterX() - currentSpider.getCenterX();
