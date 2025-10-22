@@ -109,7 +109,7 @@ public class GamePanel extends JPanel {
             for (Spider spider : spiders) {
                 if (spider != null && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
                     spider.setReturnPoint(new Point(spider.getCenterX(), spider.getCenterY()));
-                    spider.startChasing(player);
+                    spider.startChasing(player, soundManager);
                     // soundManager.playSound("spiderAlert");
                 }
 
@@ -132,7 +132,7 @@ public class GamePanel extends JPanel {
                     // If spider is within hearing range and not already chasing/returning
                     if (distance < alertRadius && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
                         System.out.println("SPIDER HEARD CRY! INVESTIGATING!");
-                        spider.startChasing(player); // We'll add this method to Spider
+                        spider.startChasing(player, soundManager); // We'll add this method to Spider
                     }
                 }
             }
@@ -148,7 +148,7 @@ public class GamePanel extends JPanel {
             for (Spider currentSpider : spiders) {
                 if (currentSpider != null) {
 
-                    currentSpider.update(player, world);
+                    currentSpider.update(player, world, soundManager);
 
                     // Check collision with each spider
                     double dx = player.getCenterX() - currentSpider.getCenterX();
@@ -165,7 +165,6 @@ public class GamePanel extends JPanel {
                             return; // Exit updateGame immediately
                         }
                         if (currentSpider.isChasing()) { // We'll add this method next
-                            soundManager.playSound("chasing");
                             if (player.isCrying()) { // check baby is crying if crying then game over
                                 soundManager.stopSound("music");
                                 soundManager.playSound("gameover");

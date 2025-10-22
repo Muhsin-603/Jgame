@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-//import src.com.buglife.assets.SoundManager;
+import src.com.buglife.assets.SoundManager;
 //import src.com.buglife.entities.Player.PlayerState;
 import src.com.buglife.world.World;
 import java.awt.Point;
@@ -122,11 +122,13 @@ public class Spider {
     }
 
     // Method to force the spider into chase mode when alerted
-    public void startChasing(Player targetPlayer) {
-        if (currentState == SpiderState.PATROLLING) { // Only switch if currently patrolling
+    public void startChasing(Player targetPlayer, SoundManager soundManager) {
+        if (currentState == SpiderState.PATROLLING || currentState == SpiderState.RETURNING) { // Only switch if currently patrolling
             this.targetPlayer = targetPlayer; // Make sure it knows who to chase
             this.returnPoint = new Point(getCenterX(), getCenterY()); // Set return point
             this.currentState = SpiderState.CHASING;
+            soundManager.stopSound("music");
+            soundManager.playSound("chasing");
         }
     }
 
@@ -153,13 +155,15 @@ public class Spider {
     // In Spider.java, replace the entire update method.
     // In Spider.java
 
-    public void update(Player player, World world) {
+    public void update(Player player, World world, SoundManager soundManager) {
         this.targetPlayer = player;
 
         if(player.isCrying()) {
-            if(currentState == SpiderState.PATROLLING) {
+            if(currentState == SpiderState.PATROLLING || currentState == SpiderState.RETURNING) {
                 this.returnPoint = new Point(getCenterX(),getCenterY());
                 currentState = SpiderState.CHASING;
+                soundManager.stopSound("music");
+                soundManager.playSound("chasing");
             }
         }
         // The State Machine: The spider's brain.
@@ -172,6 +176,9 @@ public class Spider {
                 // Drop a GPS pin at our current location. THIS is our post.
                 this.returnPoint = new Point(getCenterX(), getCenterY());
                 currentState = SpiderState.CHASING;
+                soundManager.stopSound("music");
+                soundManager.playSound("chasing");
+                loseSightTimer = 300;
             }
             break;
 
@@ -215,6 +222,12 @@ public class Spider {
             } else {
                 // If not, take the shortest path back.
                 returnToPost();
+            }
+            if (canSeePlayer(targetPlayer, world)) {
+                currentState = SpiderState.CHASING;
+                soundManager.stopSound("music");
+                soundManager.playSound("chasing"); // Play sound when seeing player while returning
+                loseSightTimer = 300;
             }
             break;
         }
