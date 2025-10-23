@@ -98,10 +98,10 @@ public class World {
             tileTypes[0] = new Tile(floorImage, false); // false = not solid
 
             // Tile 1: The Wall
-            BufferedImage wallImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall.png"));
+            BufferedImage wallImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall_5.png"));
             tileTypes[1] = new Tile(wallImage, true);
             
-            BufferedImage wallImage1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall_5.png"));
+            BufferedImage wallImage1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/wall.png"));
             tileTypes[2] = new Tile(wallImage1, true);
 
             BufferedImage stickyImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sticky_floor.png"));
