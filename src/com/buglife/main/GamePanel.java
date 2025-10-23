@@ -160,6 +160,7 @@ public class GamePanel extends JPanel {
                         if (player.getHunger() <= 0) {
                             System.out.println("GAME OVER: Player caught with zero hunger!");
                             soundManager.stopSound("music"); // Stop background music
+                            soundManager.stopSound("chasing");
                             soundManager.playSound("gameOver"); // Play game over sound
                             currentState = GameState.GAME_OVER; // Set game state to GAME_OVER
                             return; // Exit updateGame immediately
@@ -167,6 +168,7 @@ public class GamePanel extends JPanel {
                         if (currentSpider.isChasing()) { // We'll add this method next
                             if (player.isCrying()) { // check baby is crying if crying then game over
                                 soundManager.stopSound("music");
+                                soundManager.stopSound("chasing");
                                 soundManager.playSound("gameover");
                                 currentState = GameState.GAME_OVER;
                                 return;
@@ -204,6 +206,7 @@ public class GamePanel extends JPanel {
             }
             if (player.getHunger() <= 0 && !player.isCrying()) {
                 soundManager.stopSound("music"); // Stop the background music
+                soundManager.playSound("chasing");
                 soundManager.playSound("gameOver"); // Play the death sound
                 currentState = GameState.GAME_OVER; // End the scene!
             }
