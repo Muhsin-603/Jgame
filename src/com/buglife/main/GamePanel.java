@@ -39,7 +39,7 @@ public class GamePanel extends JPanel {
     private Snail snail;
 
     public enum GameState {
-        MAIN_MENU, PLAYING, GAME_OVER
+        MAIN_MENU, PLAYING, GAME_OVER, PAUSED
     }
 
     private GameState currentState;

@@ -35,7 +35,7 @@ public class Game implements Runnable {
         window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
-        window.setTitle("Buglife");
+        window.setTitle("Lullaby Down Below");
 
         // 3. Add our game panel to the window
         window.add(gamePanel);
@@ -115,8 +115,28 @@ public class Game implements Runnable {
     /**
      * The main entry point for our application.
      */
+    public void cleanup() {
+        // Stop all sounds
+        if (soundManager != null) {
+            soundManager.stopAllSounds();
+        }
+        
+        // Dispose the window
+        if (window != null) {
+            window.dispose();
+        }
+        
+        // Stop the game thread
+        gameThread = null;
+    }
+
     public static void main(String[] args) {
         Game game = new Game();
         game.startGameThread();
+        
+        // Add shutdown hook for cleanup
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            game.cleanup();
+        }));
     }
 }
