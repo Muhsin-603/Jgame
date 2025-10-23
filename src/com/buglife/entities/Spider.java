@@ -144,7 +144,7 @@ public class Spider {
         }
 
         // Reset the AI's brain to its initial state
-        this.currentTargetIndex = 1; // Immediately target the second point to start moving
+        this.currentTargetIndex = 0; // Immediately target the second point to start moving
         this.isMovingForward = true;
 
         // Reset the animation to the first frame
@@ -211,8 +211,8 @@ public class Spider {
                         soundManager.playSound("music");
                     }
                 }
-                break;
             }
+            break;
         case RETURNING:
             // Check if we've made it back to our post.
             double dx = returnPoint.x - getCenterX();
@@ -274,7 +274,7 @@ public class Spider {
             double moveY = (dy / distance) * speed;
             x += moveX;
             y += moveY;
-            rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
+            rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 90;
         }
     }
 
@@ -294,7 +294,7 @@ public class Spider {
             double moveY = (dy / distance) * speed;
             x += moveX;
             y += moveY;
-            rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 180;
+            rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 90;
         }
     }
 

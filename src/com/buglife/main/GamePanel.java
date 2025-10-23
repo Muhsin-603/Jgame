@@ -129,29 +129,6 @@ if (snail != null) {
 
     public void updateGame() {
 
-        if (player.isCrying()) {
-            // Alert nearby spiders!
-            int alertRadius = 500; // How far the cry can be heard
-            for (Spider spider : spiders) {
-                if (spider != null) {
-                    // Calculate distance to this spider
-                    double dx = player.getCenterX() - spider.getCenterX();
-                    double dy = player.getCenterY() - spider.getCenterY();
-                    double distance = Math.sqrt(dx * dx + dy * dy);
-
-                    // If spider is within hearing range and not already chasing/returning
-                    if (distance < alertRadius && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
-                        System.out.println("SPIDER HEARD CRY! INVESTIGATING!");
-                        spider.startChasing(player, soundManager); // We'll add this method to Spider
-                    }
-                }
-            }
-            // Note: The game currently pauses if the player is crying in Player.update().
-            // You might want the game to continue so the alerted spiders can approach.
-            // Consider removing the "return;" from the isCrying check in Player.update()
-            // if you want spiders to converge on the crying player.
-        }
-
         if (currentState == GameState.PLAYING) {
             // In updateGame() -> inside the if (currentState == GameState.PLAYING) block
             if (snail != null) {snail.update(world);}
