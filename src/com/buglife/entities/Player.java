@@ -62,7 +62,7 @@ public class Player {
     public void eat(int amount) {
 
         this.hunger += amount;
-        if (this.hunger > 100) {
+        if (this.hunger > MAX_HUNGER) {
             this.hunger = MAX_HUNGER;
         }
     }
@@ -76,7 +76,7 @@ public class Player {
         this.y = 2484;
 
         // Reset hunger and crying state
-        this.hunger = 100;
+        this.hunger = MAX_HUNGER;
         this.isCrying = false;
 
         // Reset state to default idle
@@ -88,7 +88,7 @@ public class Player {
         // Reset web status completely
         this.webbedTimer = 0;
         this.webStrength = 0;
-        this.webCounter = 0;
+        this.webCounter = 4;
 
         // Make sure movement flags are off
         this.movingUp = false;
@@ -111,7 +111,7 @@ public class Player {
         }
     }
 
-    public void render(Graphics g, World world, SoundManager soundManager) {
+    public void render(Graphics g, World world) { //add if soundmanager needed
         List<BufferedImage> currentAnimation = getActiveAnimation();
         if (currentAnimation == null || currentAnimation.isEmpty() || currentFrame >= currentAnimation.size()) {
             g.setColor(Color.MAGENTA); // Failsafe
@@ -267,7 +267,7 @@ public class Player {
 
             if (webStrength <= 0) {
                 // The lock is broken!
-                // System.out.println("PLAYER: I'M FREE!");
+                System.out.println("PLAYER: I'M FREE!");
                 currentState = PlayerState.IDLE_DOWN; // FREEDOM!
             }
         }
@@ -319,8 +319,10 @@ public class Player {
                 // Normal webbed countdown
                 webbedTimer--;
                 if (webbedTimer <= 0) {
-                    System.out.println("PLAYER: I'M FREE!");
-                    currentState = PlayerState.IDLE_DOWN;
+                    System.out.println("PLAYER: Died from weebed state");
+                    this.hunger = 0;
+                    this.isCrying = true;
+                    ///currentState = PlayerState.IDLE_DOWN;
                 }
                 return; // Still can't move while webbed (unless instantly dead)
             }

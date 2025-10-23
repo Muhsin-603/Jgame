@@ -243,7 +243,7 @@ if (snail != null) {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.translate(-cameraX, -cameraY);
         if (player != null) { // Added null check for safety
-             player.render(g2d, world, soundManager);
+             player.render(g2d, world);
         }
         for (Spider spider : spiders) {
              if (spider != null) spider.draw(g2d);
