@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class Snail {
 
     private double x, y;
-    private int width = 31, height = 54; // Use exact dimensions
+    private int width = 35, height = 55; // Use exact dimensions
     private double speed = 0.5;
     private Player targetPlayer;
     private SnailState currentState = SnailState.IDLE;
@@ -61,69 +61,58 @@ public class Snail {
     walkRightFrames = new ArrayList<>();
 
     try {
+        // Use the correct path for the 143x224 sheet
         BufferedImage spriteSheet = ImageIO.read(getClass().getResourceAsStream("/res/sprites/snail/snail.png"));
 
-        // --- Animation Start Coordinates & Dimensions (From User) ---
-        final int IDLE_START_X = 342;
-        final int IDLE_START_Y = 246;
-        final int IDLE_PADDING_X = 18;
-        final int IDLE_WIDTH = 30;
-        final int IDLE_HEIGHT = 53;
+        // --- Animation Frame Dimensions ---
+        final int IDLE_WIDTH = 35, IDLE_HEIGHT = 55;
+        final int RIGHT_WIDTH = 45, RIGHT_HEIGHT = 55;
+        final int LEFT_WIDTH = 45, LEFT_HEIGHT = 55; // Corrected width based on spacing logic
+        final int UP_WIDTH = 32, UP_HEIGHT = 55;
 
-        final int RIGHT_START_X = 286;
-        final int RIGHT_START_Y = 280;
-        final int RIGHT_PADDING_X = 5;
-        final int RIGHT_WIDTH = 43;
-        final int RIGHT_HEIGHT = 54;
+        // --- Horizontal Steps (Width + Padding) ---
+        final int IDLE_H_STEP = IDLE_WIDTH + 17; // 35 + 17 = 52
+        final int RIGHT_H_STEP = RIGHT_WIDTH + 7; // 45 + 7 = 52
+        final int LEFT_H_STEP = LEFT_WIDTH + 7; // 45 + 7 = 52
+        final int UP_H_STEP = UP_WIDTH + 18; // 32 + 18 = 50
 
-        final int LEFT_START_X = 290;
-        final int LEFT_START_Y = 338;
-        final int LEFT_PADDING_X = 5;
-        final int LEFT_WIDTH = 44;
-        final int LEFT_HEIGHT = 54;
+        // --- Row Start Coordinates ---
+        final int START_X = 0; // Top-left X is 0
+        final int IDLE_START_Y = 0; // Top-left Y is 0
+        final int RIGHT_START_Y = IDLE_START_Y + IDLE_HEIGHT + 2; // 0 + 55 + 2 = 57
+        final int LEFT_START_Y = RIGHT_START_Y + RIGHT_HEIGHT + 2; // 57 + 55 + 2 = 114
+        final int UP_START_Y = LEFT_START_Y + LEFT_HEIGHT + 2; // 114 + 55 + 2 = 171
 
-        final int UP_START_X = 295;
-        final int UP_START_Y = 395;
-        final int UP_PADDING_X = 18;
-        final int UP_WIDTH = 31;
-        final int UP_HEIGHT = 55;
+        // --- Number of Frames ---
+        final int NUM_FRAMES = 3; // Looks like 3 frames per row
 
-        // --- Number of Frames (Assuming 1 for idle, 3 for movement) ---
-        final int IDLE_FRAMES = 1; // Adjust if idle has more frames
-        final int MOVE_FRAMES = 3; // Adjust if move animations have different lengths
+        // --- THE DIGITAL SCISSORS ---
 
-        // --- Helper to calculate X coord for subsequent frames ---
-        // Usage: getX.apply(START_X, frameIndex, SPRITE_WIDTH, PADDING_X)
-        TriFunction<Integer, Integer, Integer, Integer, Integer> getX =
-            (startX, index, width, paddingX) -> startX + index * (width + paddingX);
-
-        // --- THE DIGITAL SCISSORS (Using Absolute Coordinates) ---
-
-        // Idle Frames
-        for (int i = 0; i < IDLE_FRAMES; i++) {
-            idleFrames.add(spriteSheet.getSubimage(getX.apply(IDLE_START_X, i, IDLE_WIDTH, IDLE_PADDING_X), IDLE_START_Y, IDLE_WIDTH, IDLE_HEIGHT));
+        // Idle Frames (Row 0)
+        for (int i = 0; i < NUM_FRAMES; i++) {
+            idleFrames.add(spriteSheet.getSubimage(START_X + i * IDLE_H_STEP, IDLE_START_Y, IDLE_WIDTH, IDLE_HEIGHT));
         }
         walkDownFrames.addAll(idleFrames); // Reuse idle for moving down
 
-        // Walk Right Frames
-        for (int i = 0; i < MOVE_FRAMES; i++) {
-            walkRightFrames.add(spriteSheet.getSubimage(getX.apply(RIGHT_START_X, i, RIGHT_WIDTH, RIGHT_PADDING_X), RIGHT_START_Y, RIGHT_WIDTH, RIGHT_HEIGHT));
+        // Walk Right Frames (Row 1)
+        for (int i = 0; i < NUM_FRAMES; i++) {
+            walkRightFrames.add(spriteSheet.getSubimage(START_X + i * RIGHT_H_STEP, RIGHT_START_Y, RIGHT_WIDTH, RIGHT_HEIGHT));
         }
 
-        // Walk Left Frames
-        for (int i = 0; i < MOVE_FRAMES; i++) {
-            walkLeftFrames.add(spriteSheet.getSubimage(getX.apply(LEFT_START_X, i, LEFT_WIDTH, LEFT_PADDING_X), LEFT_START_Y, LEFT_WIDTH, LEFT_HEIGHT));
+        // Walk Left Frames (Row 2)
+        for (int i = 0; i < NUM_FRAMES; i++) {
+            walkLeftFrames.add(spriteSheet.getSubimage(START_X + i * LEFT_H_STEP, LEFT_START_Y, LEFT_WIDTH, LEFT_HEIGHT));
         }
 
-        // Walk Up Frames
-        for (int i = 0; i < MOVE_FRAMES; i++) {
-            walkUpFrames.add(spriteSheet.getSubimage(getX.apply(UP_START_X, i, UP_WIDTH, UP_PADDING_X), UP_START_Y, UP_WIDTH, UP_HEIGHT));
+        // Walk Up Frames (Row 3)
+        for (int i = 0; i < NUM_FRAMES; i++) {
+            walkUpFrames.add(spriteSheet.getSubimage(START_X + i * UP_H_STEP, UP_START_Y, UP_WIDTH, UP_HEIGHT));
         }
 
-        System.out.println("Snail animations sliced based on exact coordinates!");
+        System.out.println("Snail animations sliced precisely!");
 
     } catch (Exception e) {
-        System.err.println("CRASH! Could not slice snail sheet. Double-check coordinates/padding!");
+        System.err.println("CRASH! Could not slice new snail sheet. Double-check measurements/calculations!");
         e.printStackTrace();
     }
 }
