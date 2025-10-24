@@ -89,13 +89,15 @@ public class GamePanel extends JPanel {
     }
 
     public void restartGame() {
-        soundManager.loopSound("music");
+
+        soundManager.stopAllSounds();
         System.out.println("Resetting the nightmare...");
+        soundManager.loopSound("music");
         // In restartGame()
-if (snail != null) {
+    if (snail != null) {
      // Re-position or re-create the snail. Simple reset:
      snail = new Snail(150, 150, player); // Recreate it near the player
-}
+    }
 
         // 1. Reset the player.
         player.reset();
@@ -373,9 +375,13 @@ if (snail != null) {
             } else if (currentState == GameState.GAME_OVER) {
                 // --- SCENE 3: THE TRAGIC ENDING ---
                 if (key == KeyEvent.VK_ENTER) {
-                    soundManager.loopSound("gameOver");
-                    soundManager.stopSound("menuMusic");
+                    //soundManager.loopSound("gameOver");
+                    
                     soundManager.stopSound("music");
+                    soundManager.stopSound("chasing");
+                    soundManager.stopSound("gameOver");
+
+                    soundManager.stopSound("menuMusic");
                     currentState = GameState.MAIN_MENU;
                     restartGame();
                 }
