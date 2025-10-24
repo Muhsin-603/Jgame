@@ -18,6 +18,7 @@ public class Game implements Runnable {
     private final int FPS = 60; // Our target frames per second
     public static Font Tiny5;
     private SoundManager soundManager;
+    volatile boolean running = false;
     
 
     public Game() {
@@ -80,6 +81,7 @@ public class Game implements Runnable {
      * Creates and starts the game thread. This is the "beating heart" of the game.
      */
     public void startGameThread() {
+        running = true;
         gameThread = new Thread(this);
         gameThread.start(); // This will automatically call the run() method
     }
@@ -94,7 +96,7 @@ public class Game implements Runnable {
         long lastTime = System.nanoTime();
         long currentTime;
 
-        while (gameThread != null) {
+        while (running) {
             currentTime = System.nanoTime();
             delta += (currentTime - lastTime) / drawInterval;
             lastTime = currentTime;
@@ -115,20 +117,47 @@ public class Game implements Runnable {
     /**
      * The main entry point for our application.
      */
-    public void cleanup() {
-        // Stop all sounds
-        if (soundManager != null) {
-            soundManager.stopAllSounds();
+    // In Game.java
+public void cleanup() {
+    System.out.println("Cleanup requested..."); // Add more logging
+    running = false; // Signal the game loop to stop
+
+    // Wait for the game thread to actually finish
+    try {
+        if (gameThread != null && gameThread.isAlive()) {
+            System.out.println("Waiting for game thread to stop...");
+            gameThread.join(500); // Wait up to 500ms
+            if (gameThread.isAlive()) {
+                 System.err.println("Warning: Game thread did not stop cleanly.");
+                 // Consider thread interruption if needed, but join is usually enough
+                 // gameThread.interrupt();
+            } else {
+                 System.out.println("Game thread stopped.");
+            }
         }
-        
-        // Dispose the window
-        if (window != null) {
-            window.dispose();
-        }
-        
-        // Stop the game thread
-        gameThread = null;
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt(); // Restore interrupt status
+        System.err.println("Interrupted while waiting for game thread.");
     }
+    gameThread = null; // Okay to set to null after join
+
+    // Stop sounds
+    if (soundManager != null) {
+        System.out.println("Stopping sounds...");
+        soundManager.stopAllSounds();
+        // Consider adding a method to SoundManager to explicitly close Clips if necessary
+        // soundManager.closeAllClips();
+    }
+
+    // Dispose window
+    if (window != null) {
+        System.out.println("Disposing window...");
+        // Ensure this runs on the EDT if called from shutdown hook
+         SwingUtilities.invokeLater(() -> window.dispose());
+       // window.dispose(); // This might cause issues if called from non-EDT thread
+    }
+    System.out.println("Cleanup finished.");
+}
 
     public static void main(String[] args) {
         Game game = new Game();

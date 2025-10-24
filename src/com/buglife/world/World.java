@@ -94,7 +94,7 @@ public class World {
         tileTypes = new Tile[10]; // We have 2 types of tiles right now
         try {
             // Tile 0: The Floor
-            BufferedImage floorImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/floor.png"));
+            BufferedImage floorImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/floor_1.png"));
             tileTypes[0] = new Tile(floorImage, false); // false = not solid
 
             // Tile 1: The Wall

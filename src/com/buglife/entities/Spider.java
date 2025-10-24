@@ -327,6 +327,7 @@ public class Spider {
             }
             return; // Get a fresh start on the next frame.
         }
+        
 
         // 3. If we haven't arrived, calculate movement.
         double moveX = (dx / distance) * speed;
@@ -351,6 +352,7 @@ public class Spider {
             // Hit a wall! Skip to the next waypoint to try and get unstuck.
             currentTargetIndex = (currentTargetIndex + 1) % patrolPath.size();
         }
+        
     }
 
     public double getRadius() {
