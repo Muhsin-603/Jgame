@@ -10,11 +10,11 @@ import java.util.function.IntBinaryOperator;
 import src.com.buglife.assets.SoundManager;
 import src.com.buglife.world.World;
 
-import java.awt.geom.AffineTransform;
+
 
 public class Player {
     // Player attributes
-    private int x, y;
+    private double x, y;
     private int width, height;
     private double currentSpeed; // How fast we are moving RIGHT NOW
     private final double NORMAL_SPEED = 2.0; // The default speed
@@ -31,12 +31,12 @@ public class Player {
 
     // This tracks hunger and crying mechanics
 
-    private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
+    //private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
     private int animationTick = 0;
     private int animationSpeed = 3; // Change sprite every 15 frames. Higher is slower.
-    private int spriteNum = 1; // Which sprite to show: 1 or 2
+    //private int spriteNum = 1; // Which sprite to show: 1 or 2
     private int currentFrame = 0;
-    private double rotationAngle = 0;
+    //private double rotationAngle = 0;
     private PlayerState currentState = PlayerState.IDLE_DOWN;
     private List<BufferedImage> idleDownFrames;
     private List<BufferedImage> walkDownFrames;
@@ -72,8 +72,8 @@ public class Player {
 
     public void reset() {
         // Reset position
-        this.x = 594; // Or whatever your default start position is
-        this.y = 2484;
+        this.x = 594.0; // Or whatever your default start position is
+        this.y = 2484.0;
 
         // Reset hunger and crying state
         this.hunger = MAX_HUNGER;
@@ -111,32 +111,45 @@ public class Player {
         }
     }
 
-    public void render(Graphics g, World world) { //add if soundmanager needed
-        List<BufferedImage> currentAnimation = getActiveAnimation();
-        if (currentAnimation == null || currentAnimation.isEmpty() || currentFrame >= currentAnimation.size()) {
-            g.setColor(Color.MAGENTA); // Failsafe
-            g.fillRect(this.x, this.y, this.width, this.height);
-            return;
-        }
-
-        BufferedImage imageToDraw = currentAnimation.get(currentFrame);
-
-        Graphics2D g2d = (Graphics2D) g.create();
-        try {
-            // Stealth transparency check (using world object)
-            int playerTileCol = getCenterX() / World.TILE_SIZE;
-            int playerTileRow = getCenterY() / World.TILE_SIZE;
-            if (world.getTileIdAt(playerTileCol, playerTileRow) == 5) { // Shadow tile ID
-                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
-            }
-
-            // Draw the image normally. No flipping needed!
-            g2d.drawImage(imageToDraw, this.x, this.y, this.width, this.height, null);
-
-        } finally {
-            g2d.dispose();
-        }
+    // Replace your existing render method with this one in Player.java
+public void render(Graphics g, World world) {
+    List<BufferedImage> currentAnimation = getActiveAnimation();
+    // Safety check for null or empty animation list
+    if (currentAnimation == null || currentAnimation.isEmpty()) {
+        g.setColor(Color.MAGENTA); // Draw magenta square if animation is broken
+        g.fillRect((int) this.x,(int) this.y, this.width, this.height);
+        System.err.println("Player Render Error: Animation list is null or empty for state " + currentState);
+        return;
     }
+    // Safety check for currentFrame index
+    if (currentFrame < 0 || currentFrame >= currentAnimation.size()) {
+        g.setColor(Color.BLUE); // Draw blue square if frame index is wrong
+        g.fillRect((int) this.x,(int) this.y, this.width, this.height);
+         System.err.println("Player Render Error: currentFrame index (" + currentFrame + ") out of bounds for state " + currentState);
+        currentFrame = 0; // Attempt to reset frame index
+        return; // Avoid crash on next line
+    }
+
+    BufferedImage imageToDraw = currentAnimation.get(currentFrame);
+
+    // Create our disposable canvas for potential effects
+    Graphics2D g2d = (Graphics2D) g.create();
+    try {
+        // Stealth transparency check
+        int playerTileCol = getCenterX() / World.TILE_SIZE;
+        int playerTileRow = getCenterY() / World.TILE_SIZE;
+        if (world.getTileIdAt(playerTileCol, playerTileRow) == 5) { // Shadow tile ID
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+        }
+
+        // Draw the image normally using the advanced Graphics2D object
+        // Coordinates need casting if player x/y are doubles
+        g2d.drawImage(imageToDraw, (int)this.x, (int)this.y, this.width, this.height, null);
+
+    } finally {
+        g2d.dispose(); // Dispose the copy
+    }
+}
 
     // Add this method to your Player.java class
 
@@ -162,11 +175,11 @@ public class Player {
     // In Player.java
 
     public int getCenterX() {
-        return this.x + (this.width / 2);
+        return (int) this.x + (this.width / 2);
     }
 
     public int getCenterY() {
-        return this.y + (this.height / 2);
+        return (int) this.y + (this.height / 2);
     }
 
     public double getRadius() {
@@ -455,54 +468,17 @@ public class Player {
     /**
      * Draws the player on the screen.
      * 
-     * @param g The graphics context to draw with.
+     * 
      */
-    public void draw(Graphics g) {
-        // --- This is the new, upgraded draw method ---
+    
 
-        // Cast our crayon to a fancy art tool
-        Graphics2D g2d = (Graphics2D) g.create(); // Create a copy to not mess up other drawings
-
-        BufferedImage imageToDraw = null;
-
-        if (spriteNum == 1) {
-            imageToDraw = sprite_walk1;
-        } else {
-            imageToDraw = sprite_walk2;
-        }
-
-        if (imageToDraw != null) {
-
-            int centerX = x + width / 2;
-            int centerY = y + height / 2;
-
-            // This object holds our rotation information
-            AffineTransform tx = new AffineTransform();
-            // Tell it to rotate around the center of the bug
-            tx.rotate(Math.toRadians(rotationAngle), centerX, centerY);
-
-            g2d.setTransform(tx); // Apply the rotation to our drawing tool
-
-            // Draw the image!
-            g2d.drawImage(imageToDraw, x, y, width, height, null);
-        } else {
-            // Fallback green square in case something breaks
-            g.setColor(Color.GREEN);
-            g.fillRect(x, y, width, height);
-        }
-
-        g2d.dispose(); // Clean up our copy
-    }
-
-    public void setRotationAngle(double angle) {
-        this.rotationAngle = angle;
-    }
+    
 
     public int getX() {
-        return this.x;
+        return (int) this.x;
     }
     public int getY(){
-        return this.y;
+        return (int) this.y;
     }
 
     /**
@@ -511,7 +487,7 @@ public class Player {
      * @return A Rectangle object representing the player's position and size.
      */
     public Rectangle getBounds() {
-        return new Rectangle(x, y, width, height);
+        return new Rectangle((int) x,(int) y, width, height);
     }
 
     public void decreaseHunger(int amount) {
