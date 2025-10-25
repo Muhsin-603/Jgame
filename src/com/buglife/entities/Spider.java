@@ -18,7 +18,10 @@ public class Spider {
     // Core Attributes
     private double x, y;
     private int width = 48, height = 48;
-    private int speed = 2;
+    private int speed;
+    private final int PATROL_SPEED = 2;      // default patrol movement speed (pixels/frame)
+    private final int CHASE_SPEED = 3;       // speed when actively chasing (adjust this)
+    private final int SLOW_CHASE_SPEED = 1;  // slow chase speed (used when not "crying")
 
     private double rotationAngle = 90; // Start facing right (90 degrees from North)
 
@@ -66,6 +69,9 @@ public class Spider {
             this.x = this.patrolPath.get(0).x - (width / 2);
             this.y = this.patrolPath.get(0).y - (height / 2);
         }
+
+        // set default speed
+        this.speed = PATROL_SPEED;
 
         loadSprites();
     }
@@ -194,10 +200,12 @@ public class Spider {
             }
 
             if (player.isCrying()) {
-                speed = 3;
+                // previously: speed = 3;
+                speed = CHASE_SPEED;
                 chase(targetPlayer);
             } else {
-                speed = 2;
+                // previously: speed = 1;
+                speed = SLOW_CHASE_SPEED;
                 // If the player isn't webbed, continue the hunt as normal.
                 if (canSeePlayer(targetPlayer, world)) {
                     chase(targetPlayer);
@@ -376,5 +384,31 @@ public class Spider {
 
     public int getCenterY() {
         return (int) this.y + height / 2;
+    }
+
+    public void setSpawnTile(Point tilePoint) {
+        // Set spider spawn using tile coordinates (column,row)
+        int pixelX = tilePoint.x * World.TILE_SIZE + (World.TILE_SIZE / 2);
+        int pixelY = tilePoint.y * World.TILE_SIZE + (World.TILE_SIZE / 2);
+        this.x = pixelX - (width / 2.0);
+        this.y = pixelY - (height / 2.0);
+
+        if (this.patrolPath == null) this.patrolPath = new ArrayList<>();
+        if (this.patrolPath.isEmpty()) {
+            this.patrolPath.add(new Point(pixelX, pixelY));
+        } else {
+            this.patrolPath.set(0, new Point(pixelX, pixelY)); // update first patrol point
+        }
+    }
+
+    public void setSpawnPixel(int pixelX, int pixelY) {
+        this.x = pixelX - (width / 2.0);
+        this.y = pixelY - (height / 2.0);
+        if (this.patrolPath == null) this.patrolPath = new ArrayList<>();
+        if (this.patrolPath.isEmpty()) {
+            this.patrolPath.add(new Point(pixelX, pixelY));
+        } else {
+            this.patrolPath.set(0, new Point(pixelX, pixelY));
+        }
     }
 }
