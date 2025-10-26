@@ -29,7 +29,7 @@ public class GamePanel extends JPanel {
     private World world;
     private int cameraX, cameraY;
     private Random rand = new Random();
-    public static final int VIRTUAL_WIDTH = 1024;
+    public static final int VIRTUAL_WIDTH = 1366;
     public static final int VIRTUAL_HEIGHT = 768;
     private MainMenu mainMenu;
     private SoundManager soundManager;
