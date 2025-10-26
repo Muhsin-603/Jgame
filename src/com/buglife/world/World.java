@@ -114,14 +114,18 @@ public class World {
             tileTypes[5] = new Tile(shadowImage, false);
             
             //chimney intro tiles
-             BufferedImage itile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile1.png"));
+            BufferedImage itile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile1.png"));
             tileTypes[41] = new Tile(itile1, false); // false = not solid
-             BufferedImage itile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile2.png"));
+            BufferedImage itile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile2.png"));
             tileTypes[42] = new Tile(itile2, false); // false = not solid
-             BufferedImage itile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile3.png"));
-            tileTypes[43] = new Tile(itile3, true); // false = not solid
-             BufferedImage itile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile4.png"));
+            BufferedImage itile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile3.png"));
+            tileTypes[43] = new Tile(itile3, false); // false = not solid
+            BufferedImage itile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile4.png"));
             tileTypes[44] = new Tile(itile4, true); // false = not solid
+            BufferedImage itile5 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile5.png"));
+            tileTypes[45] = new Tile(itile5, true); // false = not solid
+            BufferedImage itile6 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile6.png"));
+            tileTypes[46] = new Tile(itile6, true);     
 
             //plank tiles
              BufferedImage ptile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank1.png"));

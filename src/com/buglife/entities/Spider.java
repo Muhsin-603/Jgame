@@ -91,7 +91,7 @@ public class Spider {
             return false; // I can't see anything!
         }
 
-        int detectionRadius = 300; // How far the spider can see
+        int detectionRadius = 150; // How far the spider can see
         if (distance > detectionRadius) {
             return false;
         }
