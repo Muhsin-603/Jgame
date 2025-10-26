@@ -10,8 +10,6 @@ import java.util.function.IntBinaryOperator;
 import src.com.buglife.assets.SoundManager;
 import src.com.buglife.world.World;
 
-
-
 public class Player {
     // Player attributes
     private double x, y;
@@ -31,21 +29,23 @@ public class Player {
 
     // This tracks hunger and crying mechanics
 
-    //private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
+    // private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
     private int animationTick = 0;
     private int animationSpeed = 3; // Change sprite every 15 frames. Higher is slower.
-    //private int spriteNum = 1; // Which sprite to show: 1 or 2
+    // private int spriteNum = 1; // Which sprite to show: 1 or 2
     private int currentFrame = 0;
-    //private double rotationAngle = 0;
+    // private double rotationAngle = 0;
     private PlayerState currentState = PlayerState.IDLE_DOWN;
     private List<BufferedImage> idleDownFrames;
     private List<BufferedImage> walkDownFrames;
     private List<BufferedImage> walkUpFrames;
     private List<BufferedImage> walkLeftFrames; // New list
     private List<BufferedImage> walkRightFrames;
-    private int webbedTimer = 0;
-    private int webStrength = 0;
-    private int webCounter = 4;
+    private static final int WEB_ESCAPE_REQUIRED = 4;
+    private int webStrength = WEB_ESCAPE_REQUIRED;
+    private int webbedTimer = 300;
+    
+    
 
     public boolean isWebbed() {
 
@@ -88,7 +88,7 @@ public class Player {
         // Reset web status completely
         this.webbedTimer = 0;
         this.webStrength = 0;
-        this.webCounter = 4;
+        //this.WEB_ESCAPE_REQUIRED = 4;
 
         // Make sure movement flags are off
         this.movingUp = false;
@@ -103,53 +103,54 @@ public class Player {
         if (currentState != PlayerState.WEBBED) {
             // System.out.println("PLAYER: I'M TRAPPED!");
             currentState = PlayerState.WEBBED;
-            webCounter++;
+            //WEB_ESCAPE_REQUIRED++;
 
             webbedTimer = 300; // You have 5 seconds to live...
-            webStrength = webCounter; // ...and 4 taps to escape. Good luck.
+            webStrength = WEB_ESCAPE_REQUIRED; // ...and 4 taps to escape. Good luck.
             this.currentFrame = 0;
         }
     }
 
     // Replace your existing render method with this one in Player.java
-public void render(Graphics g, World world) {
-    List<BufferedImage> currentAnimation = getActiveAnimation();
-    // Safety check for null or empty animation list
-    if (currentAnimation == null || currentAnimation.isEmpty()) {
-        g.setColor(Color.MAGENTA); // Draw magenta square if animation is broken
-        g.fillRect((int) this.x,(int) this.y, this.width, this.height);
-        System.err.println("Player Render Error: Animation list is null or empty for state " + currentState);
-        return;
-    }
-    // Safety check for currentFrame index
-    if (currentFrame < 0 || currentFrame >= currentAnimation.size()) {
-        g.setColor(Color.BLUE); // Draw blue square if frame index is wrong
-        g.fillRect((int) this.x,(int) this.y, this.width, this.height);
-         System.err.println("Player Render Error: currentFrame index (" + currentFrame + ") out of bounds for state " + currentState);
-        currentFrame = 0; // Attempt to reset frame index
-        return; // Avoid crash on next line
-    }
-
-    BufferedImage imageToDraw = currentAnimation.get(currentFrame);
-
-    // Create our disposable canvas for potential effects
-    Graphics2D g2d = (Graphics2D) g.create();
-    try {
-        // Stealth transparency check
-        int playerTileCol = getCenterX() / World.TILE_SIZE;
-        int playerTileRow = getCenterY() / World.TILE_SIZE;
-        if (world.getTileIdAt(playerTileCol, playerTileRow) == 5) { // Shadow tile ID
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+    public void render(Graphics g, World world) {
+        List<BufferedImage> currentAnimation = getActiveAnimation();
+        // Safety check for null or empty animation list
+        if (currentAnimation == null || currentAnimation.isEmpty()) {
+            g.setColor(Color.MAGENTA); // Draw magenta square if animation is broken
+            g.fillRect((int) this.x, (int) this.y, this.width, this.height);
+            System.err.println("Player Render Error: Animation list is null or empty for state " + currentState);
+            return;
+        }
+        // Safety check for currentFrame index
+        if (currentFrame < 0 || currentFrame >= currentAnimation.size()) {
+            g.setColor(Color.BLUE); // Draw blue square if frame index is wrong
+            g.fillRect((int) this.x, (int) this.y, this.width, this.height);
+            System.err.println("Player Render Error: currentFrame index (" + currentFrame + ") out of bounds for state "
+                    + currentState);
+            currentFrame = 0; // Attempt to reset frame index
+            return; // Avoid crash on next line
         }
 
-        // Draw the image normally using the advanced Graphics2D object
-        // Coordinates need casting if player x/y are doubles
-        g2d.drawImage(imageToDraw, (int)this.x, (int)this.y, this.width, this.height, null);
+        BufferedImage imageToDraw = currentAnimation.get(currentFrame);
 
-    } finally {
-        g2d.dispose(); // Dispose the copy
+        // Create our disposable canvas for potential effects
+        Graphics2D g2d = (Graphics2D) g.create();
+        try {
+            // Stealth transparency check
+            int playerTileCol = getCenterX() / World.TILE_SIZE;
+            int playerTileRow = getCenterY() / World.TILE_SIZE;
+            if (world.getTileIdAt(playerTileCol, playerTileRow) == 5) { // Shadow tile ID
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+            }
+
+            // Draw the image normally using the advanced Graphics2D object
+            // Coordinates need casting if player x/y are doubles
+            g2d.drawImage(imageToDraw, (int) this.x, (int) this.y, this.width, this.height, null);
+
+        } finally {
+            g2d.dispose(); // Dispose the copy
+        }
     }
-}
 
     // Add this method to your Player.java class
 
@@ -282,6 +283,8 @@ public void render(Graphics g, World world) {
                 // The lock is broken!
                 System.out.println("PLAYER: I'M FREE!");
                 currentState = PlayerState.IDLE_DOWN; // FREEDOM!
+                webbedTimer = 300;
+                webStrength = WEB_ESCAPE_REQUIRED;
             }
         }
     }
@@ -295,12 +298,12 @@ public void render(Graphics g, World world) {
      * catch (IOException e) { e.printStackTrace(); } }
      */
     private void checkLowHunger(SoundManager soundManager) {
-        int hungerPercentage = (hunger*100)/MAX_HUNGER;
+        int hungerPercentage = (hunger * 100) / MAX_HUNGER;
 
-        if(hungerPercentage <= LOW_HUNGER_THRESHOLD && !isLowHungerWarningPlayed) {
+        if (hungerPercentage <= LOW_HUNGER_THRESHOLD && !isLowHungerWarningPlayed) {
             soundManager.playSound("lowhunger");
             isLowHungerWarningPlayed = true;
-        } else if(hungerPercentage > LOW_HUNGER_THRESHOLD) {
+        } else if (hungerPercentage > LOW_HUNGER_THRESHOLD) {
             isLowHungerWarningPlayed = false;
         }
     }
@@ -335,7 +338,7 @@ public void render(Graphics g, World world) {
                     System.out.println("PLAYER: Died from weebed state");
                     this.hunger = 0;
                     this.isCrying = true;
-                    ///currentState = PlayerState.IDLE_DOWN;
+                    /// currentState = PlayerState.IDLE_DOWN;
                 }
                 return; // Still can't move while webbed (unless instantly dead)
             }
@@ -470,14 +473,12 @@ public void render(Graphics g, World world) {
      * 
      * 
      */
-    
-
-    
 
     public int getX() {
         return (int) this.x;
     }
-    public int getY(){
+
+    public int getY() {
         return (int) this.y;
     }
 
@@ -487,7 +488,7 @@ public void render(Graphics g, World world) {
      * @return A Rectangle object representing the player's position and size.
      */
     public Rectangle getBounds() {
-        return new Rectangle((int) x,(int) y, width, height);
+        return new Rectangle((int) x, (int) y, width, height);
     }
 
     public void decreaseHunger(int amount) {

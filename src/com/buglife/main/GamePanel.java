@@ -4,7 +4,6 @@ import java.util.Random;
 
 import src.com.buglife.assets.SoundManager;
 import src.com.buglife.entities.Food;
-// Make sure to import your new Player class!
 import src.com.buglife.entities.Player;
 import src.com.buglife.entities.Snail;
 import src.com.buglife.entities.Spider;
@@ -22,7 +21,6 @@ import java.awt.event.KeyEvent;
 import java.awt.Color;
 import java.awt.Font;
 
-// Your class declaration will look something like this
 public class GamePanel extends JPanel {
 
     private List<Spider> spiders = new ArrayList<>();
@@ -31,11 +29,13 @@ public class GamePanel extends JPanel {
     private World world;
     private int cameraX, cameraY;
     private Random rand = new Random();
-    public static final int SCREEN_WIDTH = 1024;
-    public static final int SCREEN_HEIGHT = 768;
+    public static final int VIRTUAL_WIDTH = 1024;
+    public static final int VIRTUAL_HEIGHT = 768;
     private MainMenu mainMenu;
     private SoundManager soundManager;
-    
+    private int pauseMenuSelection = 0;
+    private String[] pauseOptions = { "Resume", "Quit to Menu" };
+
     private Snail snail;
 
     public enum GameState {
@@ -44,11 +44,129 @@ public class GamePanel extends JPanel {
 
     private GameState currentState;
 
+    public class KeyInputAdapter extends KeyAdapter {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            int key = e.getKeyCode();
+
+            // The actor checks which scene they're in...
+            if (currentState == GameState.MAIN_MENU) {
+                // --- SCENE 1: THE MAIN MENU ---
+
+                if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) {
+                    mainMenu.moveUp();
+                    soundManager.playSound("menu");
+                }
+                if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
+                    mainMenu.moveDown();
+                    soundManager.playSound("menu");
+                }
+                if (key == KeyEvent.VK_ENTER) {
+                    String selectedOption = mainMenu.options[mainMenu.currentSelection];
+                    if (selectedOption.equals("New Game")) {
+                        soundManager.stopSound("menuMusic");
+                        restartGame();
+                    }
+                    if (selectedOption.equals("Resume")) {
+                        // We need to check if a game is actually in progress!
+                        // For now, let's just switch to playing.
+                        soundManager.stopSound("menuMusic");
+                        currentState = GameState.PLAYING;
+                    }
+                    if (selectedOption.equals("Quit")) {
+                        System.exit(0);
+                    }
+                }
+            } else if (currentState == GameState.PLAYING) {
+                // --- SCENE 2: THE ACTION ---
+                if (key == KeyEvent.VK_W || key == KeyEvent.VK_UP) {
+                    player.movingUp = true;
+                    // We need to make sure the player object isn't null!
+                    // if (player != null) player.setRotationAngle(0);
+                }
+                if (key == KeyEvent.VK_S || key == KeyEvent.VK_DOWN) {
+                    player.movingDown = true;
+                    // if (player != null) player.setRotationAngle(180);
+                }
+                if (key == KeyEvent.VK_A || key == KeyEvent.VK_LEFT) {
+                    player.movingLeft = true;
+                }
+                if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT) {
+                    player.movingRight = true;
+                }
+                if (key == KeyEvent.VK_SPACE) {
+                    player.struggle();
+                    soundManager.playSound("struggle");
+                }
+                if (key == KeyEvent.VK_ESCAPE) {
+                    currentState = GameState.PAUSED;
+                    // We can also stop the game music and play a pause sound here
+                    soundManager.stopSound("music");
+                    soundManager.stopSound("chasing");
+                    // soundManager.playSound("pause_jingle"); // (If you add one later)
+                }
+            } else if (currentState == GameState.GAME_OVER) {
+                // --- SCENE 3: THE TRAGIC ENDING ---
+                if (key == KeyEvent.VK_ENTER) {
+                    // soundManager.loopSound("gameOver");
+
+                    soundManager.stopSound("music");
+                    soundManager.stopSound("chasing");
+                    soundManager.stopSound("gameOver");
+
+                    soundManager.stopSound("menuMusic");
+                    currentState = GameState.MAIN_MENU;
+                    restartGame();
+                }
+            } else if (currentState == GameState.PAUSED) {
+                if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) {
+                    pauseMenuSelection--;
+                    if (pauseMenuSelection < 0)
+                        pauseMenuSelection = pauseOptions.length - 1;
+                    soundManager.playSound("menu");
+                }
+                if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
+                    pauseMenuSelection++;
+                    if (pauseMenuSelection >= pauseOptions.length)
+                        pauseMenuSelection = 0;
+                    soundManager.playSound("menu");
+                }
+                if (key == KeyEvent.VK_ESCAPE) { // Quick-resume
+                    currentState = GameState.PLAYING;
+                    soundManager.loopSound("music"); // Resume game music
+                }
+                if (key == KeyEvent.VK_ENTER) {
+                    if (pauseOptions[pauseMenuSelection].equals("Resume")) {
+                        currentState = GameState.PLAYING;
+                        soundManager.loopSound("music"); // Resume game music
+                    } else if (pauseOptions[pauseMenuSelection].equals("Quit to Menu")) {
+                        currentState = GameState.MAIN_MENU;
+                        soundManager.loopSound("menuMusic"); // Start menu music
+                    }
+                }
+            }
+        }
+
+        // You should also update your keyReleased to only work when playing!
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if (currentState == GameState.PLAYING) {
+                int key = e.getKeyCode();
+                if (key == KeyEvent.VK_W || key == KeyEvent.VK_UP)
+                    player.movingUp = false;
+                if (key == KeyEvent.VK_S || key == KeyEvent.VK_DOWN)
+                    player.movingDown = false;
+                if (key == KeyEvent.VK_A || key == KeyEvent.VK_LEFT)
+                    player.movingLeft = false;
+                if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT)
+                    player.movingRight = false;
+            }
+        }
+    }
+
     public GamePanel(SoundManager sm) {
         world = new World();
         this.soundManager = sm;
-        
-        
 
         mainMenu = new MainMenu();
         currentState = GameState.MAIN_MENU;
@@ -80,12 +198,11 @@ public class GamePanel extends JPanel {
         // This is the fix that brings your game to life!
         currentState = GameState.MAIN_MENU;
 
-        setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
+        setPreferredSize(new Dimension(VIRTUAL_WIDTH, VIRTUAL_HEIGHT));
         setFocusable(true);
         this.player = new Player(594, 2484, 32, 32);
-        snail = new Snail(594, 2464, player);
+        snail = new Snail(534, 2464, player);
 
-        
         spawnFood();
 
         addKeyListener(new KeyInputAdapter());
@@ -97,10 +214,10 @@ public class GamePanel extends JPanel {
         System.out.println("Resetting the nightmare...");
         soundManager.loopSound("music");
         // In restartGame()
-    if (snail != null) {
-     // Re-position or re-create the snail. Simple reset:
-     snail = new Snail(150, 150, player); // Recreate it near the player
-    }
+        if (snail != null) {
+            // Re-position or re-create the snail. Simple reset:
+            snail = new Snail(534, 2464, player); // Recreate it near the player
+        }
 
         // 1. Reset the player.
         player.reset();
@@ -125,7 +242,7 @@ public class GamePanel extends JPanel {
                 if (spider != null && spider.getCurrentState() == Spider.SpiderState.PATROLLING) {
                     spider.setReturnPoint(new Point(spider.getCenterX(), spider.getCenterY()));
                     spider.startChasing(player, soundManager);
-                    // soundManager.playSound("spiderAlert");
+
                 }
 
             }
@@ -136,7 +253,9 @@ public class GamePanel extends JPanel {
 
         if (currentState == GameState.PLAYING) {
             // In updateGame() -> inside the if (currentState == GameState.PLAYING) block
-            if (snail != null) {snail.update(world);}
+            if (snail != null) {
+                snail.update(world);
+            }
             player.update(world, soundManager);
             handleSpiderAlerts();
             for (Spider currentSpider : spiders) {
@@ -179,10 +298,10 @@ public class GamePanel extends JPanel {
                 }
             }
             // Update camera with bounds checking
-            cameraX = Math.max(0, Math.min(player.getCenterX() - (SCREEN_WIDTH / 2),
-                    world.getMapWidth() * World.TILE_SIZE - SCREEN_WIDTH));
-            cameraY = Math.max(0, Math.min(player.getCenterY() - (SCREEN_HEIGHT / 2),
-                    world.getMapHeight() * World.TILE_SIZE - SCREEN_HEIGHT));
+            cameraX = Math.max(0, Math.min(player.getCenterX() - (VIRTUAL_WIDTH / 2),
+                    world.getMapWidth() * World.TILE_SIZE - VIRTUAL_WIDTH));
+            cameraY = Math.max(0, Math.min(player.getCenterY() - (VIRTUAL_HEIGHT / 2),
+                    world.getMapHeight() * World.TILE_SIZE - VIRTUAL_HEIGHT));
 
             // 2. Create the spider and give it the track
 
@@ -239,173 +358,157 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (currentState == GameState.PLAYING) {
-            
-        // --- 1. Draw the World ---
-        world.render(g, cameraX, cameraY, SCREEN_WIDTH, SCREEN_HEIGHT);
+        // --- 1. THE SCALING CALCULATIONS ---
+        // Get the actual, physical size of our fullscreen window
+        int realScreenWidth = getWidth();
+        int realScreenHeight = getHeight();
 
-        // --- 2. Draw Entities (affected by camera) ---
+        // Create a new, temporary graphics object to draw on
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.translate(-cameraX, -cameraY);
-        if (player != null) { // Added null check for safety
-             player.render(g2d, world);
+
+        // Calculate how much to scale our virtual game to fit the real screen
+        double scaleX = (double) realScreenWidth / VIRTUAL_WIDTH;
+        double scaleY = (double) realScreenHeight / VIRTUAL_HEIGHT;
+        // To maintain the aspect ratio (no stretching), we use the smaller of the two
+        // scales
+        double scale = Math.min(scaleX, scaleY);
+
+        // Calculate the size of our game after scaling
+        int scaledWidth = (int) (VIRTUAL_WIDTH * scale);
+        int scaledHeight = (int) (VIRTUAL_HEIGHT * scale);
+
+        // Calculate the top-left corner to center our game on the screen (for
+        // letterboxing)
+        int xOffset = (realScreenWidth - scaledWidth) / 2;
+        int yOffset = (realScreenHeight - scaledHeight) / 2;
+
+        // --- 2. APPLY THE TRANSFORMATION ---
+        // Tell the graphics object to move to our centered position
+        g2d.translate(xOffset, yOffset);
+        // Tell it to scale everything it draws from now on
+        g2d.scale(scale, scale);
+
+        // --- 3. DRAW THE ENTIRE GAME (onto the scaled g2d) ---
+        // Now, we draw our whole game as if it were on a 1024x768 screen.
+        // The g2d object will handle all the scaling and centering automatically!
+
+        if (currentState == GameState.PLAYING) {
+            // --- 1. Draw the World (pass VIRTUAL size for culling) ---
+            world.render(g2d, cameraX, cameraY, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+
+            // --- 2. Draw Entities (affected by camera) ---
+            Graphics2D entityG2d = (Graphics2D) g2d.create();
+            try {
+                entityG2d.translate(-cameraX, -cameraY);
+                if (player != null)
+                    player.render(entityG2d, world);
+                for (Spider spider : spiders)
+                    if (spider != null)
+                        spider.draw(entityG2d);
+                if (food != null)
+                    food.draw(entityG2d);
+                if (snail != null)
+                    snail.draw(entityG2d);
+            } finally {
+                entityG2d.dispose();
+            }
+
+            // --- 3. DRAW HUD (fixed on screen, uses g2d) ---
+            // Hunger Bar
+            g2d.setColor(Color.DARK_GRAY);
+            g2d.fillRect(10, 10, 200, 20);
+            g2d.setColor(Color.ORANGE);
+            if (player != null)
+                g2d.fillRect(10, 10, player.getHunger() * 2, 20);
+            g2d.setColor(Color.BLACK);
+            g2d.drawRect(10, 10, 200, 20);
+
+            // Webbed Text
+            if (player != null && player.isWebbed()) {
+                g2d.setColor(Color.WHITE);
+                g2d.setFont(new Font("Consolas", Font.BOLD, 40));
+                String struggleMsg = "PRESS [SPACE] TO STRUGGLE!";
+                int msgWidth = g2d.getFontMetrics().stringWidth(struggleMsg);
+                g2d.drawString(struggleMsg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT - 100);
+            }
+
+        } else if (currentState == GameState.GAME_OVER) {
+            // --- Game Over (uses g2d) ---
+            if (player != null)
+                player.reset();
+            g2d.setColor(new Color(0, 0, 0, 150));
+            g2d.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+
+            g2d.setColor(Color.RED);
+            g2d.setFont(new Font("Consolas", Font.BOLD, 80));
+            String msg = "GAME OVER";
+            int msgWidth = g2d.getFontMetrics().stringWidth(msg);
+            g2d.drawString(msg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT / 2);
+
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Consolas", Font.PLAIN, 20));
+            String restartMsg = "Press Enter to Restart";
+            int restartWidth = g2d.getFontMetrics().stringWidth(restartMsg);
+            g2d.drawString(restartMsg, (VIRTUAL_WIDTH - restartWidth) / 2, VIRTUAL_HEIGHT / 2 + 50);
         }
-        for (Spider spider : spiders) {
-             if (spider != null) spider.draw(g2d);
+
+        else if (currentState == GameState.PAUSED) {
+            // --- 1. First, draw the game world in the background ---
+            // This makes it look like we're pausing *over* the game
+            world.render(g, cameraX, cameraY, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+
+            try {
+                g2d.translate(-cameraX, -cameraY);
+                if (player != null)
+                    player.render(g2d, world);
+                for (Spider spider : spiders)
+                    if (spider != null)
+                        spider.draw(g2d);
+                if (food != null)
+                    food.draw(g2d);
+                if (snail != null)
+                    snail.draw(g2d);
+            } finally {
+                g2d.dispose();
+            }
+            // Also draw the HUD
+            // ... (copy/paste your HUD drawing code here: hunger bar, etc.) ...
+
+            // --- 2. Now, draw the pause menu overlay on top ---
+            g.setColor(new Color(0, 0, 0, 150)); // Dark overlay
+            g.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Consolas", Font.BOLD, 80));
+            String msg = "PAUSED";
+            int msgWidth = g.getFontMetrics().stringWidth(msg);
+            g.drawString(msg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT / 3);
+
+            // Draw options
+            g.setFont(new Font("Consolas", Font.PLAIN, 40));
+            for (int i = 0; i < pauseOptions.length; i++) {
+                if (i == pauseMenuSelection) {
+                    g.setColor(Color.YELLOW);
+                } else {
+                    g.setColor(Color.WHITE);
+                }
+                int optionWidth = g.getFontMetrics().stringWidth(pauseOptions[i]);
+                g.drawString(pauseOptions[i], (VIRTUAL_WIDTH - optionWidth) / 2, VIRTUAL_HEIGHT / 2 + i * 60);
+            }
         }
-        if (food != null) {
-             food.draw(g2d);
+
+        else if (currentState == GameState.MAIN_MENU) {
+            // --- Main Menu (uses g2d) ---
+            mainMenu.draw(g2d);
         }
-        if (snail != null) {
-            snail.draw(g2d);
-        }
+
+        // 4. Clean up the graphics object
         g2d.dispose();
 
-        // --- 3. DRAW HUD (fixed on screen, uses original 'g') ---
+        // An inner class for handling key inputs. This is a clean way to do it.
+        // Inside GamePanel.java
 
-        // Hunger Bar
-        g.setColor(Color.DARK_GRAY);
-        g.fillRect(10, 10, 200, 20);
-        g.setColor(Color.ORANGE);
-        if (player != null) { // Added null check
-            g.fillRect(10, 10, player.getHunger() * 2, 20);
-        }
-        g.setColor(Color.BLACK);
-        g.drawRect(10, 10, 200, 20);
-
-        
-            if (player.isWebbed()) {
-                // Upgrade our drawing tool
-                Graphics2D hintG2d = (Graphics2D) g;
-
-                // Set the font and color for our panic button sign
-                hintG2d.setColor(Color.WHITE);
-                hintG2d.setFont(new Font("Consolas", Font.BOLD, 40));
-
-                // The message of hope (or despair)
-                String struggleMsg = "PRESS [SPACE] TO STRUGGLE!";
-
-                // Center it on the screen
-                int msgWidth = hintG2d.getFontMetrics().stringWidth(struggleMsg);
-                hintG2d.drawString(struggleMsg, (SCREEN_WIDTH - msgWidth) / 2, SCREEN_HEIGHT - 100);
-            }
-        } else if (currentState == GameState.GAME_OVER) {
-            // --- If the game is over, draw the final scene! ---
-            // 1. A dark, semi-transparent overlay to set the mood
-            player.reset();
-            g.setColor(new Color(0, 0, 0, 150)); // Black, with transparency
-            g.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-            // 2. The tragic final words
-            g.setColor(Color.RED);
-            g.setFont(new Font("Consolas", Font.BOLD, 80));
-            String msg = "GAME OVER";
-            int msgWidth = g.getFontMetrics().stringWidth(msg);
-            g.drawString(msg, (SCREEN_WIDTH - msgWidth) / 2, SCREEN_HEIGHT / 2);
-
-            // 3. A glimmer of hope...
-            g.setColor(Color.WHITE);
-            g.setFont(new Font("Consolas", Font.PLAIN, 20));
-            String restartMsg = "Press Enter to Restart";
-            int restartWidth = g.getFontMetrics().stringWidth(restartMsg);
-            g.drawString(restartMsg, (SCREEN_WIDTH - restartWidth) / 2, SCREEN_HEIGHT / 2 + 50);
-
-        } else if (currentState == GameState.MAIN_MENU) {
-            // --- DRAW THE MAIN MENU ---
-            mainMenu.draw(g);
-        }
-    }
-
-    // An inner class for handling key inputs. This is a clean way to do it.
-    // Inside GamePanel.java
-
-    // Inside GamePanel.java
-
-    private class KeyInputAdapter extends KeyAdapter {
-        @Override
-        public void keyPressed(KeyEvent e) {
-            int key = e.getKeyCode();
-
-            // The actor checks which scene they're in...
-            if (currentState == GameState.MAIN_MENU) {
-                // --- SCENE 1: THE MAIN MENU ---
-
-                if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) {
-                    mainMenu.moveUp();
-                    soundManager.playSound("menu");
-                }
-                if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
-                    mainMenu.moveDown();
-                    soundManager.playSound("menu");
-                }
-                if (key == KeyEvent.VK_ENTER) {
-                    String selectedOption = mainMenu.options[mainMenu.currentSelection];
-                    if (selectedOption.equals("New Game")) {
-                        soundManager.stopSound("menuMusic");
-                        restartGame();
-                    }
-                    if (selectedOption.equals("Resume")) {
-                        // We need to check if a game is actually in progress!
-                        // For now, let's just switch to playing.
-                        soundManager.stopSound("menuMusic");
-                        currentState = GameState.PLAYING;
-                    }
-                    if (selectedOption.equals("Quit")) {
-                        System.exit(0);
-                    }
-                }
-            } else if (currentState == GameState.PLAYING) {
-                // --- SCENE 2: THE ACTION ---
-                if (key == KeyEvent.VK_W || key == KeyEvent.VK_UP) {
-                    player.movingUp = true;
-                    // We need to make sure the player object isn't null!
-                    // if (player != null) player.setRotationAngle(0);
-                }
-                if (key == KeyEvent.VK_S || key == KeyEvent.VK_DOWN) {
-                    player.movingDown = true;
-                    // if (player != null) player.setRotationAngle(180);
-                }
-                if (key == KeyEvent.VK_A || key == KeyEvent.VK_LEFT) {
-                    player.movingLeft = true;
-                }
-                if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT) {
-                    player.movingRight = true;
-                }
-                if (key == KeyEvent.VK_SPACE) {
-                    player.struggle();
-                    soundManager.playSound("struggle");
-                }
-            } else if (currentState == GameState.GAME_OVER) {
-                // --- SCENE 3: THE TRAGIC ENDING ---
-                if (key == KeyEvent.VK_ENTER) {
-                    //soundManager.loopSound("gameOver");
-                    
-                    soundManager.stopSound("music");
-                    soundManager.stopSound("chasing");
-                    soundManager.stopSound("gameOver");
-
-                    soundManager.stopSound("menuMusic");
-                    currentState = GameState.MAIN_MENU;
-                    restartGame();
-                }
-            }
-        }
-
-        // You should also update your keyReleased to only work when playing!
-        @Override
-        public void keyReleased(KeyEvent e) {
-            if (currentState == GameState.PLAYING) {
-                int key = e.getKeyCode();
-                if (key == KeyEvent.VK_W || key == KeyEvent.VK_UP)
-                    player.movingUp = false;
-                if (key == KeyEvent.VK_S || key == KeyEvent.VK_DOWN)
-                    player.movingDown = false;
-                if (key == KeyEvent.VK_A || key == KeyEvent.VK_LEFT)
-                    player.movingLeft = false;
-                if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT)
-                    player.movingRight = false;
-            }
-        }
+        // Inside GamePanel.java
     }
 
 }

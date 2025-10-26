@@ -58,15 +58,15 @@ public class MainMenu {
     public void draw(Graphics g) {
     // 1. Draw the background image FIRST
     if (backgroundImage != null) {
-        g.drawImage(backgroundImage, 0, 0, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT, null);
+        g.drawImage(backgroundImage, 0, 0, GamePanel.VIRTUAL_WIDTH, GamePanel.VIRTUAL_HEIGHT, null);
     } else {
         // Fallback: Dark overlay if image failed to load
         g.setColor(new Color(0, 0, 0, 150));
-        g.fillRect(0, 0, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT);
+        g.fillRect(0, 0, GamePanel.VIRTUAL_WIDTH, GamePanel.VIRTUAL_HEIGHT);
     }
 
     if (titleimg != null) {
-        int titleX = (GamePanel.SCREEN_WIDTH - TITLE_WIDTH) / 2; // screen width - title width 
+        int titleX = (GamePanel.VIRTUAL_WIDTH - TITLE_WIDTH) / 2; // screen width - title width 
         int titleY = 100;
         g.drawImage(titleimg, titleX, titleY, TITLE_WIDTH, TITLE_HEIGHT, null);
     } else {
@@ -76,7 +76,7 @@ public class MainMenu {
         g.setColor(Color.GREEN);
         String title = "BUGLIFE";
         int titleWidth = g.getFontMetrics().stringWidth(title);
-        g.drawString(title, (GamePanel.SCREEN_WIDTH - titleWidth) / 2, 200);
+        g.drawString(title, (GamePanel.VIRTUAL_WIDTH - titleWidth) / 2, 200);
     }
     Font optionFont;
 
@@ -97,7 +97,7 @@ public class MainMenu {
             g.setColor(Color.WHITE); // Normal option color
         }
         int optionWidth = g.getFontMetrics().stringWidth(options[i]);
-        g.drawString(options[i], (GamePanel.SCREEN_WIDTH - optionWidth) / 2, 350 + i * 60);
+        g.drawString(options[i], (GamePanel.VIRTUAL_WIDTH - optionWidth) / 2, 350 + i * 60);
     }
 }
 

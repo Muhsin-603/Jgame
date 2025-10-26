@@ -1,4 +1,4 @@
-    package src.com.buglife.main;
+package src.com.buglife.main;
 
 import javax.swing.*;
 
@@ -7,6 +7,7 @@ import src.com.buglife.assets.SoundManager;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -19,18 +20,17 @@ public class Game implements Runnable {
     public static Font Tiny5;
     private SoundManager soundManager;
     volatile boolean running = false;
-    
+
+    // In Game.java
 
     public Game() {
         // 1. Create the panel that will hold all our game objects
         loadCustomFont();
-        
+
         soundManager = new SoundManager();
-        gamePanel = new GamePanel(soundManager);
+        gamePanel = new GamePanel(soundManager); // GamePanel still thinks it's 1024x768
         soundManager.loadSound("music", "/res/sounds/game_theme.wav");
-        soundManager.playSound("menuMusic"); 
         soundManager.loopSound("menuMusic");
-        
 
         // 2. Create the main window (the JFrame)
         window = new JFrame();
@@ -38,20 +38,20 @@ public class Game implements Runnable {
         window.setResizable(false);
         window.setTitle("Lullaby Down Below");
 
-        // 3. Add our game panel to the window
-        window.add(gamePanel);
+        // --- THE NEW FULLSCREEN LOGIC ---
+        window.setUndecorated(true); // Remove the title bar and borders
+        window.add(gamePanel); // Add the panel *before* going fullscreen
 
-        // 4. Size the window to fit the game panel's preferred size
-        window.pack();
+        // Get the default screen device and make the window fullscreen
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        gd.setFullScreenWindow(window);
+        // --- END FULLSCREEN LOGIC ---
 
-        // 5. Center the window on the screen and make it visible
-        window.setLocationRelativeTo(null);
-        window.setVisible(true);
-        
         // Let the panel listen for key presses
-        gamePanel.requestFocus(); 
+        gamePanel.requestFocus();
     }
-    
+
     private void loadCustomFont() {
         try {
             // Get the font file from our resources folder
@@ -118,51 +118,52 @@ public class Game implements Runnable {
      * The main entry point for our application.
      */
     // In Game.java
-public void cleanup() {
-    System.out.println("Cleanup requested..."); // Add more logging
-    running = false; // Signal the game loop to stop
+    public void cleanup() {
+        System.out.println("Cleanup requested..."); // Add more logging
+        running = false; // Signal the game loop to stop
 
-    // Wait for the game thread to actually finish
-    try {
-        if (gameThread != null && gameThread.isAlive()) {
-            System.out.println("Waiting for game thread to stop...");
-            gameThread.join(500); // Wait up to 500ms
-            if (gameThread.isAlive()) {
-                 System.err.println("Warning: Game thread did not stop cleanly.");
-                 // Consider thread interruption if needed, but join is usually enough
-                 // gameThread.interrupt();
-            } else {
-                 System.out.println("Game thread stopped.");
+        // Wait for the game thread to actually finish
+        try {
+            if (gameThread != null && gameThread.isAlive()) {
+                System.out.println("Waiting for game thread to stop...");
+                gameThread.join(500); // Wait up to 500ms
+                if (gameThread.isAlive()) {
+                    System.err.println("Warning: Game thread did not stop cleanly.");
+                    // Consider thread interruption if needed, but join is usually enough
+                    // gameThread.interrupt();
+                } else {
+                    System.out.println("Game thread stopped.");
+                }
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Restore interrupt status
+            System.err.println("Interrupted while waiting for game thread.");
         }
-    } catch (InterruptedException e) {
-        Thread.currentThread().interrupt(); // Restore interrupt status
-        System.err.println("Interrupted while waiting for game thread.");
-    }
-    gameThread = null; // Okay to set to null after join
+        gameThread = null; // Okay to set to null after join
 
-    // Stop sounds
-    if (soundManager != null) {
-        System.out.println("Stopping sounds...");
-        soundManager.stopAllSounds();
-        // Consider adding a method to SoundManager to explicitly close Clips if necessary
-        // soundManager.closeAllClips();
-    }
+        // Stop sounds
+        if (soundManager != null) {
+            System.out.println("Stopping sounds...");
+            soundManager.stopAllSounds();
+            // Consider adding a method to SoundManager to explicitly close Clips if
+            // necessary
+            // soundManager.closeAllClips();
+        }
 
-    // Dispose window
-    if (window != null) {
-        System.out.println("Disposing window...");
-        // Ensure this runs on the EDT if called from shutdown hook
-         SwingUtilities.invokeLater(() -> window.dispose());
-       // window.dispose(); // This might cause issues if called from non-EDT thread
+        // Dispose window
+        if (window != null) {
+            System.out.println("Disposing window...");
+            // Ensure this runs on the EDT if called from shutdown hook
+            SwingUtilities.invokeLater(() -> window.dispose());
+            // window.dispose(); // This might cause issues if called from non-EDT thread
+        }
+        System.out.println("Cleanup finished.");
     }
-    System.out.println("Cleanup finished.");
-}
 
     public static void main(String[] args) {
         Game game = new Game();
         game.startGameThread();
-        
+
         // Add shutdown hook for cleanup
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             game.cleanup();
