@@ -113,6 +113,7 @@ public class World {
             BufferedImage shadowImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/shadow_tile.png"));
             tileTypes[5] = new Tile(shadowImage, false);
             
+            //chimney intro tiles
              BufferedImage itile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile1.png"));
             tileTypes[41] = new Tile(itile1, false); // false = not solid
              BufferedImage itile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile2.png"));
@@ -121,6 +122,16 @@ public class World {
             tileTypes[43] = new Tile(itile3, true); // false = not solid
              BufferedImage itile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile4.png"));
             tileTypes[44] = new Tile(itile4, true); // false = not solid
+
+            //plank tiles
+             BufferedImage ptile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank1.png"));
+            tileTypes[31] = new Tile(ptile1, false); // false = not solid
+             BufferedImage ptile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank2.png"));
+            tileTypes[32] = new Tile(ptile2, false); // false = not solid
+             BufferedImage ptile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank3.png"));
+            tileTypes[33] = new Tile(ptile3, false); // false = not solid
+             BufferedImage ptile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank4.png"));
+            tileTypes[34] = new Tile(ptile4, false); // false = not solid
 
         } catch (IOException e) {
             System.err.println("Could not load tile images!");
