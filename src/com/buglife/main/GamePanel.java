@@ -47,8 +47,8 @@ public class GamePanel extends JPanel {
     public GamePanel(SoundManager sm) {
         world = new World();
         this.soundManager = sm;
-        player = new Player(200, 200, 32, 32); // Create player first
-        snail = new Snail(205, 205, player);
+        
+        
 
         mainMenu = new MainMenu();
         currentState = GameState.MAIN_MENU;
@@ -83,6 +83,7 @@ public class GamePanel extends JPanel {
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
         this.player = new Player(594, 2484, 32, 32);
+        snail = new Snail(594, 2464, player);
 
         
         spawnFood();
