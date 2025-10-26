@@ -147,6 +147,16 @@ public class World {
              BufferedImage ltile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/l4.png"));
             tileTypes[38] = new Tile(ltile4, true);
 
+            //sack prop tiles
+             BufferedImage stile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_n.png"));
+            tileTypes[11] = new Tile(stile1, true);
+             BufferedImage stile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_s.png"));
+            tileTypes[12] = new Tile(stile2, true); 
+             BufferedImage stile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_w.png"));
+            tileTypes[13] = new Tile(stile3, true); 
+             BufferedImage stile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_e.png"));
+            tileTypes[14] = new Tile(stile4, true);;
+
 
         } catch (IOException e) {
             System.err.println("Could not load tile images!");
