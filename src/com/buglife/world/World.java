@@ -115,27 +115,27 @@ public class World {
             
             //chimney intro tiles
             BufferedImage itile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile1.png"));
-            tileTypes[41] = new Tile(itile1, false); // false = not solid
+            tileTypes[41] = new Tile(itile1, false);
             BufferedImage itile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile2.png"));
-            tileTypes[42] = new Tile(itile2, false); // false = not solid
+            tileTypes[42] = new Tile(itile2, false);
             BufferedImage itile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile3.png"));
-            tileTypes[43] = new Tile(itile3, false); // false = not solid
+            tileTypes[43] = new Tile(itile3, false);
             BufferedImage itile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile4.png"));
-            tileTypes[44] = new Tile(itile4, true); // false = not solid
+            tileTypes[44] = new Tile(itile4, true); 
             BufferedImage itile5 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile5.png"));
-            tileTypes[45] = new Tile(itile5, true); // false = not solid
+            tileTypes[45] = new Tile(itile5, true); 
             BufferedImage itile6 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile6.png"));
             tileTypes[46] = new Tile(itile6, true);     
 
             //plank tiles
              BufferedImage ptile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank1.png"));
-            tileTypes[31] = new Tile(ptile1, false); // false = not solid
+            tileTypes[31] = new Tile(ptile1, false);
              BufferedImage ptile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank2.png"));
-            tileTypes[32] = new Tile(ptile2, false); // false = not solid
+            tileTypes[32] = new Tile(ptile2, false); 
              BufferedImage ptile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank3.png"));
-            tileTypes[33] = new Tile(ptile3, false); // false = not solid
+            tileTypes[33] = new Tile(ptile3, false); 
              BufferedImage ptile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank4.png"));
-            tileTypes[34] = new Tile(ptile4, false); // false = not solid
+            tileTypes[34] = new Tile(ptile4, false);
 
         } catch (IOException e) {
             System.err.println("Could not load tile images!");
