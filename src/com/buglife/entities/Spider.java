@@ -18,10 +18,10 @@ public class Spider {
     // Core Attributes
     private double x, y;
     private int width = 48, height = 48;
-    private int speed;
-    private final int PATROL_SPEED = 2;      // default patrol movement speed (pixels/frame)
-    private final int CHASE_SPEED = 3;       // speed when actively chasing (adjust this)
-    private final int SLOW_CHASE_SPEED = 1;  // slow chase speed (used when not "crying")
+    private double speed;
+    private final double PATROL_SPEED = 1;      // default patrol movement speed (pixels/frame)
+    private final double CHASE_SPEED = 3;       // speed when actively chasing (adjust this)
+    private final double SLOW_CHASE_SPEED = 1.7;  // slow chase speed (used when not "crying")
 
     private double rotationAngle = 90; // Start facing right (90 degrees from North)
 
@@ -91,7 +91,7 @@ public class Spider {
             return false; // I can't see anything!
         }
 
-        int detectionRadius = 300; // How far the spider can see
+        int detectionRadius = 200; // How far the spider can see
         if (distance > detectionRadius) {
             return false;
         }

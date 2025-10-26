@@ -54,9 +54,11 @@ public class GamePanel extends JPanel {
         currentState = GameState.MAIN_MENU;
         // spider path creation
         List<Point> patrolPath1 = new ArrayList<>();
-        patrolPath1.add(new Point(7, 7)); // Start in first open floor tile
-        patrolPath1.add(new Point(18, 7));
-        patrolPath1.add(new Point(7, 7));
+        patrolPath1.add(new Point(23, 23)); // Start in first open floor tile
+        patrolPath1.add(new Point(29, 23));
+        patrolPath1.add(new Point(29, 25));
+        patrolPath1.add(new Point(23, 25));
+        patrolPath1.add(new Point(23, 23));
 
         List<Point> patrolPath2 = new ArrayList<>();
         patrolPath2.add(new Point(14, 3)); // Start in first open floor tile

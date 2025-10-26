@@ -91,7 +91,7 @@ public class World {
     } 
 
     private void loadTileTypes() {
-        tileTypes = new Tile[10]; // We have 2 types of tiles right now
+        tileTypes = new Tile[50]; // We have 2 types of tiles right now
         try {
             // Tile 0: The Floor
             BufferedImage floorImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/floor_1.png"));
@@ -113,6 +113,50 @@ public class World {
             BufferedImage shadowImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/shadow_tile.png"));
             tileTypes[5] = new Tile(shadowImage, false);
             
+            //chimney intro tiles
+            BufferedImage itile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile1.png"));
+            tileTypes[41] = new Tile(itile1, false);
+            BufferedImage itile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile2.png"));
+            tileTypes[42] = new Tile(itile2, false);
+            BufferedImage itile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile3.png"));
+            tileTypes[43] = new Tile(itile3, false);
+            BufferedImage itile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile4.png"));
+            tileTypes[44] = new Tile(itile4, true); 
+            BufferedImage itile5 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile5.png"));
+            tileTypes[45] = new Tile(itile5, true); 
+            BufferedImage itile6 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile6.png"));
+            tileTypes[46] = new Tile(itile6, true);     
+
+            //plank tiles
+             BufferedImage ptile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank1.png"));
+            tileTypes[31] = new Tile(ptile1, false);
+             BufferedImage ptile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank2.png"));
+            tileTypes[32] = new Tile(ptile2, false); 
+             BufferedImage ptile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank3.png"));
+            tileTypes[33] = new Tile(ptile3, false); 
+             BufferedImage ptile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/plank4.png"));
+            tileTypes[34] = new Tile(ptile4, false);
+
+            //ladder tiles
+             BufferedImage ltile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/l1.png"));
+            tileTypes[35] = new Tile(ltile1, true);
+             BufferedImage ltile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/l2.png"));
+            tileTypes[36] = new Tile(ltile2, true); 
+             BufferedImage ltile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/l3.png"));
+            tileTypes[37] = new Tile(ltile3, false); 
+             BufferedImage ltile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/l4.png"));
+            tileTypes[38] = new Tile(ltile4, true);
+
+            //sack prop tiles
+             BufferedImage stile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_n.png"));
+            tileTypes[11] = new Tile(stile1, true);
+             BufferedImage stile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_s.png"));
+            tileTypes[12] = new Tile(stile2, true); 
+             BufferedImage stile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_w.png"));
+            tileTypes[13] = new Tile(stile3, true); 
+             BufferedImage stile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_e.png"));
+            tileTypes[14] = new Tile(stile4, true);;
+
 
         } catch (IOException e) {
             System.err.println("Could not load tile images!");
