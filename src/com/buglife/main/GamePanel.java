@@ -309,6 +309,15 @@ public class GamePanel extends JPanel {
                     }
                 }
             }
+
+            if (player.hasDiedFromWeb()) {
+                System.out.println("GAME OVER : Died By Webbed State");
+                soundManager.stopSound("music");
+                soundManager.stopSound("chasing");
+                soundManager.playSound("gameover");
+                currentState = GameState.GAME_OVER;
+                return;
+            }
             player.update(world, soundManager);
             handleSpiderAlerts();
             for (Spider currentSpider : spiders) {

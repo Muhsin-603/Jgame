@@ -43,12 +43,16 @@ public class Player {
     private static final int WEB_ESCAPE_REQUIRED = 4;
     private int webStrength = WEB_ESCAPE_REQUIRED;
     private int webbedTimer = 300;
+    private boolean diedFromWeb = false;
     
     
 
     public boolean isWebbed() {
 
         return this.currentState == PlayerState.WEBBED;
+    }
+    public boolean hasDiedFromWeb() {
+        return this.diedFromWeb;
     }
 
     public enum PlayerState {
@@ -77,6 +81,7 @@ public class Player {
         // Reset hunger and crying state
         this.hunger = MAX_HUNGER;
         this.isCrying = false;
+        this.diedFromWeb = false;
 
         // Reset state to default idle
         this.currentState = PlayerState.IDLE_DOWN;
@@ -278,15 +283,6 @@ public class Player {
             }
         }
     }
-
-    /*
-     * private void loadSprites() { try { // Using the path that worked for you
-     * before! sprite_walk1 =
-     * ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug.png"));
-     * sprite_walk2 =
-     * ImageIO.read(getClass().getResourceAsStream("/res/sprites/bug_mov_1.png")); }
-     * catch (IOException e) { e.printStackTrace(); } }
-     */
     private void checkLowHunger(SoundManager soundManager) {
         int hungerPercentage = (hunger * 100) / MAX_HUNGER;
 
@@ -351,8 +347,7 @@ public class Player {
                 webbedTimer--;
                 if (webbedTimer <= 0) {
                     System.out.println("PLAYER: Died from webbed state");
-                    this.hunger = 0;
-                    this.isCrying = true;
+                    this.diedFromWeb = true;
                     /// currentState = PlayerState.IDLE_DOWN;
                 }
                 return; // Still can't move while webbed (unless instantly dead)
