@@ -181,22 +181,28 @@ public class GamePanel extends JPanel {
         patrolPath1.add(new Point(23, 23));
 
         List<Point> patrolPath2 = new ArrayList<>();
-        patrolPath2.add(new Point(14, 3)); // Start in first open floor tile
-        patrolPath2.add(new Point(14, 6));
-        patrolPath2.add(new Point(14, 3));
+        patrolPath2.add(new Point(2, 2)); // Start in first open floor tile
+        patrolPath2.add(new Point(8, 2));
+        patrolPath2.add(new Point(8, 7));
+        patrolPath2.add(new Point(2, 7));
+        patrolPath2.add(new Point(2, 2));
 
         List<Point> patrolPath3 = new ArrayList<>();
-        patrolPath3.add(new Point(18, 5)); // Start in first open floor tile
-        patrolPath3.add(new Point(18, 3));
-        patrolPath3.add(new Point(26, 3));
-        patrolPath3.add(new Point(26, 8));
-        patrolPath3.add(new Point(26, 3));
-        patrolPath3.add(new Point(18, 3));
-        patrolPath3.add(new Point(18, 5));
+        patrolPath3.add(new Point(26, 1)); // Start in first open floor tile
+        patrolPath3.add(new Point(26, 10));
+        patrolPath3.add(new Point(26, 1));
+
+        List<Point> patrolPath4 = new ArrayList<>();
+        patrolPath4.add(new Point(7, 10));
+        patrolPath4.add(new Point(15, 10));
+        patrolPath4.add(new Point(15, 15));
+        patrolPath4.add(new Point(7, 15));
+        patrolPath4.add(new Point(7, 10));
         // new spider creation
         spiders.add(new Spider(patrolPath1));
         spiders.add(new Spider(patrolPath2));
         spiders.add(new Spider(patrolPath3));
+        spiders.add(new Spider(patrolPath4));
         // This is the fix that brings your game to life!
         currentState = GameState.MAIN_MENU;
 
