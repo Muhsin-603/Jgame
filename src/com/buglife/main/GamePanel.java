@@ -122,12 +122,12 @@ public class GamePanel extends JPanel {
                 if (key == KeyEvent.VK_ENTER) {
                     // soundManager.loopSound("gameOver");
 
-                    soundManager.stopSound("music");
-                    soundManager.stopSound("chasing");
-                    soundManager.stopSound("gameOver");
+                   // soundManager.stopSound("music");
+                   // soundManager.stopSound("chasing");
+                    //soundManager.stopSound("gameOver");
 
-                    soundManager.stopSound("menuMusic");
-                    currentState = GameState.MAIN_MENU;
+                    //soundManager.stopSound("menuMusic");
+                    //currentState = GameState.MAIN_MENU;
                     restartGame();
                 }
             } else if (currentState == GameState.PAUSED) {
@@ -319,7 +319,7 @@ public class GamePanel extends JPanel {
                 System.out.println("GAME OVER : Died By Webbed State");
                 soundManager.stopSound("music");
                 soundManager.stopSound("chasing");
-                soundManager.playSound("gameover");
+                soundManager.playSound("gameOver");
                 currentState = GameState.GAME_OVER;
                 return;
             }
