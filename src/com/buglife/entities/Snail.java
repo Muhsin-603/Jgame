@@ -110,6 +110,11 @@ public class Snail {
                 g2d.setColor(Color.MAGENTA);
                 g2d.fillRect((int)x, (int)y, width, height);
             }
+            if (showingDialog) {
+                drawDialogBox(g2d);
+            } else if (canInteract(player)) {
+                drawInteractionPrompt(g2d);
+            }
         } finally {
             g2d.dispose();
         }
@@ -149,6 +154,8 @@ public class Snail {
     public void interact() {
         if (!showingDialog) {
             showingDialog = true;
+            //currentDialogue = (currentDialogue + 1) % dialogues.length;
+        } else {
             currentDialogue = (currentDialogue + 1) % dialogues.length;
         }
     }

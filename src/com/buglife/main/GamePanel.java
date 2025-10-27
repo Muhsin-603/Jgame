@@ -114,7 +114,7 @@ public class GamePanel extends JPanel {
                 if (key == KeyEvent.VK_E) {
                     if (snail != null && snail.canInteract(player)) {
                         snail.interact();
-                        soundManager.playSound("menu"); // Or create a new "talk" sound
+                        //soundManager.playSound("menu"); // Or create a new "talk" sound
                     }
                 }
             } else if (currentState == GameState.GAME_OVER) {
@@ -315,6 +315,11 @@ public class GamePanel extends JPanel {
                 }
             }
 
+            
+            player.update(world, soundManager);
+            if (snail != null) {
+                snail.update(world);
+            }
             if (player.hasDiedFromWeb()) {
                 System.out.println("GAME OVER : Died By Webbed State");
                 soundManager.stopSound("music");
@@ -323,7 +328,6 @@ public class GamePanel extends JPanel {
                 currentState = GameState.GAME_OVER;
                 return;
             }
-            player.update(world, soundManager);
             handleSpiderAlerts();
             for (Spider currentSpider : spiders) {
                 if (currentSpider != null) {
@@ -465,7 +469,7 @@ public class GamePanel extends JPanel {
                 }
                 
                 // Draw snail before spiders (so it appears behind them)
-                if (snail != null && snail.isVisible()) {
+                if (snail != null/* && snail.isVisible()*/) {
                     System.out.println("Drawing snail at: " + snail.getX() + ", " + snail.getY());
                     snail.draw(entityG2d);
                 }
