@@ -33,9 +33,7 @@ public class Player {
     // private BufferedImage sprite_walk1, sprite_walk2; // Just our two images
     private int animationTick = 0;
     private int animationSpeed = 3; // Change sprite every 15 frames. Higher is slower.
-    // private int spriteNum = 1; // Which sprite to show: 1 or 2
     private int currentFrame = 0;
-    // private double rotationAngle = 0;
     private PlayerState currentState = PlayerState.IDLE_DOWN;
     private List<BufferedImage> idleDownFrames;
     private List<BufferedImage> walkDownFrames;
@@ -309,7 +307,7 @@ public class Player {
             }
         } else {
             hungerDrainTimer++;
-            if (hungerDrainTimer > 180) { // Drain 1 hunger every 3 seconds
+            if (hungerDrainTimer > 120) { // Drain 1 hunger every 2 seconds
                 this.hunger--;
                 hungerDrainTimer = 0;
                 if (this.hunger <= 0) {
