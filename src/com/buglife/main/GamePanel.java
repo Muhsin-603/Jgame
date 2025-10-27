@@ -26,10 +26,7 @@ public class GamePanel extends JPanel {
     private List<Spider> spiders = new ArrayList<>();
     private Player player;
     private List<Food> foods = new ArrayList<>();
-    private List<Point> foodsp;// food array
-    /*private int currentFoodSpawnIndex = 0; // food current spot
-    private int foodst; // food respawn timer
-    private int FOOD_DELAY = 300;//food respawn delay (5 s)*/
+    private List<Point> foodsp;
     private World world;
     private int cameraX, cameraY;
     public static final int VIRTUAL_WIDTH = 1366;
@@ -114,20 +111,18 @@ public class GamePanel extends JPanel {
                 if (key == KeyEvent.VK_E) {
                     if (snail != null && snail.canInteract(player)) {
                         snail.interact();
-                        //soundManager.playSound("menu"); // Or create a new "talk" sound
+                        //soundManager.playSound("snail_talk"); // not added now 
                     }
                 }
             } else if (currentState == GameState.GAME_OVER) {
                 // --- SCENE 3: THE TRAGIC ENDING ---
                 if (key == KeyEvent.VK_ENTER) {
-                    // soundManager.loopSound("gameOver");
-
-                   // soundManager.stopSound("music");
-                   // soundManager.stopSound("chasing");
-                    //soundManager.stopSound("gameOver");
-
-                    //soundManager.stopSound("menuMusic");
-                    //currentState = GameState.MAIN_MENU;
+                    /* soundManager.loopSound("gameOver");
+                    soundManager.stopSound("music");
+                    soundManager.stopSound("chasing"); no use here i,m gonne remove it
+                    soundManager.stopSound("gameOver");
+                    soundManager.stopSound("menuMusic");
+                    currentState = GameState.MAIN_MENU;*/
                     restartGame();
                 }
             } else if (currentState == GameState.PAUSED) {
@@ -193,14 +188,14 @@ public class GamePanel extends JPanel {
         patrolPath1.add(new Point(23, 23));
 
         List<Point> patrolPath2 = new ArrayList<>();
-        patrolPath2.add(new Point(2, 2)); // Start in first open floor tile
+        patrolPath2.add(new Point(2, 2));
         patrolPath2.add(new Point(8, 2));
         patrolPath2.add(new Point(8, 7));
         patrolPath2.add(new Point(2, 7));
         patrolPath2.add(new Point(2, 2));
 
         List<Point> patrolPath3 = new ArrayList<>();
-        patrolPath3.add(new Point(26, 1)); // Start in first open floor tile
+        patrolPath3.add(new Point(26, 1));
         patrolPath3.add(new Point(26, 10));
         patrolPath3.add(new Point(26, 1));
 
@@ -343,11 +338,11 @@ public class GamePanel extends JPanel {
                     if (distance < requiredDistance) {
                         if (player.getHunger() <= 0) {
                             System.out.println("GAME OVER: Player caught with zero hunger!");
-                            soundManager.stopSound("music"); // Stop background music
+                            soundManager.stopSound("music");
                             soundManager.stopSound("chasing");
-                            soundManager.playSound("gameOver"); // Play game over sound
-                            currentState = GameState.GAME_OVER; // Set game state to GAME_OVER
-                            return; // Exit updateGame immediately
+                            soundManager.playSound("gameOver"); 
+                            currentState = GameState.GAME_OVER;
+                            return;
                         }
                         if (currentSpider.isChasing()) { // We'll add this method next
                             if (player.isCrying()) { // check baby is crying if crying then game over
@@ -387,7 +382,6 @@ public class GamePanel extends JPanel {
                     player.eat(25); // Heal for a nice chunk of health
                     soundManager.playSound("eat");
                     foods.remove(i);
-                    //spawnFood();
                 }
             }
             if (player.getHunger() <= 0 && !player.isCrying()) {
@@ -469,7 +463,7 @@ public class GamePanel extends JPanel {
                 }
                 
                 // Draw snail before spiders (so it appears behind them)
-                if (snail != null/* && snail.isVisible()*/) {
+                if (snail != null && snail.isVisible()) {
                     System.out.println("Drawing snail at: " + snail.getX() + ", " + snail.getY());
                     snail.draw(entityG2d);
                 }
@@ -512,7 +506,7 @@ public class GamePanel extends JPanel {
 
         } else if (currentState == GameState.GAME_OVER) {
             // --- Game Over (uses g2d) ---
-            //if (player != null)
+            //if (player != null) no need of repeat calling to reset
             //    player.reset();
             g2d.setColor(new Color(0, 0, 0, 150));
             g2d.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);

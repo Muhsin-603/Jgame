@@ -155,7 +155,6 @@ public class Snail {
         if (!showingDialog) {
             showingDialog = true;
             currentDialogue = 0;
-            //currentDialogue = (currentDialogue + 1) % dialogues.length;
         } else {
             currentDialogue++;
             //currentDialogue = (currentDialogue + 1) % dialogues.length;
