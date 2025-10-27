@@ -37,7 +37,7 @@ public class GamePanel extends JPanel {
     private MainMenu mainMenu;
     private SoundManager soundManager;
     private int pauseMenuSelection = 0;
-    private String[] pauseOptions = { "Resume", "Quit to Menu" };
+    private String[] pauseOptions = { "Resume", "Restart", "Quit to Menu" };
     private Point snailTeleportTarget;
     private boolean snailHasTeleported = false;
 
@@ -151,6 +151,8 @@ public class GamePanel extends JPanel {
                     if (pauseOptions[pauseMenuSelection].equals("Resume")) {
                         currentState = GameState.PLAYING;
                         soundManager.loopSound("music"); // Resume game music
+                    } else if (pauseOptions[pauseMenuSelection].equals("Restart")) {
+                        restartGame();
                     } else if (pauseOptions[pauseMenuSelection].equals("Quit to Menu")) {
                         currentState = GameState.MAIN_MENU;
                         soundManager.loopSound("menuMusic"); // Start menu music
@@ -506,8 +508,8 @@ public class GamePanel extends JPanel {
 
         } else if (currentState == GameState.GAME_OVER) {
             // --- Game Over (uses g2d) ---
-            if (player != null)
-                player.reset();
+            //if (player != null)
+            //    player.reset();
             g2d.setColor(new Color(0, 0, 0, 150));
             g2d.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
