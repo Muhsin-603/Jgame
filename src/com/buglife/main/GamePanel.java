@@ -35,6 +35,8 @@ public class GamePanel extends JPanel {
     private SoundManager soundManager;
     private int pauseMenuSelection = 0;
     private String[] pauseOptions = { "Resume", "Quit to Menu" };
+    private Point snailTeleportTarget;
+    private boolean snailHasTeleported = false;
 
     private Snail snail;
 
@@ -201,11 +203,20 @@ public class GamePanel extends JPanel {
         setPreferredSize(new Dimension(VIRTUAL_WIDTH, VIRTUAL_HEIGHT));
         setFocusable(true);
         this.player = new Player(594, 2484, 32, 32);
-        snail = new Snail(534, 2464, player);
+        snail = new Snail(534, 2464);
+        snailTeleportTarget = new Point(1500, 300);
 
         spawnFood();
 
         addKeyListener(new KeyInputAdapter());
+        
+        
+    }
+    private boolean isRectOnScreen(int x, int y, int width, int height) {
+        return (x < cameraX + VIRTUAL_WIDTH &&
+                x + width > cameraX &&
+                y < cameraY + VIRTUAL_HEIGHT &&
+                y + height > cameraY);
     }
 
     public void restartGame() {
@@ -215,8 +226,9 @@ public class GamePanel extends JPanel {
         soundManager.loopSound("music");
         // In restartGame()
         if (snail != null) {
-            // Re-position or re-create the snail. Simple reset:
-            snail = new Snail(534, 2464, player); // Recreate it near the player
+            snail.setPosition(534, 2464); // Back to start
+            snail.show(); // Make sure it's visible
+            snailHasTeleported = false; // Reset the teleport flag
         }
 
         // 1. Reset the player.
@@ -254,7 +266,23 @@ public class GamePanel extends JPanel {
         if (currentState == GameState.PLAYING) {
             // In updateGame() -> inside the if (currentState == GameState.PLAYING) block
             if (snail != null) {
-                snail.update(world);
+                snail.update(world); // This just animates its idle
+
+                boolean isSnailOnScreen = isRectOnScreen(snail.getX(), snail.getY(), snail.getWidth(), snail.getHeight());
+                
+                // If the snail is currently visible, but the camera moves off it...
+                if (snail.isVisible() && !isSnailOnScreen && !snailHasTeleported) {
+                    System.out.println("Snail is off-screen, hiding...");
+                    snail.hide(); // Vanish!
+                }
+                
+                // If the snail is hidden (and hasn't teleported yet), move it!
+                if (!snail.isVisible() && !snailHasTeleported) {
+                    System.out.println("Snail teleporting to new location...");
+                    snail.setPosition(snailTeleportTarget.x, snailTeleportTarget.y);
+                    snail.show(); // Reappear!
+                    snailHasTeleported = true; // Only do this once
+                }
             }
             player.update(world, soundManager);
             handleSpiderAlerts();
@@ -407,8 +435,9 @@ public class GamePanel extends JPanel {
                         spider.draw(entityG2d);
                 if (food != null)
                     food.draw(entityG2d);
-                if (snail != null)
-                    snail.draw(entityG2d);
+                if (snail != null && snail.isVisible()) {
+                snail.draw(g2d);
+            }
             } finally {
                 entityG2d.dispose();
             }
