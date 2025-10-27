@@ -26,8 +26,10 @@ public class GamePanel extends JPanel {
     private List<Spider> spiders = new ArrayList<>();
     private Player player;
     private Food food;
-    private List<Point> foodsp;
-    private int currentFoodSpawnIndex = 0;
+    private List<Point> foodsp;// food array
+    private int currentFoodSpawnIndex = 0; // food current spot
+    private int foodst; // food respawn timer
+    private int FOOD_DELAY = 300;//food respawn delay (5 s)
     private World world;
     private int cameraX, cameraY;
     public static final int VIRTUAL_WIDTH = 1366;
@@ -265,7 +267,7 @@ public class GamePanel extends JPanel {
 
     private void initializeFoodSpawnPoints() { // food spawn coordinates to set
         foodsp = new ArrayList<>();
-        foodsp.add(new Point(5,5)); // coordinates
+        foodsp.add(new Point(16,25)); // coordinates
 
     }
     private void handleSpiderAlerts() {
@@ -365,6 +367,14 @@ public class GamePanel extends JPanel {
                 if (distanceFood < requiredDistanceFood) {
                     player.eat(25); // Heal for a nice chunk of health
                     soundManager.playSound("eat");
+                    food = null;
+                    foodst = FOOD_DELAY;
+                    //spawnFood();
+                }
+            } else {
+                if (foodst > 0) {
+                    foodst--;
+                }else {
                     spawnFood();
                 }
             }
