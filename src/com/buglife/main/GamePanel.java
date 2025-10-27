@@ -454,46 +454,45 @@ public class GamePanel extends JPanel {
 
         else if (currentState == GameState.PAUSED) {
             // --- 1. First, draw the game world in the background ---
-            // This makes it look like we're pausing *over* the game
-            world.render(g, cameraX, cameraY, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+            world.render(g2d, cameraX, cameraY, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
+            // Create a new Graphics2D for entities
+            Graphics2D pauseG2d = (Graphics2D) g2d.create();
             try {
-                g2d.translate(-cameraX, -cameraY);
+                pauseG2d.translate(-cameraX, -cameraY);
                 if (player != null)
-                    player.render(g2d, world);
+                    player.render(pauseG2d, world);
                 for (Spider spider : spiders)
                     if (spider != null)
-                        spider.draw(g2d);
+                        spider.draw(pauseG2d);
                 if (food != null)
-                    food.draw(g2d);
+                    food.draw(pauseG2d);
                 if (snail != null)
-                    snail.draw(g2d);
+                    snail.draw(pauseG2d);
             } finally {
-                g2d.dispose();
+                pauseG2d.dispose();
             }
-            // Also draw the HUD
-            // ... (copy/paste your HUD drawing code here: hunger bar, etc.) ...
 
             // --- 2. Now, draw the pause menu overlay on top ---
-            g.setColor(new Color(0, 0, 0, 150)); // Dark overlay
-            g.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+            g2d.setColor(new Color(0, 0, 0, 150)); // Dark overlay
+            g2d.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
-            g.setColor(Color.WHITE);
-            g.setFont(new Font("Consolas", Font.BOLD, 80));
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Consolas", Font.BOLD, 80));
             String msg = "PAUSED";
-            int msgWidth = g.getFontMetrics().stringWidth(msg);
-            g.drawString(msg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT / 3);
+            int msgWidth = g2d.getFontMetrics().stringWidth(msg);
+            g2d.drawString(msg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT / 3);
 
             // Draw options
-            g.setFont(new Font("Consolas", Font.PLAIN, 40));
+            g2d.setFont(new Font("Consolas", Font.PLAIN, 40));
             for (int i = 0; i < pauseOptions.length; i++) {
                 if (i == pauseMenuSelection) {
-                    g.setColor(Color.YELLOW);
+                    g2d.setColor(Color.YELLOW);
                 } else {
-                    g.setColor(Color.WHITE);
+                    g2d.setColor(Color.WHITE);
                 }
-                int optionWidth = g.getFontMetrics().stringWidth(pauseOptions[i]);
-                g.drawString(pauseOptions[i], (VIRTUAL_WIDTH - optionWidth) / 2, VIRTUAL_HEIGHT / 2 + i * 60);
+                int optionWidth = g2d.getFontMetrics().stringWidth(pauseOptions[i]);
+                g2d.drawString(pauseOptions[i], (VIRTUAL_WIDTH - optionWidth) / 2, VIRTUAL_HEIGHT / 2 + i * 60);
             }
         }
 

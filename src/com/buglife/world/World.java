@@ -113,6 +113,17 @@ public class World {
             BufferedImage shadowImage = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/shadow_tile.png"));
             tileTypes[5] = new Tile(shadowImage, false);
             
+
+            //stain floor
+             BufferedImage mtile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/stain_1.png"));
+            tileTypes[6] = new Tile(mtile1, false);
+             BufferedImage mtile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/stain_2.png"));
+            tileTypes[7] = new Tile(mtile2, false); 
+             BufferedImage mtile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/stain_3.png"));
+            tileTypes[8] = new Tile(mtile3, false); 
+             BufferedImage mtile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/stain_4.png"));
+            tileTypes[9] = new Tile(mtile4, false);
+
             //chimney intro tiles
             BufferedImage itile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/introtile1.png"));
             tileTypes[41] = new Tile(itile1, false);
@@ -148,13 +159,13 @@ public class World {
             tileTypes[38] = new Tile(ltile4, true);
 
             //sack prop tiles
-             BufferedImage stile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_n.png"));
+             BufferedImage stile1 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_w1.png"));
             tileTypes[11] = new Tile(stile1, true);
-             BufferedImage stile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_s.png"));
+             BufferedImage stile2 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_w2.png"));
             tileTypes[12] = new Tile(stile2, true); 
-             BufferedImage stile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_w.png"));
-            tileTypes[13] = new Tile(stile3, true); 
-             BufferedImage stile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_e.png"));
+             BufferedImage stile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_w3.png"));
+            tileTypes[13] = new Tile(stile3, false); 
+             BufferedImage stile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_w4.png"));
             tileTypes[14] = new Tile(stile4, true);;
 
 
