@@ -154,14 +154,20 @@ public class Snail {
     public void interact() {
         if (!showingDialog) {
             showingDialog = true;
+            currentDialogue = 0;
             //currentDialogue = (currentDialogue + 1) % dialogues.length;
         } else {
-            currentDialogue = (currentDialogue + 1) % dialogues.length;
+            currentDialogue++;
+            //currentDialogue = (currentDialogue + 1) % dialogues.length;
+            if (currentDialogue >= dialogues.length) {
+                closeDialog();
+            }
         }
     }
 
     public void closeDialog() {
         showingDialog = false;
+        currentDialogue = 0;
     }
 
     // Add new method for drawing dialogue box
