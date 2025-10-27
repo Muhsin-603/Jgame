@@ -107,6 +107,13 @@ public class GamePanel extends JPanel {
                     soundManager.stopSound("chasing");
                     // soundManager.playSound("pause_jingle"); // (If you add one later)
                 }
+                // Add interaction key for Snail
+                if (key == KeyEvent.VK_E) {
+                    if (snail != null && snail.canInteract(player)) {
+                        snail.interact();
+                        soundManager.playSound("menu"); // Or create a new "talk" sound
+                    }
+                }
             } else if (currentState == GameState.GAME_OVER) {
                 // --- SCENE 3: THE TRAGIC ENDING ---
                 if (key == KeyEvent.VK_ENTER) {
@@ -203,7 +210,7 @@ public class GamePanel extends JPanel {
         setPreferredSize(new Dimension(VIRTUAL_WIDTH, VIRTUAL_HEIGHT));
         setFocusable(true);
         this.player = new Player(594, 2484, 32, 32);
-        snail = new Snail(534, 2464);
+        snail = new Snail(534, 2464, player);
         snailTeleportTarget = new Point(1500, 300);
 
         spawnFood();
@@ -266,22 +273,25 @@ public class GamePanel extends JPanel {
         if (currentState == GameState.PLAYING) {
             // In updateGame() -> inside the if (currentState == GameState.PLAYING) block
             if (snail != null) {
-                snail.update(world); // This just animates its idle
+                snail.update(world);
 
-                boolean isSnailOnScreen = isRectOnScreen(snail.getX(), snail.getY(), snail.getWidth(), snail.getHeight());
+                boolean isSnailOnScreen = isRectOnScreen(
+                    snail.getX(), 
+                    snail.getY(), 
+                    snail.getWidth(), 
+                    snail.getHeight()
+                );
                 
-                // If the snail is currently visible, but the camera moves off it...
-                if (snail.isVisible() && !isSnailOnScreen && !snailHasTeleported) {
-                    System.out.println("Snail is off-screen, hiding...");
-                    snail.hide(); // Vanish!
-                }
-                
-                // If the snail is hidden (and hasn't teleported yet), move it!
-                if (!snail.isVisible() && !snailHasTeleported) {
-                    System.out.println("Snail teleporting to new location...");
-                    snail.setPosition(snailTeleportTarget.x, snailTeleportTarget.y);
-                    snail.show(); // Reappear!
-                    snailHasTeleported = true; // Only do this once
+                // Only hide and teleport if we haven't done it yet
+                if (!snailHasTeleported) {
+                    if (snail.isVisible() && !isSnailOnScreen) {
+                        System.out.println("Snail is off-screen, preparing to teleport...");
+                        snail.hide();
+                        // Add a delay before teleporting (optional)
+                        snail.setPosition(snailTeleportTarget.x, snailTeleportTarget.y);
+                        snail.show();
+                        snailHasTeleported = true;
+                    }
                 }
             }
             player.update(world, soundManager);
@@ -385,6 +395,7 @@ public class GamePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g.create();
 
         // --- 1. THE SCALING CALCULATIONS ---
         // Get the actual, physical size of our fullscreen window
@@ -392,7 +403,7 @@ public class GamePanel extends JPanel {
         int realScreenHeight = getHeight();
 
         // Create a new, temporary graphics object to draw on
-        Graphics2D g2d = (Graphics2D) g.create();
+        // Graphics2D g2d = (Graphics2D) g.create();
 
         // Calculate how much to scale our virtual game to fit the real screen
         double scaleX = (double) realScreenWidth / VIRTUAL_WIDTH;
@@ -421,27 +432,40 @@ public class GamePanel extends JPanel {
         // The g2d object will handle all the scaling and centering automatically!
 
         if (currentState == GameState.PLAYING) {
-            // --- 1. Draw the World (pass VIRTUAL size for culling) ---
+            // Draw world first
             world.render(g2d, cameraX, cameraY, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
-            // --- 2. Draw Entities (affected by camera) ---
+            // Draw all entities with camera translation
             Graphics2D entityG2d = (Graphics2D) g2d.create();
             try {
                 entityG2d.translate(-cameraX, -cameraY);
-                if (player != null)
+                
+                // Draw player
+                if (player != null) {
                     player.render(entityG2d, world);
-                for (Spider spider : spiders)
-                    if (spider != null)
-                        spider.draw(entityG2d);
-                if (food != null)
-                    food.draw(entityG2d);
+                }
+                
+                // Draw snail before spiders (so it appears behind them)
                 if (snail != null && snail.isVisible()) {
-                snail.draw(g2d);
-            }
+                    System.out.println("Drawing snail at: " + snail.getX() + ", " + snail.getY());
+                    snail.draw(entityG2d);
+                }
+                
+                // Draw spiders
+                for (Spider spider : spiders) {
+                    if (spider != null) {
+                        spider.draw(entityG2d);
+                    }
+                }
+                
+                // Draw food
+                if (food != null) {
+                    food.draw(entityG2d);
+                }
             } finally {
                 entityG2d.dispose();
             }
-
+            
             // --- 3. DRAW HUD (fixed on screen, uses g2d) ---
             // Hunger Bar
             g2d.setColor(Color.DARK_GRAY);
