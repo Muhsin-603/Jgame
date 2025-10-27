@@ -26,6 +26,7 @@ public class Player {
     private final int CRY_DEATH_DURATION = 20 * 60;
     private boolean isLowHungerWarningPlayed = false;
     private final int LOW_HUNGER_THRESHOLD = 0;
+    private BufferedImage webbedSprite;
 
     // This tracks hunger and crying mechanics
 
@@ -113,42 +114,28 @@ public class Player {
 
     // Replace your existing render method with this one in Player.java
     public void render(Graphics g, World world) {
-        List<BufferedImage> currentAnimation = getActiveAnimation();
-        // Safety check for null or empty animation list
-        if (currentAnimation == null || currentAnimation.isEmpty()) {
-            g.setColor(Color.MAGENTA); // Draw magenta square if animation is broken
-            g.fillRect((int) this.x, (int) this.y, this.width, this.height);
-            System.err.println("Player Render Error: Animation list is null or empty for state " + currentState);
-            return;
-        }
-        // Safety check for currentFrame index
-        if (currentFrame < 0 || currentFrame >= currentAnimation.size()) {
-            g.setColor(Color.BLUE); // Draw blue square if frame index is wrong
-            g.fillRect((int) this.x, (int) this.y, this.width, this.height);
-            System.err.println("Player Render Error: currentFrame index (" + currentFrame + ") out of bounds for state "
-                    + currentState);
-            currentFrame = 0; // Attempt to reset frame index
-            return; // Avoid crash on next line
-        }
-
-        BufferedImage imageToDraw = currentAnimation.get(currentFrame);
-
-        // Create our disposable canvas for potential effects
         Graphics2D g2d = (Graphics2D) g.create();
         try {
-            // Stealth transparency check
+            // Check for shadow tile transparency
             int playerTileCol = getCenterX() / World.TILE_SIZE;
             int playerTileRow = getCenterY() / World.TILE_SIZE;
-            if (world.getTileIdAt(playerTileCol, playerTileRow) == 5) { // Shadow tile ID
+            if (world.getTileIdAt(playerTileCol, playerTileRow) == 5) {
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
             }
 
-            // Draw the image normally using the advanced Graphics2D object
-            // Coordinates need casting if player x/y are doubles
-            g2d.drawImage(imageToDraw, (int) this.x, (int) this.y, this.width, this.height, null);
-
+            // Use webbed sprite if in webbed state
+            if (currentState == PlayerState.WEBBED && webbedSprite != null) {
+                g2d.drawImage(webbedSprite, (int)x, (int)y, width, height, null);
+            } else {
+                // ...existing animation rendering code...
+                List<BufferedImage> currentAnimation = getActiveAnimation();
+                if (currentAnimation != null && !currentAnimation.isEmpty()) {
+                    BufferedImage imageToDraw = currentAnimation.get(currentFrame);
+                    g2d.drawImage(imageToDraw, (int)x, (int)y, width, height, null);
+                }
+            }
         } finally {
-            g2d.dispose(); // Dispose the copy
+            g2d.dispose();
         }
     }
 
@@ -217,21 +204,26 @@ public class Player {
         walkRightFrames = new ArrayList<>();
 
         try {
+            // Load main sprite sheet
             BufferedImage spriteSheet = ImageIO.read(getClass().getResourceAsStream("/res/sprites/player/pla.png"));
+            
+            // Load webbed state sprite in the same try block
+            webbedSprite = ImageIO.read(getClass().getResourceAsStream("/res/sprites/player/webbed_state.png"));
+            if (webbedSprite == null) {
+                System.err.println("Failed to load webbed state sprite!");
+            }
 
             // --- Sprite Dimensions ---
             final int SPRITE_WIDTH = 13;
             final int SPRITE_HEIGHT = 28;
 
             // --- !!! YOUR EXACT MEASUREMENTS !!! ---
-            final int PADDING_LEFT = 25; // X offset of the very first sprite
-            final int PADDING_TOP = 15; // Y offset of the very first sprite
-            final int HORIZONTAL_SPACING = 64; // Calculated pixels between sprite starts horizontally
-            final int VERTICAL_SPACING = 64; // Calculated pixels between sprite starts vertically
+            final int PADDING_LEFT = 25;
+            final int PADDING_TOP = 15;
+            final int HORIZONTAL_SPACING = 64;
+            final int VERTICAL_SPACING = 64;
 
-            // Helper function to calculate exact coordinates using your measurements
-            // Calculates X based on padding, column index, and spacing
-            // Calculates Y based on padding, row index, and spacing
+            // Your existing coordinate calculation helper
             IntBinaryOperator getX = (col, row) -> PADDING_LEFT + col * HORIZONTAL_SPACING;
             IntBinaryOperator getY = (col, row) -> PADDING_TOP + row * VERTICAL_SPACING;
 
@@ -268,7 +260,7 @@ public class Player {
             System.out.println("Loaded " + walkDownFrames.size() + " walk down frames."); // Keep confirmation prints
 
         } catch (Exception e) {
-            System.err.println("CRASH! Could not slice player sheet. Double-check measurements!");
+            System.err.println("CRASH! Could not load sprites or slice player sheet!");
             e.printStackTrace();
         }
     }
