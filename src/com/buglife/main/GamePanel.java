@@ -498,17 +498,14 @@ public class GamePanel extends JPanel {
         }
 
         else if (currentState == GameState.MAIN_MENU) {
-            // --- Main Menu (uses g2d) ---
+            
             mainMenu.draw(g2d);
         }
 
-        // 4. Clean up the graphics object
+        
         g2d.dispose();
 
-        // An inner class for handling key inputs. This is a clean way to do it.
-        // Inside GamePanel.java
-
-        // Inside GamePanel.java
+        
     }
 
 }
