@@ -25,11 +25,11 @@ public class GamePanel extends JPanel {
 
     private List<Spider> spiders = new ArrayList<>();
     private Player player;
-    private Food food;
+    private List<Food> foods = new ArrayList<>();
     private List<Point> foodsp;// food array
-    private int currentFoodSpawnIndex = 0; // food current spot
+    /*private int currentFoodSpawnIndex = 0; // food current spot
     private int foodst; // food respawn timer
-    private int FOOD_DELAY = 300;//food respawn delay (5 s)
+    private int FOOD_DELAY = 300;//food respawn delay (5 s)*/
     private World world;
     private int cameraX, cameraY;
     public static final int VIRTUAL_WIDTH = 1366;
@@ -258,7 +258,6 @@ public class GamePanel extends JPanel {
             }
         }
 
-        // 3. Respawn the food.
         spawnFood();
 
         // 4. Set the scene back to the beginning.
@@ -267,7 +266,11 @@ public class GamePanel extends JPanel {
 
     private void initializeFoodSpawnPoints() { // food spawn coordinates to set
         foodsp = new ArrayList<>();
-        foodsp.add(new Point(16,25)); // coordinates
+        foodsp.add(new Point(16,27)); // coordinates (first point)
+        foodsp.add(new Point(34,25));
+        foodsp.add(new Point(22,10));
+        
+        
 
     }
     private void handleSpiderAlerts() {
@@ -367,24 +370,18 @@ public class GamePanel extends JPanel {
 
             // 2. Create the spider and give it the track
 
-            if (food != null) {
-                double dxFood = player.getCenterX() - food.getCenterX();
-                double dyFood = player.getCenterY() - food.getCenterY();
+            for (int i = foods.size() - 1;i >= 0; i--) {
+                Food currFood = foods.get(i);
+                double dxFood = player.getCenterX() - currFood.getCenterX();
+                double dyFood = player.getCenterY() - currFood.getCenterY();
                 double distanceFood = Math.sqrt(dxFood * dxFood + dyFood * dyFood);
-                double requiredDistanceFood = player.getRadius() + food.getRadius();
+                double requiredDistanceFood = player.getRadius() + currFood.getRadius();
 
                 if (distanceFood < requiredDistanceFood) {
                     player.eat(25); // Heal for a nice chunk of health
                     soundManager.playSound("eat");
-                    food = null;
-                    foodst = FOOD_DELAY;
+                    foods.remove(i);
                     //spawnFood();
-                }
-            } else {
-                if (foodst > 0) {
-                    foodst--;
-                }else {
-                    spawnFood();
                 }
             }
             if (player.getHunger() <= 0 && !player.isCrying()) {
@@ -398,18 +395,18 @@ public class GamePanel extends JPanel {
     }
 
     public void spawnFood() { // the food spawn system changed to new
+        foods.clear();
         if ( foodsp == null || foodsp.isEmpty()) {
             System.out.println("Warning : no food spawned");
             return;
         }
-        Point spawnTile = foodsp.get(currentFoodSpawnIndex);
+        for (Point spawnTile : foodsp) {
         int foodX = spawnTile.x * World.TILE_SIZE + (World.TILE_SIZE / 4);
         int foodY = spawnTile.y * World.TILE_SIZE + (World.TILE_SIZE / 4);
-
-        food = new Food(foodX, foodY, 20);//to create nw foodat specified loc
-        System.out.println("Food Spawned at (" + spawnTile.x +"," + spawnTile.y + ")");
-        currentFoodSpawnIndex = (currentFoodSpawnIndex + 1) % foodsp.size();
+        foods.add(new Food(foodX, foodY, 20));
         }
+        System.out.println("Food Spawned" + foods.size() + "count");
+    }
 
     // The paintComponent method now tells the player to draw itself
     @Override
@@ -479,8 +476,10 @@ public class GamePanel extends JPanel {
                 }
                 
                 // Draw food
-                if (food != null) {
-                    food.draw(entityG2d);
+                for (Food currFood : foods) {
+                    if (currFood != null) {
+                        currFood.draw(entityG2d);
+                    }
                 }
             } finally {
                 entityG2d.dispose();
@@ -538,8 +537,11 @@ public class GamePanel extends JPanel {
                 for (Spider spider : spiders)
                     if (spider != null)
                         spider.draw(pauseG2d);
-                if (food != null)
-                    food.draw(pauseG2d);
+                for (Food currFood : foods) {
+                    if (currFood != null) {
+                        currFood.draw(pauseG2d);
+                    }
+                }
                 if (snail != null)
                     snail.draw(pauseG2d);
             } finally {
