@@ -88,7 +88,7 @@ public class Player {
         // --- THE FIX ---
         // Reset web status completely
         this.webbedTimer = 0;
-        this.webStrength = 0;
+        this.webStrength = WEB_ESCAPE_REQUIRED;
         //this.WEB_ESCAPE_REQUIRED = 4;
 
         // Make sure movement flags are off
@@ -300,6 +300,31 @@ public class Player {
         }
     }
 
+    private void updateHungerAndCrying(SoundManager soundManager) {
+        if (isCrying) {
+            cryDeathTimer--;
+            if (cryDeathTimer <= 0) {
+                System.out.println("PLAYER: Died from hunger/crying.");
+                this.hunger = 0; 
+            }
+        } else {
+            hungerDrainTimer++;
+            if (hungerDrainTimer > 180) { // Drain 1 hunger every 3 seconds
+                this.hunger--;
+                hungerDrainTimer = 0;
+                if (this.hunger <= 0) {
+                    this.hunger = 0;
+                    if (!isCrying) {
+                        System.out.println("PLAYER: WAAAAAAH! Hunger is zero!");
+                        this.isCrying = true;
+                        this.cryDeathTimer = CRY_DEATH_DURATION;
+                    }
+                }
+            }
+        }
+        checkLowHunger(soundManager);
+    }
+
     /**
      * Updates the player's position based on movement flags. This will be called in
      * the main game loop.
@@ -327,7 +352,7 @@ public class Player {
                 // Normal webbed countdown
                 webbedTimer--;
                 if (webbedTimer <= 0) {
-                    System.out.println("PLAYER: Died from weebed state");
+                    System.out.println("PLAYER: Died from webbed state");
                     this.hunger = 0;
                     this.isCrying = true;
                     /// currentState = PlayerState.IDLE_DOWN;
@@ -335,38 +360,7 @@ public class Player {
                 return; // Still can't move while webbed (unless instantly dead)
             }
         }
-
-        if (isCrying) {
-            // If crying, the death timer ticks down
-            cryDeathTimer--;
-            System.out.println("Crying! Time until death: " + cryDeathTimer / 60); // Debug print seconds left
-
-            if (cryDeathTimer <= 0) {
-                System.out.println("PLAYER: Died from hunger/crying.");
-                this.hunger = 0; // Ensure hunger is 0 for Game Over check
-            }
-            // Player can potentially still move while crying (unless you want them frozen?)
-            // If you want them frozen while crying, add a 'return;' here.
-        } else {
-            // --- Normal Hunger Drain (Only if NOT crying) ---
-            hungerDrainTimer++;
-            if (hungerDrainTimer > 180) { // Drain 1 hunger every 3 seconds
-                this.hunger--;
-                hungerDrainTimer = 0;
-                // System.out.println("Hunger: " + this.hunger); // Optional debug
-
-                if (this.hunger <= 0) {
-                    this.hunger = 0;
-                    if (!isCrying) { // Start crying ONLY if not already crying
-                        System.out.println("PLAYER: WAAAAAAH! Hunger is zero!");
-                        this.isCrying = true;
-                        this.cryDeathTimer = CRY_DEATH_DURATION; // Start the 20-second death timer
-                        // Maybe play a continuous cry sound loop here? soundManager.loopSound("cry");
-                    }
-                }
-            }
-        }
-        checkLowHunger(soundManager);
+        updateHungerAndCrying(soundManager);
 
         if (currentState != PlayerState.WEBBED) {
             // --- If we are NOT webbed, proceed with normal life ---
@@ -412,24 +406,10 @@ public class Player {
 
                 if (!world.isTileSolid(nextLeft, nextTop) && !world.isTileSolid(nextRight, nextTop)
                         && !world.isTileSolid(nextLeft, nextBottom) && !world.isTileSolid(nextRight, nextBottom)) {
-                    x = (int) nextX;
-                    y = (int) nextY;
+                    x = nextX;
+                    y = nextY;
                 }
             }
-
-            // 3. Hunger Drain (runs only when not webbed)
-            hungerDrainTimer++;
-            if (hungerDrainTimer > 120) {
-                this.hunger--;
-                hungerDrainTimer = 0;
-                // Check if hunger is depleted
-                if (this.hunger <= 0) {
-                    this.hunger = 0;
-                    System.out.println("PLAYER: WAAAAAAH!");
-                    this.isCrying = true;
-                }
-            }
-
             // 4. Animation
             boolean isMoving = movingUp || movingDown || movingLeft || movingRight;
             if (isMoving) {
