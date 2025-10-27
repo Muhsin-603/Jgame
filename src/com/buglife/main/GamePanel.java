@@ -1,6 +1,6 @@
 package src.com.buglife.main;
 
-import java.util.Random;
+//import java.util.Random; no use now so commented if we need to use in future
 
 import src.com.buglife.assets.SoundManager;
 import src.com.buglife.entities.Food;
@@ -26,9 +26,10 @@ public class GamePanel extends JPanel {
     private List<Spider> spiders = new ArrayList<>();
     private Player player;
     private Food food;
+    private List<Point> foodsp;
+    private int currentFoodSpawnIndex = 0;
     private World world;
     private int cameraX, cameraY;
-    private Random rand = new Random();
     public static final int VIRTUAL_WIDTH = 1366;
     public static final int VIRTUAL_HEIGHT = 768;
     private MainMenu mainMenu;
@@ -219,6 +220,7 @@ public class GamePanel extends JPanel {
         snail = new Snail(534, 2464, player);
         snailTeleportTarget = new Point(1500, 300);
 
+        initializeFoodSpawnPoints();
         spawnFood();
 
         addKeyListener(new KeyInputAdapter());
@@ -261,6 +263,11 @@ public class GamePanel extends JPanel {
         currentState = GameState.PLAYING;
     }
 
+    private void initializeFoodSpawnPoints() { // food spawn coordinates to set
+        foodsp = new ArrayList<>();
+        foodsp.add(new Point(5,5)); // coordinates
+
+    }
     private void handleSpiderAlerts() {
         if (player.isCrying()) {
             for (Spider spider : spiders) {
@@ -371,31 +378,19 @@ public class GamePanel extends JPanel {
 
     }
 
-    public void spawnFood() {
-        int maxTries = 100; // Give it 100 attempts to find a spot.
-        int tries = 0;
-
-        while (tries < maxTries) {
-            int randomCol = rand.nextInt(world.getMapWidth());
-            int randomRow = rand.nextInt(world.getMapHeight());
-
-            // Check if the tile at that random spot is a floor tile (ID 0)
-            if (world.getTileIdAt(randomCol, randomRow) == 0) {
-                // Success! Create the food and exit.
-                int foodX = randomCol * World.TILE_SIZE + (World.TILE_SIZE / 4);
-                int foodY = randomRow * World.TILE_SIZE + (World.TILE_SIZE / 4);
-                food = new Food(foodX, foodY, 20);
-                System.out.println("Food spawned successfully at [" + randomCol + ", " + randomRow + "]");
-                return; // We're done, exit the method.
-            }
-
-            tries++; // Increment our attempt counter.
+    public void spawnFood() { // the food spawn system changed to new
+        if ( foodsp == null || foodsp.isEmpty()) {
+            System.out.println("Warning : no food spawned");
+            return;
         }
+        Point spawnTile = foodsp.get(currentFoodSpawnIndex);
+        int foodX = spawnTile.x * World.TILE_SIZE + (World.TILE_SIZE / 4);
+        int foodY = spawnTile.y * World.TILE_SIZE + (World.TILE_SIZE / 4);
 
-        // If the loop finishes without finding a spot, we print a warning.
-        System.err.println(
-                "WARNING: Could not find a valid spot to spawn food after " + maxTries + " tries. Is your map full?");
-    }
+        food = new Food(foodX, foodY, 20);//to create nw foodat specified loc
+        System.out.println("Food Spawned at (" + spawnTile.x +"," + spawnTile.y + ")");
+        currentFoodSpawnIndex = (currentFoodSpawnIndex + 1) % foodsp.size();
+        }
 
     // The paintComponent method now tells the player to draw itself
     @Override
