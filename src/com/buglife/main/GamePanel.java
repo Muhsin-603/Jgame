@@ -652,6 +652,8 @@ public class GamePanel extends JPanel {
         }
 
         else if (currentState == GameState.MAIN_MENU) {
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
             
             mainMenu.draw(g2d);
         }
