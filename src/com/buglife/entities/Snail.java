@@ -28,8 +28,7 @@ public class Snail {
     private int currentLocationIndex = 0;
 
     // --- Glow effect ---
-    private int glowRadius = 50;
-    private Color glowColor = new Color(255, 255, 150, 60);
+    
 
     // Add new fields for NPC behavior
     private static final int INTERACTION_RADIUS = 50;
@@ -114,9 +113,9 @@ public class Snail {
         Graphics2D g2d = (Graphics2D) g.create();
         try {
             // Draw glow effect
-            g2d.setColor(glowColor);
+            /*g2d.setColor(glowColor);
             g2d.fillOval((int)x - glowRadius, (int)y - glowRadius, 
-                         glowRadius * 2, glowRadius * 2);
+                         glowRadius * 2, glowRadius * 2);*/
 
             // Draw snail sprite
             if (idleFrames != null && !idleFrames.isEmpty()) {
