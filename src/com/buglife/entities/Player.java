@@ -27,6 +27,7 @@ public class Player {
     private boolean isLowHungerWarningPlayed = false;
     private final int LOW_HUNGER_THRESHOLD = 0;
     private BufferedImage webbedSprite;
+    private boolean onLevelCompleteTile = false;
 
     // This tracks hunger and crying mechanics
 
@@ -100,6 +101,9 @@ public class Player {
         this.movingLeft = false;
         this.movingRight = false;
         // this.isFacingLeft = false; // Reset facing direction
+
+        //game win
+        this.onLevelCompleteTile = false;
     }
 
     // Add this method to Player.java
@@ -327,6 +331,8 @@ public class Player {
     public void update(World world, SoundManager soundManager) {
         // --- First, check for paralysis ---
         // Inside Player.java's update() method...
+        int playerTileCol = getCenterX() / World.TILE_SIZE;
+        int playerTileRow = getCenterY() / World.TILE_SIZE;
         int currentTileCol = getCenterX() / World.TILE_SIZE;
         int currentTileRow = getCenterY() / World.TILE_SIZE;
         int tileID = world.getTileIdAt(currentTileCol, currentTileRow);
@@ -334,6 +340,11 @@ public class Player {
             this.currentSpeed = SLOW_SPEED;
         } else {
             this.currentSpeed = NORMAL_SPEED;
+        }
+        if (world.getTileIdAt(playerTileCol, playerTileRow) == 37) {
+            this.onLevelCompleteTile = true;
+        } else {
+            this.onLevelCompleteTile = false; // Ensure it's false when not on the tile
         }
 
         if (currentState == PlayerState.WEBBED) {
@@ -415,6 +426,9 @@ public class Player {
                 currentFrame = 0;
             }
         }
+    }
+    public boolean isOnLevelCompleteTile() {
+        return this.onLevelCompleteTile;
     }
 
     private List<BufferedImage> getActiveAnimation() {

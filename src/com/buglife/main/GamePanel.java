@@ -44,7 +44,7 @@ public class GamePanel extends JPanel {
     private int nextSnailLocationIndex = 1;
 
     public enum GameState {
-        MAIN_MENU, PLAYING, GAME_OVER, PAUSED
+        MAIN_MENU, PLAYING, GAME_OVER, PAUSED, LEVEL_COMPLETE
     }
 
     private GameState currentState;
@@ -157,6 +157,17 @@ public class GamePanel extends JPanel {
                         soundManager.loopSound("menuMusic"); // Start menu music
                     }
                 }
+            }
+            else if (currentState == GameState.LEVEL_COMPLETE) { // Use 'else if' here
+                if (key == KeyEvent.VK_ENTER) {
+                    // For now, let's go back to the main menu
+                    // Later, this could load the next level
+                    currentState = GameState.MAIN_MENU;
+                    soundManager.stopAllSounds();
+                    // Make sure you have a sound file named "menu_music.wav"
+                    soundManager.loopSound("menuMusic"); 
+                }
+                // REMOVED the incorrect 'break;' statement
             }
         }
 
@@ -331,6 +342,11 @@ public class GamePanel extends JPanel {
                 if (interactionIsNeeded) {
                     canTeleport = canTeleport && playerHasInteractedWithSnail;
                 }
+                if (player.isOnLevelCompleteTile()) {
+                currentState = GameState.LEVEL_COMPLETE;
+                soundManager.stopAllSounds();
+                soundManager.playSound("level_complete"); // Optional: play a victory sound
+            }
                 
                 // Only hide and teleport if we haven't done it yet
                 if (canTeleport) {
@@ -587,6 +603,7 @@ public class GamePanel extends JPanel {
             } finally {
                 pauseG2d.dispose();
             }
+            
 
             // --- 2. Now, draw the pause menu overlay on top ---
             g2d.setColor(new Color(0, 0, 0, 150)); // Dark overlay
@@ -609,6 +626,29 @@ public class GamePanel extends JPanel {
                 int optionWidth = g2d.getFontMetrics().stringWidth(pauseOptions[i]);
                 g2d.drawString(pauseOptions[i], (VIRTUAL_WIDTH - optionWidth) / 2, VIRTUAL_HEIGHT / 2 + i * 60);
             }
+        }
+        else if (currentState == GameState.LEVEL_COMPLETE) {
+            // --- ADD THIS NEW DRAWING BLOCK ---
+            // First, draw the game world in the background
+            world.render(g2d, cameraX, cameraY, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+
+            // Draw a semi-transparent overlay
+            g2d.setColor(new Color(0, 100, 0, 150)); // A green overlay
+            g2d.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+
+            // Draw "Level Complete" text
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Consolas", Font.BOLD, 80));
+            String msg = "Level 1 Complete!";
+            int msgWidth = g2d.getFontMetrics().stringWidth(msg);
+            g2d.drawString(msg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT / 3);
+
+            // Draw instruction text
+            g2d.setFont(new Font("Consolas", Font.PLAIN, 40));
+            String continueMsg = "Press Enter to Continue";
+            int continueWidth = g2d.getFontMetrics().stringWidth(continueMsg);
+            g2d.drawString(continueMsg, (VIRTUAL_WIDTH - continueWidth) / 2, VIRTUAL_HEIGHT / 2);
+            // --- END of new block ---
         }
 
         else if (currentState == GameState.MAIN_MENU) {
