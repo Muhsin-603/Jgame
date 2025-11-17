@@ -566,6 +566,11 @@ public class GamePanel extends JPanel {
                 }
                 if (toy != null) {
                     toy.draw(entityG2d);
+                    
+                    // Draw interaction prompt if player is near
+                    if (!toy.isCarried() && toy.canPickUp(player)) {
+                        toy.drawInteractionPrompt(entityG2d);
+                    }
                 }
 
                 // Draw snail before spiders (so it appears behind them)

@@ -64,6 +64,7 @@ public class Toy {
         this.active = true;
         this.makingNoise = true;
         this.noiseTimer = NOISE_DURATION;
+        this.isCarried = false;
 
         velX = 0; velY = 0;
         if (direction.equals("UP")) velY = -THROW_SPEED;
@@ -94,6 +95,16 @@ public class Toy {
                 // This allows the player to pick it up from where it landed
             }
         }
+    }
+    public void drawInteractionPrompt(Graphics g) {
+        if (isCarried || !isSpawned || !canPickUp(null)) return; // Don't show if carried or can't interact
+        
+        g.setColor(new Color(255, 255, 255));
+        g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+        String prompt = "Press E to pick up";
+        java.awt.FontMetrics fm = g.getFontMetrics();
+        int promptWidth = fm.stringWidth(prompt);
+        g.drawString(prompt, getCenterX() - promptWidth/2, (int)y - 10);
     }
 
     public void draw(Graphics g) {
@@ -133,6 +144,7 @@ public class Toy {
 
     public boolean canPickUp(Player player) {
         if (isCarried || isSpawned == false) return false;
+        if (player == null) return true;
         
         double dx = player.getCenterX() - getCenterX();
         double dy = player.getCenterY() - getCenterY();
