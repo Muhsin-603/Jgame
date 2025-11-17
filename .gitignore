@@ -1,0 +1,15 @@
+# Ignore the compiled executable
+*.jar
+*.exe
+
+# Ignore compiled class files
+*.class
+
+# Ignore the build folders
+bin/
+out/
+target/
+
+# Ignore OS generated files
+Thumbs.db
+.DS_Store

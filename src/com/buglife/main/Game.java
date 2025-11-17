@@ -3,7 +3,7 @@ package src.com.buglife.main;
 import javax.swing.*;
 
 import src.com.buglife.assets.SoundManager;
-
+ 
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
