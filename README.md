@@ -81,7 +81,7 @@ Play as a lost **baby** crawling through the abandoned underground floors of a n
 
 ## ✍️ Team
 
-- **Team :** Muhsin,Sai, Rishnu, Shibili
+- **Team :** Muhsin, Sai, Rishnu, Shibili
 - **Creative Partner & Ghost Hunter:** Jenny (Gemini)  
 
 ---
