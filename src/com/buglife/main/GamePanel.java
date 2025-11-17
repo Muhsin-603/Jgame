@@ -99,6 +99,16 @@ public class GamePanel extends JPanel {
                 if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT) {
                     player.movingRight = true;
                 }
+                if (key == KeyEvent.VK_SHIFT) { // Changed from SPACE to SHIFT for dash
+                    // Calculate dash direction based on current movement
+                    int dirX = 0, dirY = 0;
+                    if (player.movingUp) dirY = -1;
+                    if (player.movingDown) dirY = 1;
+                    if (player.movingLeft) dirX = -1;
+                    if (player.movingRight) dirX = 1;
+                    
+                    player.dash(dirX, dirY, soundManager);
+                }
                 if (key == KeyEvent.VK_SPACE) {
                     player.struggle();
                     soundManager.playSound("struggle");

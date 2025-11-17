@@ -12,6 +12,15 @@ import src.com.buglife.world.World;
 
 public class Player {
     // Player attributes
+    private static final int DASH_SPEED = 8;
+    private static final int DASH_DURATION = 15; // ticks
+    private static final int DASH_COOLDOWN = 60; // ticks between dashes
+    private static final int DASH_HUNGER_COST = 15; // Hunger consumed per dash
+    private int dashDuration = 0;
+    private int dashCooldown = 0;
+    private double dashVelX = 0;
+    private double dashVelY = 0;
+    private boolean isDashing = false;
     private double x, y;
     private int width, height;
     private double currentSpeed; // How fast we are moving RIGHT NOW
@@ -73,6 +82,56 @@ public class Player {
     // Add this method anywhere inside your Player class
 
     // In Player.java
+    public void dash(int directionX, int directionY, SoundManager soundManager) {
+        // Check if player has enough hunger and cooldown is ready
+        if (dashCooldown <= 0 && !isDashing && hunger >= DASH_HUNGER_COST) {
+            // Normalize direction
+            double length = Math.sqrt(directionX * directionX + directionY * directionY);
+            if (length > 0) {
+                dashVelX = (directionX / length) * DASH_SPEED;
+                dashVelY = (directionY / length) * DASH_SPEED;
+            } else {
+                // If no direction, dash in the direction the player is facing
+                switch(currentState) {
+                    case WALKING_UP:
+                        dashVelY = -DASH_SPEED;
+                        break;
+                    case WALKING_DOWN:
+                        dashVelY = DASH_SPEED;
+                        break;
+                    case WALKING_LEFT:
+                        dashVelX = -DASH_SPEED;
+                        break;
+                    case WALKING_RIGHT:
+                        dashVelX = DASH_SPEED;
+                        break;
+                    default:
+                        dashVelY = DASH_SPEED; // Default down
+                }
+            }
+            
+            isDashing = true;
+            dashDuration = DASH_DURATION;
+            dashCooldown = DASH_COOLDOWN;
+            
+            // Consume hunger for the dash
+            this.hunger -= DASH_HUNGER_COST;
+            if (this.hunger < 0) {
+                this.hunger = 0;
+            }
+            
+            soundManager.playSound("dash"); // Play dash sound
+            System.out.println("Dashed! Hunger remaining: " + this.hunger);
+        } else if (dashCooldown > 0) {
+            System.out.println("Dash on cooldown!");
+        } else if (hunger < DASH_HUNGER_COST) {
+            System.out.println("Not enough hunger to dash! Need: " + DASH_HUNGER_COST + " | Have: " + this.hunger);
+        }
+    }
+
+    public boolean isDashing() {
+        return isDashing;
+    }
 
     public void reset() {
         // Reset position
@@ -101,6 +160,11 @@ public class Player {
         this.movingLeft = false;
         this.movingRight = false;
         // this.isFacingLeft = false; // Reset facing direction
+        this.isDashing = false;
+        this.dashDuration = 0;
+        this.dashCooldown = 0;
+        this.dashVelX = 0;
+        this.dashVelY = 0;
 
         //game win
         this.onLevelCompleteTile = false;
@@ -345,6 +409,29 @@ public class Player {
             this.onLevelCompleteTile = true;
         } else {
             this.onLevelCompleteTile = false; // Ensure it's false when not on the tile
+        }
+        if (dashCooldown > 0) {
+            dashCooldown--;
+        }
+        if (dashDuration > 0) {
+            dashDuration--;
+        } else {
+            isDashing = false;
+        }
+
+        // If currently dashing, apply dash velocity
+        if (isDashing) {
+            x += dashVelX;
+            y += dashVelY;
+            
+            // Check collision with walls during dash using the new checkCollision method
+            if (world.checkCollision((int)x, (int)y, width, height)) {
+                // Hit a wall, revert movement and stop dash
+                x -= dashVelX;
+                y -= dashVelY;
+                isDashing = false;
+            }
+            return; // Skip normal movement while dashing
         }
 
         if (currentState == PlayerState.WEBBED) {

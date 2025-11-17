@@ -30,6 +30,31 @@ public class World {
         // Return the tile ID from our map data
         return mapData[mapRow][mapCol];
     }
+    public boolean checkCollision(int x, int y, int width, int height) {
+        // Check all four corners of the bounding box
+        int left = x;
+        int right = x + width - 1;
+        int top = y;
+        int bottom = y + height - 1;
+
+        // Check if any corner hits a solid tile
+        if (isTileSolid(left, top)) return true;      // Top-left
+        if (isTileSolid(right, top)) return true;     // Top-right
+        if (isTileSolid(left, bottom)) return true;   // Bottom-left
+        if (isTileSolid(right, bottom)) return true;  // Bottom-right
+
+        // Also check the center for more accuracy
+        int centerX = x + width / 2;
+        int centerY = y + height / 2;
+        if (isTileSolid(centerX, centerY)) return true;
+
+        return false; // No collision detected
+    }
+
+    // Alternative overloaded version that accepts a center point and size
+    public boolean checkCollision(double centerX, double centerY, int width, int height) {
+        return checkCollision((int)(centerX - width/2.0), (int)(centerY - height/2.0), width, height);
+    }
 
     // Add this method to your World.java class
     public boolean isTileSolid(int worldX, int worldY) {
