@@ -19,9 +19,9 @@ public class Spider {
     private double x, y;
     private int width = 48, height = 48;
     private double speed;
-    private final double PATROL_SPEED = 1;      // default patrol movement speed (pixels/frame)
-    private final double CHASE_SPEED = 3;       // speed when actively chasing (adjust this)
-    private final double SLOW_CHASE_SPEED = 1.7;  // slow chase speed (used when not "crying")
+    private final double PATROL_SPEED = 1; // default patrol movement speed (pixels/frame)
+    private final double CHASE_SPEED = 3; // speed when actively chasing (adjust this)
+    private final double SLOW_CHASE_SPEED = 1.7; // slow chase speed (used when not "crying")
 
     private double rotationAngle = 90; // Start facing right (90 degrees from North)
 
@@ -49,6 +49,7 @@ public class Spider {
     }
 
     private SpiderState currentState; // A variable to hold the spider's current mood
+
     public void setReturnPoint(Point p) {
         this.returnPoint = p;
     }
@@ -130,7 +131,8 @@ public class Spider {
 
     // Method to force the spider into chase mode when alerted
     public void startChasing(Player targetPlayer, SoundManager soundManager) {
-        if (currentState == SpiderState.PATROLLING || currentState == SpiderState.RETURNING) { // Only switch if currently patrolling
+        if (currentState == SpiderState.PATROLLING || currentState == SpiderState.RETURNING) { // Only switch if
+                                                                                               // currently patrolling
             this.targetPlayer = targetPlayer; // Make sure it knows who to chase
             this.returnPoint = new Point(getCenterX(), getCenterY()); // Set return point
             this.currentState = SpiderState.CHASING;
@@ -166,113 +168,157 @@ public class Spider {
         this.targetPlayer = player;
 
         if (player.isCrying()) {
-        // Ignore everything else. KILL.
-        this.returnPoint = new Point(getCenterX(), getCenterY());
-        currentState = SpiderState.CHASING;
-        // (Your existing crying chase logic...)
-        speed = 3; // Fast!
-        chase(targetPlayer);
-        return; // Skip the rest of the state machine
-    }
+            // Ignore everything else. KILL.
+            this.returnPoint = new Point(getCenterX(), getCenterY());
+            currentState = SpiderState.CHASING;
+            // (Your existing crying chase logic...)
+            speed = 3; // Fast!
+            chase(targetPlayer);
+            return; // Skip the rest of the state machine
+        }
+        if (toy != null && toy.isMakingNoise()) {
+            double dxToy = toy.getCenterX() - getCenterX();
+            double dyToy = toy.getCenterY() - getCenterY();
+            double distanceToToy = Math.sqrt(dxToy * dxToy + dyToy * dyToy);
+
+            // If toy is within detection radius and not already chasing player closely
+            if (distanceToToy < 250) { // Toy detection radius
+                if (currentState != SpiderState.CHASING || distanceToToy < 150) {
+                    currentState = SpiderState.DISTRACTED;
+                    this.returnPoint = new Point(getCenterX(), getCenterY());
+                    soundManager.stopSound("chasing");
+                }
+            }
+        }
         // The State Machine: The spider's brain.
         switch (currentState) {
-        case PATROLLING:
-            doPatrol(world);
-            // While patrolling, constantly look for the player.
-            if (canSeePlayer(targetPlayer, world)) {
-                // System.out.println("SPIDER: TARGET ACQUIRED!");
-                // Drop a GPS pin at our current location. THIS is our post.
-                this.returnPoint = new Point(getCenterX(), getCenterY());
-                currentState = SpiderState.CHASING;
-                soundManager.stopSound("music");
-                soundManager.playSound("chasing");
-                loseSightTimer = 300;
-            }
-            break;
-        case DISTRACTED:
-            // Go to the toy!
-            if (toy != null && toy.isMakingNoise()) {
-                double dx = toy.getCenterX() - getCenterX();
-                double dy = toy.getCenterY() - getCenterY();
-                double dist = Math.sqrt(dx*dx + dy*dy);
-                
-                if (dist > 5) {
-                    // Move towards toy
-                    double moveX = (dx / dist) * speed;
-                    double moveY = (dy / dist) * speed;
-                    // Add wall collision check here if you want!
-                    x += moveX;
-                    y += moveY;
-                    rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 90;
-                } else {
-                    // We reached the toy. Just hang out until it stops making noise.
-                }
-            } else {
-                // Toy stopped making noise. Go back to work.
-                System.out.println("SPIDER: Must have been the wind.");
-                currentState = SpiderState.RETURNING;
-            }
-            
-            // While distracted, if we literally bump into the player, we should probably attack?
-            // But for now, let's say the noise is overpowering.
-            break;
-
-        case CHASING:
-            // --- NEW "MISSION ACCOMPLISHED" CHECK ---
-            // First, check if our target is already webbed.
-            if (targetPlayer.isWebbed()) {
-                // System.out.println("SPIDER: PREY CAPTURED. RETURNING TO POST.");
-                currentState = SpiderState.RETURNING;// My job here is done.
-                soundManager.stopSound("chasing");
-                soundManager.playSound("music"); 
-                break; // Immediately exit the CHASING logic.
-            }
-
-            if (player.isCrying()) {
-                // previously: speed = 3;
-                speed = CHASE_SPEED;
-                chase(targetPlayer);
-            } else {
-                // previously: speed = 1;
-                speed = SLOW_CHASE_SPEED;
-                // If the player isn't webbed, continue the hunt as normal.
+            case PATROLLING:
+                doPatrol(world);
+                // While patrolling, constantly look for the player.
                 if (canSeePlayer(targetPlayer, world)) {
-                    chase(targetPlayer);
+                    // System.out.println("SPIDER: TARGET ACQUIRED!");
+                    // Drop a GPS pin at our current location. THIS is our post.
+                    this.returnPoint = new Point(getCenterX(), getCenterY());
+                    currentState = SpiderState.CHASING;
+                    soundManager.stopSound("music");
+                    soundManager.playSound("chasing");
                     loseSightTimer = 300;
-                } else {
-                    loseSightTimer--;
-                    if (loseSightTimer <= 0) {
-                        // System.out.println("SPIDER: TARGET LOST. RETURNING TO POST.");
+                }
+                break;
+            case DISTRACTED:
+                // Go to the toy!
+                if (toy != null && toy.isMakingNoise()) {
+                    double dx = toy.getCenterX() - getCenterX();
+                    double dy = toy.getCenterY() - getCenterY();
+                    double dist = Math.sqrt(dx * dx + dy * dy);
+                    speed = SLOW_CHASE_SPEED;
+
+                    if (dist > 10) {
+                        // Move towards toy
+                        double moveX = (dx / dist) * speed;
+                        double moveY = (dy / dist) * speed;
+
+                        // Check wall collision
+                        double nextX = x + moveX;
+                        double nextY = y + moveY;
+                        int nextLeft = (int) nextX;
+                        int nextRight = (int) nextX + width - 1;
+                        int nextTop = (int) nextY;
+                        int nextBottom = (int) nextY + height - 1;
+
+                        if (!world.isTileSolid(nextLeft, nextTop) && !world.isTileSolid(nextRight, nextTop)
+                                && !world.isTileSolid(nextLeft, nextBottom)
+                                && !world.isTileSolid(nextRight, nextBottom)) {
+                            x += moveX;
+                            y += moveY;
+                        }
+
+                        rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 90;
+                    } else {
+                        // We reached the toy. Just hang out until it stops making noise.
+                        System.out.println("SPIDER: Found the noise source!");
+                    }
+                    if (canSeePlayer(targetPlayer, world)) {
+                        double dxPlayer = targetPlayer.getCenterX() - getCenterX();
+                        double dyPlayer = targetPlayer.getCenterY() - getCenterY();
+                        double distToPlayer = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
+
+                        if (distToPlayer < 80) { // Very close
+                            System.out.println("SPIDER: WAIT, THAT'S NOT THE NOISE!");
+                            currentState = SpiderState.CHASING;
+                            soundManager.stopSound("music");
+                            soundManager.playSound("chasing");
+                            loseSightTimer = 300;
+                        }
+                    } else {
+                        // Toy stopped making noise. Go back to work.
+                        System.out.println("SPIDER: Must have been the wind.");
                         currentState = SpiderState.RETURNING;
-                        soundManager.stopSound("chasing");
-                        soundManager.playSound("music");
+                        this.returnPoint = new Point(getCenterX(), getCenterY());
+                    }
+
+                    // While distracted, if we literally bump into the player, we should probably
+                    // attack?
+                    // But for now, let's say the noise is overpowering.
+                    break;
+                }
+
+            case CHASING:
+                // --- NEW "MISSION ACCOMPLISHED" CHECK ---
+                // First, check if our target is already webbed.
+                if (targetPlayer.isWebbed()) {
+                    // System.out.println("SPIDER: PREY CAPTURED. RETURNING TO POST.");
+                    currentState = SpiderState.RETURNING;// My job here is done.
+                    soundManager.stopSound("chasing");
+                    soundManager.playSound("music");
+                    break; // Immediately exit the CHASING logic.
+                }
+
+                if (player.isCrying()) {
+                    // previously: speed = 3;
+                    speed = CHASE_SPEED;
+                    chase(targetPlayer);
+                } else {
+                    // previously: speed = 1;
+                    speed = SLOW_CHASE_SPEED;
+                    // If the player isn't webbed, continue the hunt as normal.
+                    if (canSeePlayer(targetPlayer, world)) {
+                        chase(targetPlayer);
+                        loseSightTimer = 300;
+                    } else {
+                        loseSightTimer--;
+                        if (loseSightTimer <= 0) {
+                            // System.out.println("SPIDER: TARGET LOST. RETURNING TO POST.");
+                            currentState = SpiderState.RETURNING;
+                            soundManager.stopSound("chasing");
+                            soundManager.playSound("music");
+                        }
                     }
                 }
-            }
-            break;
-        case RETURNING:
-            // Check if we've made it back to our post.
-            double dx = returnPoint.x - getCenterX();
-            double dy = returnPoint.y - getCenterY();
-            double distanceToPost = Math.sqrt(dx * dx + dy * dy);
+                break;
+            case RETURNING:
+                // Check if we've made it back to our post.
+                double dx = returnPoint.x - getCenterX();
+                double dy = returnPoint.y - getCenterY();
+                double distanceToPost = Math.sqrt(dx * dx + dy * dy);
 
-            if (distanceToPost < 5) {
-                // We're back! Resume normal patrol.
-                // System.out.println("SPIDER: RESUMING PATROL.");
-                currentState = SpiderState.PATROLLING;
-                soundManager.stopSound("chasing");
-                soundManager.playSound("music");
-            } else {
-                // If not, take the shortest path back.
-                returnToPost();
-            }
-            if (canSeePlayer(targetPlayer, world)) {
-                currentState = SpiderState.CHASING;
-                soundManager.stopSound("music");
-                soundManager.playSound("chasing"); // Play sound when seeing player while returning
-                loseSightTimer = 300;
-            }
-            break;
+                if (distanceToPost < 5) {
+                    // We're back! Resume normal patrol.
+                    // System.out.println("SPIDER: RESUMING PATROL.");
+                    currentState = SpiderState.PATROLLING;
+                    soundManager.stopSound("chasing");
+                    soundManager.playSound("music");
+                } else {
+                    // If not, take the shortest path back.
+                    returnToPost();
+                }
+                if (canSeePlayer(targetPlayer, world)) {
+                    currentState = SpiderState.CHASING;
+                    soundManager.stopSound("music");
+                    soundManager.playSound("chasing"); // Play sound when seeing player while returning
+                    loseSightTimer = 300;
+                }
+                break;
         }
 
         animationTick++;
@@ -364,7 +410,6 @@ public class Spider {
             }
             return; // Get a fresh start on the next frame.
         }
-        
 
         // 3. If we haven't arrived, calculate movement.
         double moveX = (dx / distance) * speed;
@@ -389,7 +434,7 @@ public class Spider {
             // Hit a wall! Skip to the next waypoint to try and get unstuck.
             currentTargetIndex = (currentTargetIndex + 1) % patrolPath.size();
         }
-        
+
     }
 
     public double getRadius() {
@@ -422,7 +467,8 @@ public class Spider {
         this.x = pixelX - (width / 2.0);
         this.y = pixelY - (height / 2.0);
 
-        if (this.patrolPath == null) this.patrolPath = new ArrayList<>();
+        if (this.patrolPath == null)
+            this.patrolPath = new ArrayList<>();
         if (this.patrolPath.isEmpty()) {
             this.patrolPath.add(new Point(pixelX, pixelY));
         } else {
@@ -433,7 +479,8 @@ public class Spider {
     public void setSpawnPixel(int pixelX, int pixelY) {
         this.x = pixelX - (width / 2.0);
         this.y = pixelY - (height / 2.0);
-        if (this.patrolPath == null) this.patrolPath = new ArrayList<>();
+        if (this.patrolPath == null)
+            this.patrolPath = new ArrayList<>();
         if (this.patrolPath.isEmpty()) {
             this.patrolPath.add(new Point(pixelX, pixelY));
         } else {
