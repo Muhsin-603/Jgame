@@ -191,7 +191,7 @@ public class World {
              BufferedImage stile3 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_w3.png"));
             tileTypes[13] = new Tile(stile3, false); 
              BufferedImage stile4 = ImageIO.read(getClass().getResourceAsStream("/res/sprites/tiles/sack_w4.png"));
-            tileTypes[14] = new Tile(stile4, true);;
+            tileTypes[14] = new Tile(stile4, true);
 
 
         } catch (IOException e) {
