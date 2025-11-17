@@ -20,6 +20,7 @@ Play as a lost **baby** crawling through the abandoned underground floors of a n
 - **Struggle Mechanic:** When webbed, mash **SPACE** to escape before the 5-second **Death Clock** hits zero.
 - **Stealth Tiles:** Hide in **Shadows** to evade enemies.
 - **Environmental Hazards:** Sticky floors slow movement; water blocks it entirely.
+- **Items:** You can throw items to distract the spider
 
 ### 🕷️ Advanced Spider AI
 - **Patrol Routes:** Level-defined and dynamic.
@@ -47,8 +48,10 @@ Play as a lost **baby** crawling through the abandoned underground floors of a n
 | **A / Left Arrow** | Move Left |
 | **D / Right Arrow** | Move Right |
 | **Space** | Struggle (if webbed) |
-| **E** | Interact (with snail) |
+| **E** | Interact |
+| **F** | Throw |
 | **Esc** | Pause / Resume |
+
 
 ---
 
