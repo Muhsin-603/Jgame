@@ -4,8 +4,7 @@ import src.com.buglife.world.World;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-//import java.io.IOException;
-//import java.io.InputStream;
+
 import java.util.List;
 import java.util.ArrayList;
 
