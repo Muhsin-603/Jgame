@@ -7,6 +7,7 @@ import src.com.buglife.entities.Food;
 import src.com.buglife.entities.Player;
 import src.com.buglife.entities.Snail;
 import src.com.buglife.entities.Spider;
+import src.com.buglife.entities.Toy;
 import src.com.buglife.ui.MainMenu;
 import src.com.buglife.world.World;
 import java.awt.Point;
@@ -24,6 +25,7 @@ import java.awt.Font;
 public class GamePanel extends JPanel {
 
     private List<Spider> spiders = new ArrayList<>();
+    private Toy toy;
     private Player player;
     private List<Food> foods = new ArrayList<>();
     private List<Point> foodsp;
@@ -36,10 +38,9 @@ public class GamePanel extends JPanel {
     private int pauseMenuSelection = 0;
     private String[] pauseOptions = { "Resume", "Restart", "Quit to Menu" };
     private boolean playerHasInteractedWithSnail = false;
-    
 
     private Snail snail;
-    
+
     private boolean snailHasTeleported = true;
     private int nextSnailLocationIndex = 1;
 
@@ -102,11 +103,15 @@ public class GamePanel extends JPanel {
                 if (key == KeyEvent.VK_SHIFT) { // Changed from SPACE to SHIFT for dash
                     // Calculate dash direction based on current movement
                     int dirX = 0, dirY = 0;
-                    if (player.movingUp) dirY = -1;
-                    if (player.movingDown) dirY = 1;
-                    if (player.movingLeft) dirX = -1;
-                    if (player.movingRight) dirX = 1;
-                    
+                    if (player.movingUp)
+                        dirY = -1;
+                    if (player.movingDown)
+                        dirY = 1;
+                    if (player.movingLeft)
+                        dirX = -1;
+                    if (player.movingRight)
+                        dirX = 1;
+
                     player.dash(dirX, dirY, soundManager);
                 }
                 if (key == KeyEvent.VK_SPACE) {
@@ -125,18 +130,34 @@ public class GamePanel extends JPanel {
                     if (snail != null && snail.canInteract(player)) {
                         snail.interact();
                         playerHasInteractedWithSnail = true;
-                        //soundManager.playSound("snail_talk"); // not added now 
+                    }
+                    // --- ADD THIS: Toy interaction ---
+                    else if (toy != null && toy.canPickUp(player)) {
+                        toy.pickUp(player);
+                    }
+                    // --- END OF NEW CODE ---
+                }
+                // In keyPressed
+                if (key == KeyEvent.VK_F) {
+                    if (toy != null) {
+                        if (toy.isCarried()) {
+                            // Throw the toy in the direction the player is facing
+                            toy.throwToy(player.getCenterX(), player.getCenterY(), player.getFacingDirection());
+                            soundManager.playSound("throw");
+                        }
                     }
                 }
             } else if (currentState == GameState.GAME_OVER) {
                 // --- SCENE 3: THE TRAGIC ENDING ---
                 if (key == KeyEvent.VK_ENTER) {
-                    /* soundManager.loopSound("gameOver");
-                    soundManager.stopSound("music");
-                    soundManager.stopSound("chasing"); no use here i,m gonne remove it
-                    soundManager.stopSound("gameOver");
-                    soundManager.stopSound("menuMusic");
-                    currentState = GameState.MAIN_MENU;*/
+                    /*
+                     * soundManager.loopSound("gameOver");
+                     * soundManager.stopSound("music");
+                     * soundManager.stopSound("chasing"); no use here i,m gonne remove it
+                     * soundManager.stopSound("gameOver");
+                     * soundManager.stopSound("menuMusic");
+                     * currentState = GameState.MAIN_MENU;
+                     */
                     restartGame();
                 }
             } else if (currentState == GameState.PAUSED) {
@@ -167,15 +188,14 @@ public class GamePanel extends JPanel {
                         soundManager.loopSound("menuMusic"); // Start menu music
                     }
                 }
-            }
-            else if (currentState == GameState.LEVEL_COMPLETE) { // Use 'else if' here
+            } else if (currentState == GameState.LEVEL_COMPLETE) { // Use 'else if' here
                 if (key == KeyEvent.VK_ENTER) {
                     // For now, let's go back to the main menu
                     // Later, this could load the next level
                     currentState = GameState.MAIN_MENU;
                     soundManager.stopAllSounds();
                     // Make sure you have a sound file named "menu_music.wav"
-                    soundManager.loopSound("menuMusic"); 
+                    soundManager.loopSound("menuMusic");
                 }
                 // REMOVED the incorrect 'break;' statement
             }
@@ -201,6 +221,10 @@ public class GamePanel extends JPanel {
     public GamePanel(SoundManager sm) {
         world = new World();
         this.soundManager = sm;
+        // In constructor
+        toy = new Toy();
+
+        toy.setSpawnLocationPixels(574, 2256);
 
         mainMenu = new MainMenu();
         currentState = GameState.MAIN_MENU;
@@ -243,24 +267,24 @@ public class GamePanel extends JPanel {
         this.player = new Player(594, 2484, 32, 32);
         List<Snail.SnailLocation> snailLocations = new ArrayList<>();
         snailLocations.add(new Snail.SnailLocation(
-            new Point(534, 2464), 
-            new String[] { "Hello little one...", "Be careful of the spiders!" },
-            true // Interaction IS required at this location
+                new Point(534, 2464),
+                new String[] { "Hello little one...", "Be careful of the spiders!" },
+                true // Interaction IS required at this location
         ));
         snailLocations.add(new Snail.SnailLocation(
-            new Point(938, 1754), 
-            new String[] { "You shouldn't stay hungry", "Eat thease berries.", "Thease gives you energy" },
-            true // Interaction IS required at this location
+                new Point(938, 1754),
+                new String[] { "You shouldn't stay hungry", "Eat thease berries.", "Thease gives you energy" },
+                true // Interaction IS required at this location
         ));
         snailLocations.add(new Snail.SnailLocation(
-            new Point(1116, 976), 
-            new String[] { "There are dark shadows.", "You can hide from the spiders in it" },
-            true // Interaction is NOT required here; it will teleport automatically
+                new Point(1116, 976),
+                new String[] { "There are dark shadows.", "You can hide from the spiders in it" },
+                true // Interaction is NOT required here; it will teleport automatically
         ));
         snailLocations.add(new Snail.SnailLocation(
-            new Point(2166, 136), 
-            new String[] { "Stay safe", "Climb thease ladders to the next floor.", "Farewell little one...!" },
-            true // Interaction IS required at this location
+                new Point(2166, 136),
+                new String[] { "Stay safe", "Climb thease ladders to the next floor.", "Farewell little one...!" },
+                true // Interaction IS required at this location
         ));
         snail = new Snail(player, snailLocations);
 
@@ -268,9 +292,9 @@ public class GamePanel extends JPanel {
         spawnFood();
 
         addKeyListener(new KeyInputAdapter());
-        
-        
+
     }
+
     private boolean isRectOnScreen(int x, int y, int width, int height) {
         return (x < cameraX + VIRTUAL_WIDTH &&
                 x + width > cameraX &&
@@ -288,19 +312,22 @@ public class GamePanel extends JPanel {
             // Reset the snail to its starting position (index 0)
             snail.teleportToLocation(0);
             nextSnailLocationIndex = 1; // Reset the next teleport target
-            snailHasTeleported = true;  // Reset the teleport flag
+            snailHasTeleported = true; // Reset the teleport flag
             playerHasInteractedWithSnail = false;
+        }
+        if (toy != null) {
+            toy.setSpawnLocationPixels(574 , 2256); // Reset toy to spawn point
         }
 
         // 1. Reset the player.
         player.reset();
 
         // 2. Reset every spider in our existing army.
-        for (Spider spider : spiders) {
-            if (spider != null) {
-                spider.reset();
-            }
-        }
+        // for (Spider spider : spiders) {
+        //     if (spider != null) {
+        //         spider.reset();
+        //     }
+        // }
 
         spawnFood();
 
@@ -310,13 +337,12 @@ public class GamePanel extends JPanel {
 
     private void initializeFoodSpawnPoints() { // food spawn coordinates to set
         foodsp = new ArrayList<>();
-        foodsp.add(new Point(16,27)); // coordinates (first point)
-        foodsp.add(new Point(34,25));
-        foodsp.add(new Point(22,10));
-        
-        
+        foodsp.add(new Point(16, 27)); // coordinates (first point)
+        foodsp.add(new Point(34, 25));
+        foodsp.add(new Point(22, 10));
 
     }
+
     private void handleSpiderAlerts() {
         if (player.isCrying()) {
             for (Spider spider : spiders) {
@@ -336,13 +362,15 @@ public class GamePanel extends JPanel {
             // In updateGame() -> inside the if (currentState == GameState.PLAYING) block
             if (snail != null && snail.getLocationsCount() > 1) {
                 snail.update(world);
-                boolean isSnailOnScreen = isRectOnScreen(snail.getX(), snail.getY(), snail.getWidth(), snail.getHeight());
+                boolean isSnailOnScreen = isRectOnScreen(snail.getX(), snail.getY(), snail.getWidth(),
+                        snail.getHeight());
 
-                // If the snail is on-screen, it becomes eligible to teleport the *next* time it's off-screen
+                // If the snail is on-screen, it becomes eligible to teleport the *next* time
+                // it's off-screen
                 if (isSnailOnScreen) {
                     snailHasTeleported = false;
                 }
-                
+
                 // --- Updated Teleport Logic ---
                 Snail.SnailLocation currentLocation = snail.getCurrentLocation();
                 boolean interactionIsNeeded = currentLocation.requiresInteraction();
@@ -353,28 +381,37 @@ public class GamePanel extends JPanel {
                     canTeleport = canTeleport && playerHasInteractedWithSnail;
                 }
                 if (player.isOnLevelCompleteTile()) {
-                currentState = GameState.LEVEL_COMPLETE;
-                soundManager.stopAllSounds();
-                soundManager.playSound("level_complete"); // Optional: play a victory sound
-            }
-                
+                    currentState = GameState.LEVEL_COMPLETE;
+                    soundManager.stopAllSounds();
+                    soundManager.playSound("level_complete"); // Optional: play a victory sound
+                }
+
                 // Only hide and teleport if we haven't done it yet
                 if (canTeleport) {
                     System.out.println("Snail teleporting to location " + nextSnailLocationIndex);
                     snail.teleportToLocation(nextSnailLocationIndex);
-                    
+
                     // Update the index for the next teleport, wrapping around the list
                     nextSnailLocationIndex = (nextSnailLocationIndex + 1) % snail.getLocationsCount();
-                    
+
                     // Prevent it from teleporting again until it has been seen on-screen
                     snailHasTeleported = true;
                     playerHasInteractedWithSnail = false; // Reset for the new location
                 }
             }
+            if (toy != null)
+                toy.update();
 
-            
+            // Update Spiders (Pass the toy!)
+            for (Spider spider : spiders) {
+                if (spider != null) {
+                    spider.update(player, world, soundManager, toy); // <-- Pass toy here
+                    // ... collision logic ...
+                }
+            }
+
             player.update(world, soundManager);
-            
+
             if (player.hasDiedFromWeb()) {
                 System.out.println("GAME OVER : Died By Webbed State");
                 soundManager.stopSound("music");
@@ -387,7 +424,7 @@ public class GamePanel extends JPanel {
             for (Spider currentSpider : spiders) {
                 if (currentSpider != null) {
 
-                    currentSpider.update(player, world, soundManager);
+                    currentSpider.update(player, world, soundManager, toy);
 
                     // Check collision with each spider
                     double dx = player.getCenterX() - currentSpider.getCenterX();
@@ -400,7 +437,7 @@ public class GamePanel extends JPanel {
                             System.out.println("GAME OVER: Player caught with zero hunger!");
                             soundManager.stopSound("music");
                             soundManager.stopSound("chasing");
-                            soundManager.playSound("gameOver"); 
+                            soundManager.playSound("gameOver");
                             currentState = GameState.GAME_OVER;
                             return;
                         }
@@ -431,7 +468,7 @@ public class GamePanel extends JPanel {
 
             // 2. Create the spider and give it the track
 
-            for (int i = foods.size() - 1;i >= 0; i--) {
+            for (int i = foods.size() - 1; i >= 0; i--) {
                 Food currFood = foods.get(i);
                 double dxFood = player.getCenterX() - currFood.getCenterX();
                 double dyFood = player.getCenterY() - currFood.getCenterY();
@@ -453,18 +490,16 @@ public class GamePanel extends JPanel {
         }
     }
 
-    
-
     public void spawnFood() { // the food spawn system changed to new
         foods.clear();
-        if ( foodsp == null || foodsp.isEmpty()) {
+        if (foodsp == null || foodsp.isEmpty()) {
             System.out.println("Warning : no food spawned");
             return;
         }
         for (Point spawnTile : foodsp) {
-        int foodX = spawnTile.x * World.TILE_SIZE + (World.TILE_SIZE / 4);
-        int foodY = spawnTile.y * World.TILE_SIZE + (World.TILE_SIZE / 4);
-        foods.add(new Food(foodX, foodY, 20));
+            int foodX = spawnTile.x * World.TILE_SIZE + (World.TILE_SIZE / 4);
+            int foodY = spawnTile.y * World.TILE_SIZE + (World.TILE_SIZE / 4);
+            foods.add(new Food(foodX, foodY, 20));
         }
         System.out.println("Food Spawned" + foods.size() + "count");
     }
@@ -474,6 +509,8 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g.create();
+        // In paintComponent()
+        
 
         // --- 1. THE SCALING CALCULATIONS ---
         // Get the actual, physical size of our fullscreen window
@@ -517,7 +554,7 @@ public class GamePanel extends JPanel {
             Graphics2D entityG2d = (Graphics2D) g2d.create();
             try {
                 entityG2d.translate(-cameraX, -cameraY);
-                
+
                 // Draw player
                 if (player != null) {
                     player.render(entityG2d, world);
@@ -527,20 +564,23 @@ public class GamePanel extends JPanel {
                     int coordsWidth = g2d.getFontMetrics().stringWidth(coords);
                     g2d.drawString(coords, VIRTUAL_WIDTH - coordsWidth - 15, 25);
                 }
-                
+                if (toy != null) {
+                    toy.draw(entityG2d);
+                }
+
                 // Draw snail before spiders (so it appears behind them)
                 if (snail != null && snail.isVisible()) {
                     System.out.println("Drawing snail at: " + snail.getX() + ", " + snail.getY());
                     snail.draw(entityG2d);
                 }
-                
+
                 // Draw spiders
                 for (Spider spider : spiders) {
                     if (spider != null) {
                         spider.draw(entityG2d);
                     }
                 }
-                
+
                 // Draw food
                 for (Food currFood : foods) {
                     if (currFood != null) {
@@ -550,7 +590,7 @@ public class GamePanel extends JPanel {
             } finally {
                 entityG2d.dispose();
             }
-            
+
             // --- 3. DRAW HUD (fixed on screen, uses g2d) ---
             // Hunger Bar
             g2d.setColor(Color.DARK_GRAY);
@@ -572,8 +612,8 @@ public class GamePanel extends JPanel {
 
         } else if (currentState == GameState.GAME_OVER) {
             // --- Game Over (uses g2d) ---
-            //if (player != null) no need of repeat calling to reset
-            //    player.reset();
+            // if (player != null) no need of repeat calling to reset
+            // player.reset();
             g2d.setColor(new Color(0, 0, 0, 150));
             g2d.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
@@ -613,7 +653,6 @@ public class GamePanel extends JPanel {
             } finally {
                 pauseG2d.dispose();
             }
-            
 
             // --- 2. Now, draw the pause menu overlay on top ---
             g2d.setColor(new Color(0, 0, 0, 150)); // Dark overlay
@@ -636,8 +675,7 @@ public class GamePanel extends JPanel {
                 int optionWidth = g2d.getFontMetrics().stringWidth(pauseOptions[i]);
                 g2d.drawString(pauseOptions[i], (VIRTUAL_WIDTH - optionWidth) / 2, VIRTUAL_HEIGHT / 2 + i * 60);
             }
-        }
-        else if (currentState == GameState.LEVEL_COMPLETE) {
+        } else if (currentState == GameState.LEVEL_COMPLETE) {
             // --- ADD THIS NEW DRAWING BLOCK ---
             // First, draw the game world in the background
             world.render(g2d, cameraX, cameraY, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
@@ -664,14 +702,12 @@ public class GamePanel extends JPanel {
         else if (currentState == GameState.MAIN_MENU) {
             g2d.setColor(Color.BLACK);
             g2d.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-            
+
             mainMenu.draw(g2d);
         }
 
-        
         g2d.dispose();
 
-        
     }
 
 }

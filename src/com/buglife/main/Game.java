@@ -3,10 +3,6 @@ package src.com.buglife.main;
 import javax.swing.*;
 
 import src.com.buglife.assets.SoundManager;
- 
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.GraphicsEnvironment;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,9 +85,9 @@ public class Game implements Runnable {
     /**
      * This is the Game Loop. It will run continuously.
      */
-    @Override
+                @Override
     public void run() {
-        double drawInterval = 1_000_000_000.0 / FPS; // Time for one frame in nanoseconds
+        double drawInterval = 1_000_000_000.0 / FPS;
         double delta = 0;
         long lastTime = System.nanoTime();
         long currentTime;
@@ -101,13 +97,12 @@ public class Game implements Runnable {
             delta += (currentTime - lastTime) / drawInterval;
             lastTime = currentTime;
 
-            // When delta reaches 1, it means enough time has passed to draw the next frame
             if (delta >= 1) {
-                // 1. UPDATE: Update all game logic (character positions, etc.)
+                // 1. UPDATE: Update all game logic
                 gamePanel.updateGame();
 
-                // 2. DRAW: Redraw the screen with the new information
-                gamePanel.repaint();
+                // 2. DRAW: Use paintImmediately instead
+                gamePanel.paintImmediately(0, 0, gamePanel.getWidth(), gamePanel.getHeight());
 
                 delta--;
             }

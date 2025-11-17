@@ -12,6 +12,7 @@ import src.com.buglife.world.World;
 
 public class Player {
     // Player attributes
+    public String facingDirection = "DOWN"; // Default
     private static final int DASH_SPEED = 8;
     private static final int DASH_DURATION = 15; // ticks
     private static final int DASH_COOLDOWN = 60; // ticks between dashes
@@ -54,13 +55,12 @@ public class Player {
     private int webStrength = WEB_ESCAPE_REQUIRED;
     private int webbedTimer = 300;
     private boolean diedFromWeb = false;
-    
-    
 
     public boolean isWebbed() {
 
         return this.currentState == PlayerState.WEBBED;
     }
+
     public boolean hasDiedFromWeb() {
         return this.diedFromWeb;
     }
@@ -92,7 +92,7 @@ public class Player {
                 dashVelY = (directionY / length) * DASH_SPEED;
             } else {
                 // If no direction, dash in the direction the player is facing
-                switch(currentState) {
+                switch (currentState) {
                     case WALKING_UP:
                         dashVelY = -DASH_SPEED;
                         break;
@@ -109,17 +109,17 @@ public class Player {
                         dashVelY = DASH_SPEED; // Default down
                 }
             }
-            
+
             isDashing = true;
             dashDuration = DASH_DURATION;
             dashCooldown = DASH_COOLDOWN;
-            
+
             // Consume hunger for the dash
             this.hunger -= DASH_HUNGER_COST;
             if (this.hunger < 0) {
                 this.hunger = 0;
             }
-            
+
             soundManager.playSound("dash"); // Play dash sound
             System.out.println("Dashed! Hunger remaining: " + this.hunger);
         } else if (dashCooldown > 0) {
@@ -152,7 +152,7 @@ public class Player {
         // Reset web status completely
         this.webbedTimer = 0;
         this.webStrength = WEB_ESCAPE_REQUIRED;
-        //this.WEB_ESCAPE_REQUIRED = 4;
+        // this.WEB_ESCAPE_REQUIRED = 4;
 
         // Make sure movement flags are off
         this.movingUp = false;
@@ -166,7 +166,7 @@ public class Player {
         this.dashVelX = 0;
         this.dashVelY = 0;
 
-        //game win
+        // game win
         this.onLevelCompleteTile = false;
     }
 
@@ -175,7 +175,7 @@ public class Player {
         if (currentState != PlayerState.WEBBED) {
             // System.out.println("PLAYER: I'M TRAPPED!");
             currentState = PlayerState.WEBBED;
-            //WEB_ESCAPE_REQUIRED++;
+            // WEB_ESCAPE_REQUIRED++;
 
             webbedTimer = 300; // You have 5 seconds to live...
             webStrength = WEB_ESCAPE_REQUIRED; // ...and 4 taps to escape. Good luck.
@@ -196,13 +196,13 @@ public class Player {
 
             // Use webbed sprite if in webbed state
             if (currentState == PlayerState.WEBBED && webbedSprite != null) {
-                g2d.drawImage(webbedSprite, (int)x, (int)y, width, height, null);
+                g2d.drawImage(webbedSprite, (int) x, (int) y, width, height, null);
             } else {
                 // ...existing animation rendering code...
                 List<BufferedImage> currentAnimation = getActiveAnimation();
                 if (currentAnimation != null && !currentAnimation.isEmpty()) {
                     BufferedImage imageToDraw = currentAnimation.get(currentFrame);
-                    g2d.drawImage(imageToDraw, (int)x, (int)y, width, height, null);
+                    g2d.drawImage(imageToDraw, (int) x, (int) y, width, height, null);
                 }
             }
         } finally {
@@ -277,7 +277,7 @@ public class Player {
         try {
             // Load main sprite sheet
             BufferedImage spriteSheet = ImageIO.read(getClass().getResourceAsStream("/res/sprites/player/pla.png"));
-            
+
             // Load webbed state sprite in the same try block
             webbedSprite = ImageIO.read(getClass().getResourceAsStream("/res/sprites/player/webbed_state.png"));
             if (webbedSprite == null) {
@@ -351,6 +351,7 @@ public class Player {
             }
         }
     }
+
     private void checkLowHunger(SoundManager soundManager) {
         int hungerPercentage = (hunger * 100) / MAX_HUNGER;
 
@@ -367,7 +368,7 @@ public class Player {
             cryDeathTimer--;
             if (cryDeathTimer <= 0) {
                 System.out.println("PLAYER: Died from hunger/crying.");
-                this.hunger = 0; 
+                this.hunger = 0;
             }
         } else {
             hungerDrainTimer++;
@@ -423,9 +424,9 @@ public class Player {
         if (isDashing) {
             x += dashVelX;
             y += dashVelY;
-            
+
             // Check collision with walls during dash using the new checkCollision method
-            if (world.checkCollision((int)x, (int)y, width, height)) {
+            if (world.checkCollision((int) x, (int) y, width, height)) {
                 // Hit a wall, revert movement and stop dash
                 x -= dashVelX;
                 y -= dashVelY;
@@ -461,12 +462,16 @@ public class Player {
 
             if (movingUp) {
                 currentState = PlayerState.WALKING_UP;
+                facingDirection = "UP"; // <--- Add this
             } else if (movingDown) {
                 currentState = PlayerState.WALKING_DOWN;
-            } else if (movingLeft) { // Separate check for Left
+                facingDirection = "DOWN"; // <--- Add this
+            } else if (movingLeft) {
                 currentState = PlayerState.WALKING_LEFT;
-            } else if (movingRight) { // Separate check for Right
+                facingDirection = "LEFT"; // <--- Add this
+            } else if (movingRight) {
                 currentState = PlayerState.WALKING_RIGHT;
+                facingDirection = "RIGHT"; // <--- Add this
             } else {
                 // If not moving, stay idle (facing down for now)
                 currentState = PlayerState.IDLE_DOWN;
@@ -514,23 +519,28 @@ public class Player {
             }
         }
     }
+
+    public String getFacingDirection() {
+        return facingDirection;
+    }
+
     public boolean isOnLevelCompleteTile() {
         return this.onLevelCompleteTile;
     }
 
     private List<BufferedImage> getActiveAnimation() {
         switch (currentState) {
-        case WALKING_UP:
-            return walkUpFrames;
-        case WALKING_DOWN:
-            return walkDownFrames;
-        case WALKING_LEFT:
-            return walkLeftFrames; // Use the new list
-        case WALKING_RIGHT:
-            return walkRightFrames; // Use the new list
-        case IDLE_DOWN:
-        default:
-            return idleDownFrames;
+            case WALKING_UP:
+                return walkUpFrames;
+            case WALKING_DOWN:
+                return walkDownFrames;
+            case WALKING_LEFT:
+                return walkLeftFrames; // Use the new list
+            case WALKING_RIGHT:
+                return walkRightFrames; // Use the new list
+            case IDLE_DOWN:
+            default:
+                return idleDownFrames;
         }
     }
 

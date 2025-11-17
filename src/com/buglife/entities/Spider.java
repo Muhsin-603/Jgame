@@ -44,7 +44,8 @@ public class Spider {
     public enum SpiderState {
         PATROLLING, // The default, boring patrol
         CHASING, // The "I see you!" bloodlust mode
-        RETURNING // The "Where did he go?" confused mode
+        RETURNING, // The "Where did he go?" confused mode
+        DISTRACTED
     }
 
     private SpiderState currentState; // A variable to hold the spider's current mood
@@ -161,17 +162,18 @@ public class Spider {
     // In Spider.java, replace the entire update method.
     // In Spider.java
 
-    public void update(Player player, World world, SoundManager soundManager) {
+    public void update(Player player, World world, SoundManager soundManager, Toy toy) {
         this.targetPlayer = player;
 
-        if(player.isCrying()) {
-            if(currentState == SpiderState.PATROLLING || currentState == SpiderState.RETURNING) {
-                this.returnPoint = new Point(getCenterX(),getCenterY());
-                currentState = SpiderState.CHASING;
-                soundManager.stopSound("music");
-                soundManager.playSound("chasing");
-            }
-        }
+        if (player.isCrying()) {
+        // Ignore everything else. KILL.
+        this.returnPoint = new Point(getCenterX(), getCenterY());
+        currentState = SpiderState.CHASING;
+        // (Your existing crying chase logic...)
+        speed = 3; // Fast!
+        chase(targetPlayer);
+        return; // Skip the rest of the state machine
+    }
         // The State Machine: The spider's brain.
         switch (currentState) {
         case PATROLLING:
@@ -186,6 +188,33 @@ public class Spider {
                 soundManager.playSound("chasing");
                 loseSightTimer = 300;
             }
+            break;
+        case DISTRACTED:
+            // Go to the toy!
+            if (toy != null && toy.isMakingNoise()) {
+                double dx = toy.getCenterX() - getCenterX();
+                double dy = toy.getCenterY() - getCenterY();
+                double dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist > 5) {
+                    // Move towards toy
+                    double moveX = (dx / dist) * speed;
+                    double moveY = (dy / dist) * speed;
+                    // Add wall collision check here if you want!
+                    x += moveX;
+                    y += moveY;
+                    rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 90;
+                } else {
+                    // We reached the toy. Just hang out until it stops making noise.
+                }
+            } else {
+                // Toy stopped making noise. Go back to work.
+                System.out.println("SPIDER: Must have been the wind.");
+                currentState = SpiderState.RETURNING;
+            }
+            
+            // While distracted, if we literally bump into the player, we should probably attack?
+            // But for now, let's say the noise is overpowering.
             break;
 
         case CHASING:
