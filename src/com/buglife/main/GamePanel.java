@@ -407,12 +407,12 @@ public class GamePanel extends JPanel {
                 toy.update();
 
             // Update Spiders (Pass the toy!)
-            // for (Spider spider : spiders) {
-            // if (spider != null) {
-            // spider.update(player, world, soundManager, toy); // <-- Pass toy here
-            // // ... collision logic ...
-            // }
-            // }
+            for (Spider spider : spiders) {
+            if (spider != null) {
+            spider.update(player, world, soundManager, toy); // <-- Pass toy here
+            // ... collision logic ...
+            }
+            }
 
             player.update(world, soundManager);
 

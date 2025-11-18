@@ -25,7 +25,7 @@ public class Player {
     private double x, y;
     private int width, height;
     private double currentSpeed; // How fast we are moving RIGHT NOW
-    private final double NORMAL_SPEED = 2.0; // The default speed
+    private final double NORMAL_SPEED = 3.0; // The default speed
     private final double SLOW_SPEED = 0.5; // The speed when stuck!
     private int hunger = 100;
     private final int MAX_HUNGER = 100;
@@ -38,6 +38,8 @@ public class Player {
     private final int LOW_HUNGER_THRESHOLD = 0;
     private BufferedImage webbedSprite;
     private boolean onLevelCompleteTile = false;
+    private int webbedWidth, webbedHeight;
+    private Rectangle bounds;
 
     // This tracks hunger and crying mechanics
 
@@ -196,7 +198,9 @@ public class Player {
 
             // Use webbed sprite if in webbed state
             if (currentState == PlayerState.WEBBED && webbedSprite != null) {
-                g2d.drawImage(webbedSprite, (int) x, (int) y, width, height, null);
+                int drawX = (int)x - (webbedWidth - width) / 2;
+                int drawY = (int)y - (webbedHeight - height) / 2;
+                g2d.drawImage(webbedSprite, drawX, drawY, webbedWidth, webbedHeight, null);
             } else {
                 // ...existing animation rendering code...
                 List<BufferedImage> currentAnimation = getActiveAnimation();
@@ -263,6 +267,8 @@ public class Player {
         this.width = drawSize;
         this.height = drawSize;
         this.collisionRadius = collisionSize / 2;
+        this.webbedWidth = (int)(width * 1.2);
+        this.webbedHeight = (int)(height * 1.2);
         loadAnimations();
     }
     /// res/sprites/player/pla.png"
@@ -398,9 +404,7 @@ public class Player {
         // Inside Player.java's update() method...
         int playerTileCol = getCenterX() / World.TILE_SIZE;
         int playerTileRow = getCenterY() / World.TILE_SIZE;
-        int currentTileCol = getCenterX() / World.TILE_SIZE;
-        int currentTileRow = getCenterY() / World.TILE_SIZE;
-        int tileID = world.getTileIdAt(currentTileCol, currentTileRow);
+        int tileID = world.getTileIdAt(playerTileCol, playerTileRow);
         if (tileID == 3) { // If it's our sticky tile ID
             this.currentSpeed = SLOW_SPEED;
         } else {
@@ -564,7 +568,8 @@ public class Player {
      * @return A Rectangle object representing the player's position and size.
      */
     public Rectangle getBounds() {
-        return new Rectangle((int) x, (int) y, width, height);
+        bounds.setLocation((int)x, (int)y); // Update and return the same object
+        return bounds;
     }
 
     public void decreaseHunger(int amount) {
