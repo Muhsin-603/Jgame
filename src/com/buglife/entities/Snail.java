@@ -218,14 +218,14 @@ public class Snail {
         }
 
         // Draw dialogue box background
-        g2d.setColor(new Color(0, 0, 0, 200));
-        g2d.fillRoundRect(boxX, boxY, boxWidth, boxHeight, 10, 10);
-        g2d.setColor(Color.WHITE);
-        g2d.drawRoundRect(boxX, boxY, boxWidth, boxHeight, 10, 10);
+        // g2d.setColor(new Color(0, 0, 0, 200));
+        // g2d.fillRoundRect(boxX, boxY, boxWidth, boxHeight, 10, 10);
+        // g2d.setColor(Color.WHITE);
+        // g2d.drawRoundRect(boxX, boxY, boxWidth, boxHeight, 10, 10);
 
         // Draw text
-        g2d.setFont(new Font("Arial", Font.PLAIN, 16));
-        g2d.setColor(Color.WHITE);
+        // g2d.setFont(new Font("Arial", Font.PLAIN, 16));
+        // g2d.setColor(Color.WHITE);
         //drawWrappedText(g2d, dialogues[currentDialogue], boxX + 10, boxY + 30, boxWidth - 20);
 
         // Draw "press E" prompt

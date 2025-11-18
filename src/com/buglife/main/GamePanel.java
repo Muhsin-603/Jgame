@@ -424,7 +424,7 @@ public class GamePanel extends JPanel {
             for (Spider currentSpider : spiders) {
                 if (currentSpider != null) {
 
-                    currentSpider.update(player, world, soundManager, toy);
+                    // currentSpider.update(player, world, soundManager, toy);
 
                     // Check collision with each spider
                     double dx = player.getCenterX() - currentSpider.getCenterX();

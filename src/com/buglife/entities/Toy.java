@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
+import src.com.buglife.world.World;
+
 public class Toy {
     private double x, y;
     private int width = 24, height = 24;
@@ -30,8 +32,8 @@ public class Toy {
     
     // --- ADD THIS NEW METHOD ---
     public void setSpawnLocation(int tileX, int tileY) {
-        this.spawnX = tileX * 32 + (32 / 4); // Assuming TILE_SIZE is 32
-        this.spawnY = tileY * 32 + (32 / 4);
+        this.spawnX = tileX * World.TILE_SIZE + (World.TILE_SIZE / 4);
+        this.spawnY = tileY * World.TILE_SIZE + (World.TILE_SIZE / 4);
         this.x = spawnX;
         this.y = spawnY;
         this.isSpawned = true;
