@@ -39,6 +39,12 @@ public class GamePanel extends JPanel {
     private String[] pauseOptions = { "Resume", "Restart", "Quit to Menu" };
     private boolean playerHasInteractedWithSnail = false;
 
+    private static final Font HUD_FONT = new Font("Consolas", Font.PLAIN, 16);
+    private static final Font MID_FONT = new Font("Consolas", Font.BOLD, 40);
+    private static final Font BIG_FONT = new Font("Consolas", Font.BOLD, 80);
+
+    
+
     private Snail snail;
 
     private boolean snailHasTeleported = true;
@@ -323,11 +329,11 @@ public class GamePanel extends JPanel {
         player.reset();
 
         // 2. Reset every spider in our existing army.
-        // for (Spider spider : spiders) {
-        //     if (spider != null) {
-        //         spider.reset();
-        //     }
-        // }
+        for (Spider spider : spiders) {
+            if (spider != null) {
+                spider.reset();
+            }
+        }
 
         spawnFood();
 
@@ -403,12 +409,12 @@ public class GamePanel extends JPanel {
                 toy.update();
 
             // Update Spiders (Pass the toy!)
-            for (Spider spider : spiders) {
-                if (spider != null) {
-                    spider.update(player, world, soundManager, toy); // <-- Pass toy here
-                    // ... collision logic ...
-                }
-            }
+            // for (Spider spider : spiders) {
+            //     if (spider != null) {
+            //         spider.update(player, world, soundManager, toy); // <-- Pass toy here
+            //         // ... collision logic ...
+            //     }
+            // }
 
             player.update(world, soundManager);
 
@@ -558,7 +564,7 @@ public class GamePanel extends JPanel {
                 // Draw player
                 if (player != null) {
                     player.render(entityG2d, world);
-                    g2d.setFont(new Font("Consolas", Font.PLAIN, 16));
+                    g2d.setFont(HUD_FONT);
                     g2d.setColor(Color.WHITE);
                     String coords = "X: " + player.getCenterX() + " | Y: " + player.getCenterY();
                     int coordsWidth = g2d.getFontMetrics().stringWidth(coords);
@@ -609,7 +615,7 @@ public class GamePanel extends JPanel {
             // Webbed Text
             if (player != null && player.isWebbed()) {
                 g2d.setColor(Color.WHITE);
-                g2d.setFont(new Font("Consolas", Font.BOLD, 40));
+                g2d.setFont(MID_FONT);
                 String struggleMsg = "PRESS [SPACE] TO STRUGGLE!";
                 int msgWidth = g2d.getFontMetrics().stringWidth(struggleMsg);
                 g2d.drawString(struggleMsg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT - 100);
@@ -623,13 +629,13 @@ public class GamePanel extends JPanel {
             g2d.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
             g2d.setColor(Color.RED);
-            g2d.setFont(new Font("Consolas", Font.BOLD, 80));
+            g2d.setFont(BIG_FONT);
             String msg = "GAME OVER";
             int msgWidth = g2d.getFontMetrics().stringWidth(msg);
             g2d.drawString(msg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT / 2);
 
             g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Consolas", Font.PLAIN, 20));
+            g2d.setFont(HUD_FONT);
             String restartMsg = "Press Enter to Restart";
             int restartWidth = g2d.getFontMetrics().stringWidth(restartMsg);
             g2d.drawString(restartMsg, (VIRTUAL_WIDTH - restartWidth) / 2, VIRTUAL_HEIGHT / 2 + 50);
@@ -664,13 +670,13 @@ public class GamePanel extends JPanel {
             g2d.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
             g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Consolas", Font.BOLD, 80));
+            g2d.setFont(BIG_FONT);
             String msg = "PAUSED";
             int msgWidth = g2d.getFontMetrics().stringWidth(msg);
             g2d.drawString(msg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT / 3);
 
             // Draw options
-            g2d.setFont(new Font("Consolas", Font.PLAIN, 40));
+            g2d.setFont(MID_FONT);
             for (int i = 0; i < pauseOptions.length; i++) {
                 if (i == pauseMenuSelection) {
                     g2d.setColor(Color.YELLOW);
@@ -691,13 +697,13 @@ public class GamePanel extends JPanel {
 
             // Draw "Level Complete" text
             g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Consolas", Font.BOLD, 80));
+            g2d.setFont(BIG_FONT);
             String msg = "Level 1 Complete!";
             int msgWidth = g2d.getFontMetrics().stringWidth(msg);
             g2d.drawString(msg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT / 3);
 
             // Draw instruction text
-            g2d.setFont(new Font("Consolas", Font.PLAIN, 40));
+            g2d.setFont(MID_FONT);
             String continueMsg = "Press Enter to Continue";
             int continueWidth = g2d.getFontMetrics().stringWidth(continueMsg);
             g2d.drawString(continueMsg, (VIRTUAL_WIDTH - continueWidth) / 2, VIRTUAL_HEIGHT / 2);
