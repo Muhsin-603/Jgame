@@ -1,4 +1,4 @@
-package src.com.buglife.entities; // <-- 1. "src." REMOVED
+package src.com.buglife.entities;
 
 import src.com.buglife.world.World;
 import javax.imageio.ImageIO;
@@ -13,13 +13,18 @@ public class Snail {
     private double x, y;
     private int width = 35; // Use the Idle dimensions
     private int height = 55;
-    
+
+    private static final Font DIALOG_FONT = new Font("Arial", Font.PLAIN, 16);
+    private static final Font DIALOG_PROMPT_FONT = new Font("Arial", Font.ITALIC, 12);
+    private static final Font INTERACTION_FONT = new Font("Arial", Font.BOLD, 14);
+    private static final Color DIALOG_BG_COLOR = new Color(0, 0, 0, 200);
+
     // --- Simplified Animation ---
     private List<BufferedImage> idleFrames;
     private int currentFrame = 0;
     private int animationTick = 0;
     private int animationSpeed = 20; // Snails are slow
-    private Player player;  // Reference to the player
+    private Player player; // Reference to the player
 
     // --- State ---
     private boolean isVisible = true;
@@ -27,42 +32,42 @@ public class Snail {
     private int currentLocationIndex = 0;
 
     // --- Glow effect ---
-    
 
     // Add new fields for NPC behavior
     private static final int INTERACTION_RADIUS = 50;
-    
+
     private int currentDialogue = 0;
-    //private boolean isInteracting = false;
+    // private boolean isInteracting = false;
     private boolean showingDialog = false;
 
     // --- 2. THE NEW, SIMPLER CONSTRUCTOR ---
     public Snail(Player player, List<SnailLocation> locations) {
         this.player = player;
         this.locations = locations;
-        
+
         if (locations != null && !locations.isEmpty()) {
             // Set initial state from the first location in the list
-            teleportToLocation(0); 
+            teleportToLocation(0);
         } else {
             this.isVisible = false; // Hide if no locations are defined
         }
-        
+
         loadAnimations();
     }
+
     public void teleportToLocation(int locationIndex) {
         if (locations == null || locationIndex < 0 || locationIndex >= locations.size()) {
             System.err.println("Invalid snail location index: " + locationIndex);
             return;
         }
-        
+
         this.currentLocationIndex = locationIndex;
         SnailLocation newLocation = locations.get(currentLocationIndex);
-        
+
         setPosition(newLocation.position().x, newLocation.position().y);
-        
+
         closeDialog(); // Reset dialogue state
-        show();        // Ensure it's visible
+        show(); // Ensure it's visible
     }
 
     private void loadAnimations() {
@@ -111,19 +116,16 @@ public class Snail {
 
         Graphics2D g2d = (Graphics2D) g.create();
         try {
-            // Draw glow effect
-            /*g2d.setColor(glowColor);
-            g2d.fillOval((int)x - glowRadius, (int)y - glowRadius, 
-                         glowRadius * 2, glowRadius * 2);*/
+            
 
             // Draw snail sprite
             if (idleFrames != null && !idleFrames.isEmpty()) {
                 BufferedImage currentSprite = idleFrames.get(currentFrame);
-                g2d.drawImage(currentSprite, (int)x, (int)y, width, height, null);
+                g2d.drawImage(currentSprite, (int) x, (int) y, width, height, null);
             } else {
                 // Debug rectangle if sprite fails to load
                 g2d.setColor(Color.MAGENTA);
-                g2d.fillRect((int)x, (int)y, width, height);
+                g2d.fillRect((int) x, (int) y, width, height);
             }
             if (showingDialog) {
                 drawDialogBox(g2d);
@@ -141,30 +143,59 @@ public class Snail {
         this.y = y;
         System.out.println("Snail position set to: " + x + ", " + y);
     }
-    public boolean isVisible() { return this.isVisible; }
-    public void hide() { this.isVisible = false; }
+
+    public boolean isVisible() {
+        return this.isVisible;
+    }
+
+    public void hide() {
+        this.isVisible = false;
+    }
+
     public void show() {
         this.isVisible = true;
         System.out.println("Snail is now visible at: " + x + ", " + y);
     }
-    
-    
+
     // Helper methods
-    public int getX() { return (int)x; }
-    public int getY() { return (int)y; }
-    public int getWidth() { return width; }   // <-- Missing method
-    public int getHeight() { return height; } // <-- Missing method
-    public int getCenterX() { return (int)x + width / 2; }
-    public int getCenterY() { return (int)y + height / 2; }
-    public record SnailLocation(Point position, String[] dialogues, boolean requiresInteraction) {}
+    public int getX() {
+        return (int) x;
+    }
+
+    public int getY() {
+        return (int) y;
+    }
+
+    public int getWidth() {
+        return width;
+    } // <-- Missing method
+
+    public int getHeight() {
+        return height;
+    } // <-- Missing method
+
+    public int getCenterX() {
+        return (int) x + width / 2;
+    }
+
+    public int getCenterY() {
+        return (int) y + height / 2;
+    }
+
+    public record SnailLocation(Point position, String[] dialogues, boolean requiresInteraction) {
+    }
 
     // Add new method for interaction check
     public boolean canInteract(Player player) {
+        if (player == null) {
+            return false; // Can't interact with nothing
+        }
         double dx = player.getCenterX() - getCenterX();
         double dy = player.getCenterY() - getCenterY();
         double distance = Math.sqrt(dx * dx + dy * dy);
         return distance <= INTERACTION_RADIUS;
     }
+
     public SnailLocation getCurrentLocation() {
         if (locations != null && !locations.isEmpty()) {
             return locations.get(currentLocationIndex);
@@ -197,49 +228,37 @@ public class Snail {
     private void drawDialogBox(Graphics2D g2d) {
         int boxWidth = 300;
         int boxHeight = 80;
-        int boxX = getCenterX() - boxWidth/2;
+        int boxX = getCenterX() - boxWidth / 2;
         int boxY = getY() - boxHeight - 20;
         SnailLocation currentLocation = locations.get(currentLocationIndex);
         String[] currentDialogues = currentLocation.dialogues();
 
         // Draw dialogue box background
-        g2d.setColor(new Color(0, 0, 0, 200));
+        g2d.setColor(DIALOG_BG_COLOR);
         g2d.fillRoundRect(boxX, boxY, boxWidth, boxHeight, 10, 10);
         g2d.setColor(Color.WHITE);
         g2d.drawRoundRect(boxX, boxY, boxWidth, boxHeight, 10, 10);
 
         // Draw text
-        g2d.setFont(new Font("Arial", Font.PLAIN, 16));
+        g2d.setFont(DIALOG_FONT);
         g2d.setColor(Color.WHITE);
-        
+
         // This is the CORRECT line that uses the location-specific dialogue
         if (currentDialogue < currentDialogues.length) {
             drawWrappedText(g2d, currentDialogues[currentDialogue], boxX + 10, boxY + 30, boxWidth - 20);
         }
 
-        // Draw dialogue box background
-        // g2d.setColor(new Color(0, 0, 0, 200));
-        // g2d.fillRoundRect(boxX, boxY, boxWidth, boxHeight, 10, 10);
-        // g2d.setColor(Color.WHITE);
-        // g2d.drawRoundRect(boxX, boxY, boxWidth, boxHeight, 10, 10);
-
-        // Draw text
-        // g2d.setFont(new Font("Arial", Font.PLAIN, 16));
-        // g2d.setColor(Color.WHITE);
-        //drawWrappedText(g2d, dialogues[currentDialogue], boxX + 10, boxY + 30, boxWidth - 20);
-
-        // Draw "press E" prompt
-        g2d.setFont(new Font("Arial", Font.ITALIC, 12));
+        g2d.setFont(DIALOG_PROMPT_FONT);
         g2d.drawString("Press E to continue", boxX + boxWidth - 100, boxY + boxHeight - 10);
     }
 
     // Add new method for drawing interaction prompt
     private void drawInteractionPrompt(Graphics2D g2d) {
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.BOLD, 14));
+        g2d.setFont(INTERACTION_FONT);
         String prompt = "Press E to talk";
         int promptWidth = g2d.getFontMetrics().stringWidth(prompt);
-        g2d.drawString(prompt, getCenterX() - promptWidth/2, getY() - 10);
+        g2d.drawString(prompt, getCenterX() - promptWidth / 2, getY() - 10);
     }
 
     // Helper method for text wrapping
@@ -260,6 +279,7 @@ public class Snail {
         }
         g2d.drawString(line.toString(), x, lineY);
     }
+
     public int getLocationsCount() {
         return locations != null ? locations.size() : 0;
     }

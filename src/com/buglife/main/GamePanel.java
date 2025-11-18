@@ -43,8 +43,6 @@ public class GamePanel extends JPanel {
     private static final Font MID_FONT = new Font("Consolas", Font.BOLD, 40);
     private static final Font BIG_FONT = new Font("Consolas", Font.BOLD, 80);
 
-    
-
     private Snail snail;
 
     private boolean snailHasTeleported = true;
@@ -322,7 +320,7 @@ public class GamePanel extends JPanel {
             playerHasInteractedWithSnail = false;
         }
         if (toy != null) {
-            toy.setSpawnLocationPixels(574 , 2256); // Reset toy to spawn point
+            toy.setSpawnLocationPixels(574, 2256); // Reset toy to spawn point
         }
 
         // 1. Reset the player.
@@ -410,10 +408,10 @@ public class GamePanel extends JPanel {
 
             // Update Spiders (Pass the toy!)
             // for (Spider spider : spiders) {
-            //     if (spider != null) {
-            //         spider.update(player, world, soundManager, toy); // <-- Pass toy here
-            //         // ... collision logic ...
-            //     }
+            // if (spider != null) {
+            // spider.update(player, world, soundManager, toy); // <-- Pass toy here
+            // // ... collision logic ...
+            // }
             // }
 
             player.update(world, soundManager);
@@ -516,7 +514,6 @@ public class GamePanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g.create();
         // In paintComponent()
-        
 
         // --- 1. THE SCALING CALCULATIONS ---
         // Get the actual, physical size of our fullscreen window
@@ -572,7 +569,7 @@ public class GamePanel extends JPanel {
                 }
                 if (toy != null) {
                     toy.draw(entityG2d);
-                    
+
                     // Draw interaction prompt if player is near
                     if (!toy.isCarried() && toy.canPickUp(player)) {
                         toy.drawInteractionPrompt(entityG2d);
@@ -581,7 +578,6 @@ public class GamePanel extends JPanel {
 
                 // Draw snail before spiders (so it appears behind them)
                 if (snail != null && snail.isVisible()) {
-                    System.out.println("Drawing snail at: " + snail.getX() + ", " + snail.getY());
                     snail.draw(entityG2d);
                 }
 
