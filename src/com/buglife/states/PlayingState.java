@@ -7,6 +7,7 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 import src.com.buglife.assets.SoundManager;
 import src.com.buglife.entities.Food;
@@ -14,6 +15,7 @@ import src.com.buglife.entities.Player;
 import src.com.buglife.entities.Snail;
 import src.com.buglife.entities.Spider;
 import src.com.buglife.entities.Toy;
+import src.com.buglife.entities.TripWire;
 import src.com.buglife.main.GameStateManager;
 import src.com.buglife.world.World;
 
@@ -26,6 +28,7 @@ public class PlayingState extends GameState {
     private List<Food> foods;
     private World world;
     private SoundManager soundManager;
+    private List<TripWire> tripWires;
 
     // Camera
     private int cameraX, cameraY;
@@ -68,6 +71,9 @@ public class PlayingState extends GameState {
             soundManager.loopSound("music");
             return;
         }
+
+        tripWires = new ArrayList<>();
+        initTripWires();
         // Initialize world
         world = new World();
 
@@ -101,6 +107,13 @@ public class PlayingState extends GameState {
 
         //for resume function
         hasBeenInitialized = true;
+    }
+
+    private void initTripWires() {
+        // Example: Placing a wire in a hallway or near a key item
+        // You will eventually load this from your map file ID (e.g., ID 60)
+        tripWires.add(new TripWire(1718, 1770)); 
+        tripWires.add(new TripWire(800, 2400));
     }
 
     public void restart() {
@@ -138,6 +151,28 @@ public class PlayingState extends GameState {
                 nextSnailLocationIndex = (nextSnailLocationIndex + 1) % snail.getLocationsCount();
                 snailHasTeleported = true;
                 playerHasInteractedWithSnail = false;
+            }
+        }
+
+        Iterator<TripWire> it = tripWires.iterator();
+        while(it.hasNext()){
+            TripWire wire = it.next();
+            
+            if(wire.checkCollision(player)){
+                // SNAP! 
+                soundManager.playSound("webbed"); 
+                System.out.println("CLUMS! Player tripped a wire!");
+
+                // Alert ALL spiders
+                // Pass the CENTER of the wire and its SPECIFIC RADIUS
+                Point noiseLocation = new Point(wire.getX() + 16, wire.getY() + 16);
+                int radius = wire.getSoundRadius();
+                
+                for(Spider s : spiders){
+                    s.hearNoise(noiseLocation, radius);
+                }
+                
+                it.remove();
             }
         }
 
@@ -268,6 +303,10 @@ public class PlayingState extends GameState {
                     toy.drawInteractionPrompt(entityG2d);
                 }
             }
+
+            for(TripWire wire : tripWires){
+            wire.draw(entityG2d);
+        }
 
             // Draw snail
             if (snail != null && snail.isVisible()) {

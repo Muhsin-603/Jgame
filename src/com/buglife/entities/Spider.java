@@ -22,8 +22,12 @@ public class Spider {
     private final double PATROL_SPEED = 1; // default patrol movement speed (pixels/frame)
     private final double CHASE_SPEED = 3; // speed when actively chasing (adjust this)
     private final double SLOW_CHASE_SPEED = 1.7; // slow chase speed (used when not "crying")
+    private final double INVESTIGATE_SPEED = 3.5;
 
     private double rotationAngle = 90; // Start facing right (90 degrees from North)
+
+    private Point investigationPoint;
+    private int investigationTimer;
 
     // Animation Reel (for the 2-frame bug)
     private BufferedImage[] walkingFrames;
@@ -45,7 +49,8 @@ public class Spider {
         PATROLLING, // The default, boring patrol
         CHASING, // The "I see you!" bloodlust mode
         RETURNING, // The "Where did he go?" confused mode
-        DISTRACTED
+        DISTRACTED,
+        INVESTIGATING
     }
 
     private SpiderState currentState; // A variable to hold the spider's current mood
@@ -161,6 +166,30 @@ public class Spider {
         this.animationTick = 0;
     }
 
+    // In Spider.java
+
+    public void hearNoise(Point noiseLocation, int soundRadius) {
+        // Ignore noise if we are already busy killing the player
+        if (currentState != SpiderState.CHASING) {
+            double dist = Math.sqrt(Math.pow(noiseLocation.x - getCenterX(), 2) + Math.pow(noiseLocation.y - getCenterY(), 2));
+            
+            // Use the Trip Wire's specific radius
+            if (dist < soundRadius) { 
+                // CRITICAL: Only update 'returnPoint' if we were patrolling.
+                // If we were already investigating or returning, we want to remember 
+                // our ORIGINAL patrol post, not the random spot we are standing in now.
+                if (currentState == SpiderState.PATROLLING) {
+                    this.returnPoint = new Point(getCenterX(), getCenterY());
+                }
+                
+                this.investigationPoint = noiseLocation;
+                this.currentState = SpiderState.INVESTIGATING;
+                this.investigationTimer = 300; // 5 Seconds (60 frames * 5)
+            }
+        }
+    }
+    
+
     // In Spider.java, replace the entire update method.
     // In Spider.java
 
@@ -203,6 +232,33 @@ public class Spider {
                     soundManager.stopSound("music");
                     soundManager.playSound("chasing");
                     loseSightTimer = 300;
+                }
+                break;
+
+            case INVESTIGATING:
+                // --- THE GHOST LOGIC ---
+                speed = INVESTIGATE_SPEED;
+                
+                double dxNoise = investigationPoint.x - getCenterX();
+                double dyNoise = investigationPoint.y - getCenterY();
+                double distNoise = Math.sqrt(dxNoise * dxNoise + dyNoise * dyNoise);
+
+                if (distNoise > 5) {
+                    // Move DIRECTLY to noise. NO WALL CHECKS.
+                    double moveX = (dxNoise / distNoise) * speed;
+                    double moveY = (dyNoise / distNoise) * speed;
+                    
+                    x += moveX;
+                    y += moveY;
+                    rotationAngle = Math.toDegrees(Math.atan2(moveY, moveX)) + 90;
+                    
+                } else {
+                    // Arrived. Wait 5 seconds.
+                    investigationTimer--;
+                    if (investigationTimer <= 0) {
+                        // Time's up. Nothing here. Return to original post.
+                        currentState = SpiderState.RETURNING;
+                    }
                 }
                 break;
             case DISTRACTED:
