@@ -18,34 +18,53 @@ public class Game implements Runnable {
     volatile boolean running = false;
 
     // In Game.java
+    // private void initWindow() {
+    //     JFrame window = new JFrame("Lullaby Down Below");
+    //     window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+    //     soundManager = new SoundManager();
+    //     gamePanel = new GamePanel(soundManager);
+    //     window.add(gamePanel);
+        
+    //     window.pack();
+    //     window.setLocationRelativeTo(null);
+    //     window.setVisible(true);
+
+    //     // --- ADD THIS LINE ---
+    //     // After the window is visible, explicitly request focus for the GamePanel.
+    //     gamePanel.requestFocusInWindow();
+    // }
 
     public Game() {
-        // 1. Create the panel that will hold all our game objects
+        // 1. Load assets first
         loadCustomFont();
-
         soundManager = new SoundManager();
-        gamePanel = new GamePanel(soundManager); // GamePanel still thinks it's 1024x768
         soundManager.loadSound("music", "/res/sounds/game_theme.wav");
         soundManager.loopSound("menuMusic");
 
-        // 2. Create the main window (the JFrame)
+        // 2. Create the panel that will hold the game
+        gamePanel = new GamePanel(soundManager);
+
+        // 3. Create and configure the main window (the JFrame)
         window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setResizable(false);
         window.setTitle("Lullaby Down Below");
+        window.setUndecorated(true); // Remove title bar for fullscreen
+        window.setResizable(false);
+        
+        // Add the panel to the window's content pane
+        window.add(gamePanel);
 
-        // --- THE NEW FULLSCREEN LOGIC ---
-        window.setUndecorated(true); // Remove the title bar and borders
-        window.add(gamePanel); // Add the panel *before* going fullscreen
-
-        // Get the default screen device and make the window fullscreen
+        // 4. Set the window to fullscreen
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice gd = ge.getDefaultScreenDevice();
-        gd.setFullScreenWindow(window);
-        // --- END FULLSCREEN LOGIC ---
+        gd.setFullScreenWindow(window); // This also makes the window visible
 
-        // Let the panel listen for key presses
-        gamePanel.requestFocus();
+        // 5. CRITICAL: Request keyboard focus AFTER the window is visible/fullscreen.
+        // This is the most reliable way to ensure key presses are heard.
+        gamePanel.requestFocusInWindow();
+
+        System.out.println("Game initialized successfully in fullscreen mode.");
     }
 
     private void loadCustomFont() {
@@ -102,7 +121,7 @@ public class Game implements Runnable {
                 gamePanel.updateGame();
 
                 // 2. DRAW: Use paintImmediately instead
-                gamePanel.paintImmediately(0, 0, gamePanel.getWidth(), gamePanel.getHeight());
+                gamePanel.repaint();
 
                 delta--;
             }

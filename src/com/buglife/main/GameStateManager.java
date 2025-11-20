@@ -1,0 +1,128 @@
+package src.com.buglife.main;
+
+import java.awt.Graphics2D;
+import src.com.buglife.assets.SoundManager;
+import src.com.buglife.states.GameState;
+import src.com.buglife.states.MenuState;
+import src.com.buglife.states.PlayingState;
+
+public class GameStateManager {
+    // State constants
+    public static final int MENU = 0;
+    public static final int PLAYING = 1;
+    public static final int PAUSED = 2;
+    public static final int GAME_OVER = 3;
+    public static final int LEVEL_COMPLETE = 4;
+
+    private GameState currentState;
+    private int nextStateID = -1;
+    private SoundManager soundManager;
+    private GamePanel gamePanel; // Reference to parent panel for context
+
+    // Cache states to avoid repeated instantiation
+    private MenuState menuState;
+    private PlayingState playingState;
+
+    public GameStateManager(SoundManager soundManager, GamePanel gamePanel) {
+        this.soundManager = soundManager;
+        this.gamePanel = gamePanel;
+
+        // Pre-create states
+        this.menuState = new MenuState(this, soundManager);
+        this.playingState = new PlayingState(this, soundManager);
+
+        // Start with menu state
+        setState(MENU);
+    }
+
+    /**
+     * Change to a new game state.
+     */
+    public void setState(int stateID) {
+        nextStateID = stateID; // Instead of changing immediately, just set the request
+    }
+    private void applyStateChange() {
+        if (nextStateID == -1) {
+            return; // No change requested
+        }
+
+        // Cleanup the old state
+        if (currentState != null) {
+            currentState.cleanup();
+        }
+
+        // Set the new state based on the ID
+        switch (nextStateID) {
+            case MENU:
+                currentState = menuState;
+                break;
+            case PLAYING:
+                currentState = playingState;
+                break;
+            default:
+                System.err.println("Unknown state ID: " + nextStateID);
+                currentState = menuState;
+                break;
+        }
+
+        nextStateID = -1; // Reset the request
+
+        // Initialize the new state
+        if (currentState != null) {
+            currentState.init();
+        }
+    }
+
+    /**
+     * Update the current state.
+     */
+    public void update() {
+        // Apply any pending state changes at the beginning of the update loop
+        applyStateChange();
+
+        if (currentState != null) {
+            currentState.update();
+        }
+    }
+
+    /**
+     * Render the current state.
+     */
+    public void draw(Graphics2D g) {
+        if (currentState != null) {
+            currentState.draw(g);
+        }
+    }
+
+    /**
+     * Handle key press events.
+     */
+    public void keyPressed(int keyCode) {
+        if (currentState != null) {
+            currentState.keyPressed(keyCode);
+        }
+    }
+
+    /**
+     * Handle key release events.
+     */
+    public void keyReleased(int keyCode) {
+        if (currentState != null) {
+            currentState.keyReleased(keyCode);
+        }
+    }
+
+    /**
+     * Get the SoundManager instance.
+     */
+    public SoundManager getSoundManager() {
+        return soundManager;
+    }
+
+    /**
+     * Get the GamePanel instance for context.
+     */
+    public GamePanel getGamePanel() {
+        return gamePanel;
+    }
+}
