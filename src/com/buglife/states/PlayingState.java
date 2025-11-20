@@ -20,7 +20,6 @@ import src.com.buglife.main.GameStateManager;
 import src.com.buglife.world.World;
 
 public class PlayingState extends GameState {
-    // Game entities
     private Player player;
     private List<Spider> spiders;
     private Snail snail;
@@ -30,28 +29,22 @@ public class PlayingState extends GameState {
     private SoundManager soundManager;
     private List<TripWire> tripWires;
 
-    // Camera
     private int cameraX, cameraY;
     private static final int VIRTUAL_WIDTH = 1366;
     private static final int VIRTUAL_HEIGHT = 768;
 
-    // Snail teleport tracking
     private boolean snailHasTeleported = true;
     private int nextSnailLocationIndex = 1;
     private boolean playerHasInteractedWithSnail = false;
 
-    // Food spawn points
-    private List<Point> foodSpawnPoints;
+    // private List<Point> foodSpawnPoints;
 
-    //resume function fix
     private boolean hasBeenInitialized = false;
 
-    // Pause menu
     private boolean isPaused = false;
     private int pauseMenuSelection = 0;
-    private String[] pauseOptions = {"Resume", "Restart", "Quit to Menu"};
+    private String[] pauseOptions = { "Resume", "Restart", "Quit to Menu" };
 
-    // Fonts (reusable constants)
     private static final Font HUD_FONT = new Font("Consolas", Font.PLAIN, 16);
     private static final Font MID_FONT = new Font("Consolas", Font.BOLD, 40);
     private static final Font BIG_FONT = new Font("Consolas", Font.BOLD, 80);
@@ -63,8 +56,6 @@ public class PlayingState extends GameState {
 
     @Override
     public void init() {
-
-        //resume function
         if (hasBeenInitialized) {
             isPaused = false;
             soundManager.stopAllSounds();
@@ -74,45 +65,35 @@ public class PlayingState extends GameState {
 
         tripWires = new ArrayList<>();
         initTripWires();
-        // Initialize world
         world = new World();
 
-        // Initialize player
         player = new Player(594, 2484, 32, 32);
 
-        // Initialize toy
         toy = new Toy();
-        toy.setSpawnLocationPixels(574 , 2256 );
+        toy.setSpawnLocationPixels(574, 2256);
 
-        // Initialize spiders
         spiders = new ArrayList<>();
         initializeSpiders();
 
-        // Initialize snail
         snail = new Snail(player, initializeSnailLocations());
         snailHasTeleported = true;
         nextSnailLocationIndex = 1;
         playerHasInteractedWithSnail = false;
 
-        // Initialize food
         foods = new ArrayList<>();
-        initializeFoodSpawnPoints();
+        spawnFood();
         spawnFood();
 
-        // Start playing music
         soundManager.stopAllSounds();
         soundManager.loopSound("music");
 
         isPaused = false;
 
-        //for resume function
         hasBeenInitialized = true;
     }
 
     private void initTripWires() {
-        // Example: Placing a wire in a hallway or near a key item
-        // You will eventually load this from your map file ID (e.g., ID 60)
-        tripWires.add(new TripWire(1718, 1770)); 
+        tripWires.add(new TripWire(1718, 1770));
         tripWires.add(new TripWire(800, 2400));
     }
 
@@ -124,10 +105,9 @@ public class PlayingState extends GameState {
     @Override
     public void update() {
         if (isPaused) {
-            return; // Don't update game while paused
+            return;
         }
 
-        // Update snail with teleport logic
         if (snail != null && snail.getLocationsCount() > 1) {
             snail.update(world);
             boolean isSnailOnScreen = isRectOnScreen(snail.getX(), snail.getY(), snail.getWidth(),
@@ -155,45 +135,38 @@ public class PlayingState extends GameState {
         }
 
         Iterator<TripWire> it = tripWires.iterator();
-        while(it.hasNext()){
+        while (it.hasNext()) {
             TripWire wire = it.next();
-            
-            if(wire.checkCollision(player)){
-                // SNAP! 
-                soundManager.playSound("webbed"); 
+
+            if (wire.checkCollision(player)) {
+                soundManager.playSound("webbed");
                 System.out.println("CLUMS! Player tripped a wire!");
 
-                // Alert ALL spiders
-                // Pass the CENTER of the wire and its SPECIFIC RADIUS
                 Point noiseLocation = new Point(wire.getX() + 16, wire.getY() + 16);
                 int radius = wire.getSoundRadius();
-                
-                for(Spider s : spiders){
+
+                for (Spider s : spiders) {
                     s.hearNoise(noiseLocation, radius);
                 }
-                
+
                 it.remove();
             }
         }
 
-        // Update toy
         if (toy != null) {
             toy.update();
         }
 
-        // Update spiders
         for (Spider spider : spiders) {
             if (spider != null) {
                 spider.update(player, world, soundManager, toy);
             }
         }
 
-        // Update player
         if (player != null) {
             player.update(world, soundManager);
         }
 
-        // Check if player died from webbing
         if (player.hasDiedFromWeb()) {
             System.out.println("GAME OVER: Died By Webbed State");
             soundManager.stopSound("music");
@@ -203,10 +176,8 @@ public class PlayingState extends GameState {
             return;
         }
 
-        // Handle spider alerts (if player is crying)
         handleSpiderAlerts();
 
-        // Check collisions with spiders
         for (Spider currentSpider : spiders) {
             if (currentSpider != null) {
                 double dx = player.getCenterX() - currentSpider.getCenterX();
@@ -242,13 +213,11 @@ public class PlayingState extends GameState {
             }
         }
 
-        // Update camera
         cameraX = Math.max(0, Math.min(player.getCenterX() - (VIRTUAL_WIDTH / 2),
                 world.getMapWidth() * World.TILE_SIZE - VIRTUAL_WIDTH));
         cameraY = Math.max(0, Math.min(player.getCenterY() - (VIRTUAL_HEIGHT / 2),
                 world.getMapHeight() * World.TILE_SIZE - VIRTUAL_HEIGHT));
 
-        // Check food collisions
         for (int i = foods.size() - 1; i >= 0; i--) {
             Food currFood = foods.get(i);
             double dxFood = player.getCenterX() - currFood.getCenterX();
@@ -257,13 +226,12 @@ public class PlayingState extends GameState {
             double requiredDistanceFood = player.getRadius() + currFood.getRadius();
 
             if (distanceFood < requiredDistanceFood) {
-                player.eat(25);
+                player.eat(currFood);
                 soundManager.playSound("eat");
                 foods.remove(i);
             }
         }
 
-        // Check if player reached level complete tile
         if (player.isOnLevelCompleteTile()) {
             soundManager.stopAllSounds();
             soundManager.playSound("level_complete");
@@ -271,7 +239,6 @@ public class PlayingState extends GameState {
             return;
         }
 
-        // Check if player starved
         if (player.getHunger() <= 0 && !player.isCrying()) {
             soundManager.stopSound("music");
             soundManager.playSound("chasing");
@@ -283,20 +250,16 @@ public class PlayingState extends GameState {
 
     @Override
     public void draw(Graphics2D g) {
-        // Draw world
         world.render(g, cameraX, cameraY, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
-        // Draw all entities with camera translation
         Graphics2D entityG2d = (Graphics2D) g.create();
         try {
             entityG2d.translate(-cameraX, -cameraY);
 
-            // Draw player
             if (player != null) {
                 player.render(entityG2d, world);
             }
 
-            // Draw toy
             if (toy != null) {
                 toy.draw(entityG2d);
                 if (!toy.isCarried() && toy.canPickUp(player)) {
@@ -304,23 +267,20 @@ public class PlayingState extends GameState {
                 }
             }
 
-            for(TripWire wire : tripWires){
-            wire.draw(entityG2d);
-        }
+            for (TripWire wire : tripWires) {
+                wire.draw(entityG2d);
+            }
 
-            // Draw snail
             if (snail != null && snail.isVisible()) {
                 snail.draw(entityG2d);
             }
 
-            // Draw spiders
             for (Spider spider : spiders) {
                 if (spider != null) {
                     spider.draw(entityG2d);
                 }
             }
 
-            // Draw food
             for (Food currFood : foods) {
                 if (currFood != null) {
                     currFood.draw(entityG2d);
@@ -330,17 +290,14 @@ public class PlayingState extends GameState {
             entityG2d.dispose();
         }
 
-        // Draw HUD (fixed on screen)
         drawHUD(g);
 
-        // Draw pause menu if paused
         if (isPaused) {
             drawPauseMenu(g);
         }
     }
 
     private void drawHUD(Graphics2D g) {
-        // Hunger bar
         g.setColor(Color.DARK_GRAY);
         g.fillRect(10, 10, 200, 20);
         g.setColor(Color.ORANGE);
@@ -350,7 +307,29 @@ public class PlayingState extends GameState {
         g.setColor(Color.BLACK);
         g.drawRect(10, 10, 200, 20);
 
-        // Coordinates
+        if (player != null && player.getSpeedBoostTimer() > 0) {
+            int maxBoostTime = 300; // 5 seconds * 60 frames
+            int currentBoost = player.getSpeedBoostTimer();
+            int barWidth = (int) ((double) currentBoost / maxBoostTime * 200);
+
+            // Draw bar background
+            g.setColor(Color.DARK_GRAY);
+            g.fillRect(10, 35, 200, 10); // Positioned slightly below hunger bar
+
+            // Draw green energy bar
+            g.setColor(Color.GREEN);
+            g.fillRect(10, 35, barWidth, 10);
+
+            // Draw border
+            g.setColor(Color.BLACK);
+            g.drawRect(10, 35, 200, 10);
+            
+            // Optional Text
+            g.setFont(new Font("Arial", Font.BOLD, 10));
+            g.setColor(Color.WHITE);
+            g.drawString("SPEED BOOST", 220, 44);
+        }
+
         if (player != null) {
             g.setFont(HUD_FONT);
             g.setColor(Color.WHITE);
@@ -359,7 +338,6 @@ public class PlayingState extends GameState {
             g.drawString(coords, VIRTUAL_WIDTH - coordsWidth - 15, 25);
         }
 
-        // Webbed text
         if (player != null && player.isWebbed()) {
             g.setColor(Color.WHITE);
             g.setFont(MID_FONT);
@@ -370,18 +348,15 @@ public class PlayingState extends GameState {
     }
 
     private void drawPauseMenu(Graphics2D g) {
-        // Darken the background
         g.setColor(new Color(0, 0, 0, 150));
         g.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
-        // Draw "PAUSED" text
         g.setColor(Color.WHITE);
         g.setFont(BIG_FONT);
         String msg = "PAUSED";
         int msgWidth = g.getFontMetrics().stringWidth(msg);
         g.drawString(msg, (VIRTUAL_WIDTH - msgWidth) / 2, VIRTUAL_HEIGHT / 3);
 
-        // Draw pause options
         g.setFont(MID_FONT);
         for (int i = 0; i < pauseOptions.length; i++) {
             if (i == pauseMenuSelection) {
@@ -402,7 +377,6 @@ public class PlayingState extends GameState {
             return;
         }
 
-        // Movement
         if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP) {
             player.movingUp = true;
         }
@@ -416,7 +390,6 @@ public class PlayingState extends GameState {
             player.movingRight = true;
         }
 
-        // Dash
         if (keyCode == KeyEvent.VK_SHIFT) {
             int dirX = 0, dirY = 0;
             if (player.movingUp)
@@ -430,13 +403,11 @@ public class PlayingState extends GameState {
             player.dash(dirX, dirY, soundManager);
         }
 
-        // Struggle
         if (keyCode == KeyEvent.VK_SPACE) {
             player.struggle();
             soundManager.playSound("struggle");
         }
 
-        // Pause
         if (keyCode == KeyEvent.VK_ESCAPE) {
             isPaused = true;
             pauseMenuSelection = 0;
@@ -444,7 +415,6 @@ public class PlayingState extends GameState {
             soundManager.stopSound("chasing");
         }
 
-        // Interact with snail or toy
         if (keyCode == KeyEvent.VK_E) {
             if (snail != null && snail.canInteract(player)) {
                 snail.interact();
@@ -454,7 +424,6 @@ public class PlayingState extends GameState {
             }
         }
 
-        // Throw toy
         if (keyCode == KeyEvent.VK_F) {
             if (toy != null && toy.isCarried()) {
                 toy.throwToy(player.getCenterX(), player.getCenterY(), player.getFacingDirection());
@@ -506,7 +475,7 @@ public class PlayingState extends GameState {
                 isPaused = false;
                 soundManager.loopSound("music");
             } else if (pauseOptions[pauseMenuSelection].equals("Restart")) {
-                init(); // Reinitialize the playing state
+                init();
             } else if (pauseOptions[pauseMenuSelection].equals("Quit to Menu")) {
                 manager.setState(GameStateManager.MENU);
             }
@@ -518,7 +487,6 @@ public class PlayingState extends GameState {
         soundManager.stopAllSounds();
     }
 
-    // Helper methods
     private boolean isRectOnScreen(int x, int y, int width, int height) {
         return (x < cameraX + VIRTUAL_WIDTH &&
                 x + width > cameraX &&
@@ -563,41 +531,48 @@ public class PlayingState extends GameState {
         List<Snail.SnailLocation> locations = new ArrayList<>();
         locations.add(new Snail.SnailLocation(
                 new Point(534, 2464),
-                new String[]{"Hello little one...", "Be careful of the spiders!"},
+                new String[] { "Hello little one...", "Be careful of the spiders!" },
                 true));
         locations.add(new Snail.SnailLocation(
                 new Point(938, 1754),
-                new String[]{"You shouldn't stay hungry", "Eat these berries.", "These give you energy"},
+                new String[] { "You shouldn't stay hungry", "Eat these berries.", "These give you energy" },
                 true));
         locations.add(new Snail.SnailLocation(
                 new Point(1116, 976),
-                new String[]{"There are dark shadows.", "You can hide from the spiders in it"},
+                new String[] { "There are dark shadows.", "You can hide from the spiders in it" },
                 true));
         locations.add(new Snail.SnailLocation(
                 new Point(2166, 136),
-                new String[]{"Stay safe", "Climb these ladders to the next floor.", "Farewell little one...!"},
+                new String[] { "Stay safe", "Climb these ladders to the next floor.", "Farewell little one...!" },
                 true));
         return locations;
     }
 
-    private void initializeFoodSpawnPoints() {
-        foodSpawnPoints = new ArrayList<>();
-        foodSpawnPoints.add(new Point(16, 27));
-        foodSpawnPoints.add(new Point(34, 25));
-        foodSpawnPoints.add(new Point(22, 10));
+    private void spawnFoodAtTile(int tileX, int tileY, Food.FoodType type) {
+        int x = tileX * World.TILE_SIZE + (World.TILE_SIZE / 4);
+        int y = tileY * World.TILE_SIZE + (World.TILE_SIZE / 4);
+        foods.add(new Food(x, y, 20, type));
     }
 
+    // 2. Replace the old spawnFood() method with this "Manual Control" version
     private void spawnFood() {
-        foods.clear();
-        if (foodSpawnPoints == null || foodSpawnPoints.isEmpty()) {
-            System.out.println("Warning: no food spawn points defined");
-            return;
-        }
-        for (Point spawnTile : foodSpawnPoints) {
-            int foodX = spawnTile.x * World.TILE_SIZE + (World.TILE_SIZE / 4);
-            int foodY = spawnTile.y * World.TILE_SIZE + (World.TILE_SIZE / 4);
-            foods.add(new Food(foodX, foodY, 20));
-        }
+        foods = new ArrayList<>();
+        
+        // --- LEVEL DESIGNER AREA ---
+        // Place your food here! 
+        // (TileX, TileY, Type)
+        
+        // The easy snacks
+        spawnFoodAtTile(16, 27, Food.FoodType.BERRY);
+        spawnFoodAtTile(34, 25, Food.FoodType.BERRY);
+        
+        // The strategic boosts (Green!)
+        spawnFoodAtTile(22, 10, Food.FoodType.ENERGY_SEED); 
+        spawnFoodAtTile(15, 15, Food.FoodType.ENERGY_SEED); 
+        
+        // More berries...
+        spawnFoodAtTile(5, 5, Food.FoodType.BERRY);
+        
         System.out.println("Food spawned: " + foods.size());
     }
 

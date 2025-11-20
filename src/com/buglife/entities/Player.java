@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
 import java.util.function.IntBinaryOperator;
-
+ 
 import src.com.buglife.assets.SoundManager;
 import src.com.buglife.world.World;
 
@@ -27,6 +27,10 @@ public class Player {
     private double currentSpeed; // How fast we are moving RIGHT NOW
     private final double NORMAL_SPEED = 2.3; // The default speed
     private final double SLOW_SPEED = 0.5; // The speed when stuck!
+
+    private final double BOOST_SPEED = 4.0; // Zoom!
+    private int speedBoostTimer = 0;
+
     private int hunger = 100;
     private final int MAX_HUNGER = 100;
     private int collisionRadius;
@@ -62,6 +66,9 @@ public class Player {
 
         return this.currentState == PlayerState.WEBBED;
     }
+    public int getSpeedBoostTimer() {
+        return this.speedBoostTimer;
+    }
 
     public boolean hasDiedFromWeb() {
         return this.diedFromWeb;
@@ -74,11 +81,18 @@ public class Player {
         // Maybe add IDLE_UP, IDLE_LEFT, IDLE_RIGHT later? For now, idle is just down.
     }
 
-    public void eat(int amount) {
-
-        this.hunger += amount;
+    public void eat(Food food) {
+        // 1. Restore Hunger
+        this.hunger += food.getHungerValue();
         if (this.hunger > MAX_HUNGER) {
             this.hunger = MAX_HUNGER;
+        }
+
+        // 2. Check Properties
+        if (food.getType() == Food.FoodType.ENERGY_SEED) {
+            // Apply 5 seconds of speed (60 fps * 5)
+            this.speedBoostTimer = 300; 
+            System.out.println("PLAYER: ENERGY RUSH!");
         }
     }
     // Add this method anywhere inside your Player class
@@ -402,6 +416,23 @@ public class Player {
     public void update(World world, SoundManager soundManager) {
         // --- First, check for paralysis ---
         // Inside Player.java's update() method...
+
+        if (speedBoostTimer > 0) {
+            this.currentSpeed = BOOST_SPEED; // Use the boost speed
+            speedBoostTimer--;               // Tick down the timer
+        } else {
+            // Normal logic when not boosted
+            int playerTileCol = getCenterX() / World.TILE_SIZE;
+            int playerTileRow = getCenterY() / World.TILE_SIZE;
+            int tileID = world.getTileIdAt(playerTileCol, playerTileRow);
+            
+            if (tileID == 3) { // Sticky floor
+                this.currentSpeed = SLOW_SPEED;
+            } else {
+                this.currentSpeed = NORMAL_SPEED;
+            }
+        }
+        
         int playerTileCol = getCenterX() / World.TILE_SIZE;
         int playerTileRow = getCenterY() / World.TILE_SIZE;
         int tileID = world.getTileIdAt(playerTileCol, playerTileRow);
