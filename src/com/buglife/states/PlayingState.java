@@ -145,7 +145,7 @@ public class PlayingState extends GameState {
             soundManager.stopSound("music");
             soundManager.stopSound("chasing");
             soundManager.playSound("gameOver");
-            manager.setState(GameStateManager.MENU);
+            manager.setState(GameStateManager.GAME_OVER);
             return;
         }
 
@@ -166,7 +166,7 @@ public class PlayingState extends GameState {
                         soundManager.stopSound("music");
                         soundManager.stopSound("chasing");
                         soundManager.playSound("gameOver");
-                        manager.setState(GameStateManager.MENU);
+                        manager.setState(GameStateManager.GAME_OVER);
                         return;
                     }
 
@@ -175,7 +175,7 @@ public class PlayingState extends GameState {
                             soundManager.stopSound("music");
                             soundManager.stopSound("chasing");
                             soundManager.playSound("gameOver");
-                            manager.setState(GameStateManager.MENU);
+                            manager.setState(GameStateManager.GAME_OVER);
                             return;
                         } else {
                             player.getWebbed();
@@ -213,7 +213,7 @@ public class PlayingState extends GameState {
         if (player.isOnLevelCompleteTile()) {
             soundManager.stopAllSounds();
             soundManager.playSound("level_complete");
-            manager.setState(GameStateManager.MENU);
+            manager.setState(GameStateManager.LEVEL_COMPLETE);
             return;
         }
 
@@ -222,7 +222,7 @@ public class PlayingState extends GameState {
             soundManager.stopSound("music");
             soundManager.playSound("chasing");
             soundManager.playSound("gameOver");
-            manager.setState(GameStateManager.MENU);
+            manager.setState(GameStateManager.GAME_OVER);
             return;
         }
     }

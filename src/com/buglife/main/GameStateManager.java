@@ -6,6 +6,9 @@ import src.com.buglife.states.GameState;
 import src.com.buglife.states.MenuState;
 import src.com.buglife.states.PlayingState;
 
+import src.com.buglife.states.GameOverState;
+import src.com.buglife.states.LevelCompleteState;
+
 public class GameStateManager {
     // State constants
     public static final int MENU = 0;
@@ -23,6 +26,9 @@ public class GameStateManager {
     private MenuState menuState;
     private PlayingState playingState;
 
+    private GameOverState gameOverState;
+    private LevelCompleteState levelCompleteState;
+
     public GameStateManager(SoundManager soundManager, GamePanel gamePanel) {
         this.soundManager = soundManager;
         this.gamePanel = gamePanel;
@@ -30,6 +36,10 @@ public class GameStateManager {
         // Pre-create states
         this.menuState = new MenuState(this, soundManager);
         this.playingState = new PlayingState(this, soundManager);
+
+        //game over and won game state
+        this.gameOverState = new GameOverState(this, soundManager);
+        this.levelCompleteState = new LevelCompleteState(this, soundManager);
 
         // Start with menu state
         setState(MENU);
@@ -59,10 +69,15 @@ public class GameStateManager {
             case PLAYING:
                 currentState = playingState;
                 break;
+            // --- ADD CASES FOR NEW STATES ---
+            case GAME_OVER:
+                currentState = gameOverState;
+                break;
+            case LEVEL_COMPLETE:
+                currentState = levelCompleteState;
+                break;
             default:
                 System.err.println("Unknown state ID: " + nextStateID);
-                currentState = menuState;
-                break;
         }
 
         nextStateID = -1; // Reset the request
