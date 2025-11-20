@@ -65,9 +65,7 @@ Play as a lost **baby** crawling through the abandoned underground floors of a n
 ### For Developers
 1. Clone the repository.
 2. Open in VS Code or IntelliJ.
-3. Mark **src** and **res** as **Source Roots**.  
-   > Prevents the infamous “Ghost Asset Crash.”
-4. Run `com.buglife.main.Game`.
+3. Run `src.com.buglife.main.Game`.
 
 ---
 
