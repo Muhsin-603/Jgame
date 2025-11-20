@@ -207,11 +207,15 @@ public class Spider {
                 break;
             case DISTRACTED:
                 // Go to the toy!
+                soundManager.stopSound("music");
                 if (toy != null && toy.isMakingNoise()) {
                     double dx = toy.getCenterX() - getCenterX();
                     double dy = toy.getCenterY() - getCenterY();
                     double dist = Math.sqrt(dx * dx + dy * dy);
                     speed = SLOW_CHASE_SPEED;
+
+                    
+                    // soundManager.playSound("chasing");
 
                     if (dist > 10) {
                         // Move towards toy
