@@ -65,7 +65,7 @@ public class PlayingState extends GameState {
 
         // Initialize toy
         toy = new Toy();
-        toy.setSpawnLocationPixels(574 * World.TILE_SIZE, 2256 * World.TILE_SIZE);
+        toy.setSpawnLocationPixels(574 , 2256 );
 
         // Initialize spiders
         spiders = new ArrayList<>();
