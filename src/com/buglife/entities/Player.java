@@ -435,12 +435,7 @@ public class Player {
         
         int playerTileCol = getCenterX() / World.TILE_SIZE;
         int playerTileRow = getCenterY() / World.TILE_SIZE;
-        int tileID = world.getTileIdAt(playerTileCol, playerTileRow);
-        if (tileID == 3) { // If it's our sticky tile ID
-            this.currentSpeed = SLOW_SPEED;
-        } else {
-            this.currentSpeed = NORMAL_SPEED;
-        }
+
         if (world.getTileIdAt(playerTileCol, playerTileRow) == 37) {
             this.onLevelCompleteTile = true;
         } else {
