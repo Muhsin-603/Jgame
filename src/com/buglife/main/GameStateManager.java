@@ -45,6 +45,10 @@ public class GameStateManager {
         setState(MENU);
     }
 
+    public PlayingState getPlayingState() {
+        return this.playingState;
+    }
+
     /**
      * Change to a new game state.
      */

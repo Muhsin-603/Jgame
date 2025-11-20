@@ -40,6 +40,9 @@ public class PlayingState extends GameState {
     // Food spawn points
     private List<Point> foodSpawnPoints;
 
+    //resume function fix
+    private boolean hasBeenInitialized = false;
+
     // Pause menu
     private boolean isPaused = false;
     private int pauseMenuSelection = 0;
@@ -57,6 +60,14 @@ public class PlayingState extends GameState {
 
     @Override
     public void init() {
+
+        //resume function
+        if (hasBeenInitialized) {
+            isPaused = false;
+            soundManager.stopAllSounds();
+            soundManager.loopSound("music");
+            return;
+        }
         // Initialize world
         world = new World();
 
@@ -87,6 +98,14 @@ public class PlayingState extends GameState {
         soundManager.loopSound("music");
 
         isPaused = false;
+
+        //for resume function
+        hasBeenInitialized = true;
+    }
+
+    public void restart() {
+        this.hasBeenInitialized = false;
+        init();
     }
 
     @Override

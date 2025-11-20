@@ -51,6 +51,7 @@ public class MenuState extends GameState {
 
             if (selectedOption.equals("New Game")) {
                 soundManager.stopSound("menuMusic");
+                manager.getPlayingState().restart();
                 manager.setState(GameStateManager.PLAYING);
             } else if (selectedOption.equals("Resume")) {
                 soundManager.stopSound("menuMusic");
