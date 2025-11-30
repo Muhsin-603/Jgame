@@ -82,7 +82,6 @@ public class PlayingState extends GameState {
 
         foods = new ArrayList<>();
         spawnFood();
-        spawnFood();
 
         soundManager.stopAllSounds();
         soundManager.loopSound("music");
