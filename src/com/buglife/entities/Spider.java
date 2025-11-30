@@ -227,6 +227,7 @@ public class Spider {
                 if (canSeePlayer(targetPlayer, world)) {
                     // System.out.println("SPIDER: TARGET ACQUIRED!");
                     // Drop a GPS pin at our current location. THIS is our post.
+                
                     this.returnPoint = new Point(getCenterX(), getCenterY());
                     currentState = SpiderState.CHASING;
                     soundManager.stopSound("music");
@@ -358,6 +359,7 @@ public class Spider {
                 break;
             case RETURNING:
                 // Check if we've made it back to our post.
+                speed = PATROL_SPEED;
                 double dx = returnPoint.x - getCenterX();
                 double dy = returnPoint.y - getCenterY();
                 double distanceToPost = Math.sqrt(dx * dx + dy * dy);

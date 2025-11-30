@@ -10,7 +10,6 @@ public class TripWire {
     private int width = 32, height = 32;
     private boolean broken = false;
     
-    // --- NEW: Adjustable Sound Radius ---
     private int soundRadius = 500; // Default radius, adjustable via setter
 
     public TripWire(int x, int y) {
